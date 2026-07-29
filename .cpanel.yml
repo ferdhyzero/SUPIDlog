@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/myhostzo/public_html/supid
+    - /bin/cp -R dist/* $DEPLOYPATH/
+    - /bin/cp -R api $DEPLOYPATH/
+    - /bin/cp database.sql $DEPLOYPATH/

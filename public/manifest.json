@@ -1,0 +1,17 @@
+{
+  "short_name": "SUPID Log",
+  "name": "SUPID Log - PaddleLog by SUP.ID Indonesia",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B1329",
+  "theme_color": "#00B4D8",
+  "display": "standalone",
+  "orientation": "portrait"
+}
