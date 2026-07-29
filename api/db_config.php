@@ -13,35 +13,40 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS
     exit();
 }
 
-$db_host = '127.0.0.1'; // or 'localhost'
-$db_user = 'root';
-$db_pass = '';
-$primary_db = 'myhostzo_sup'; // Production cPanel Database Name
-$fallback_db = 'supidlog_db'; // Local XAMPP Database Name
+$db_host = 'localhost';
+
+// cPanel Production Credentials vs Local XAMPP Fallback
+$cpanel_user = 'myhostzo_sup'; // Ubah dengan Username MySQL cPanel Anda
+$cpanel_pass = '';             // Ubah dengan Password MySQL cPanel Anda
+$primary_db  = 'myhostzo_sup';
+
+$local_user   = 'root';
+$local_pass   = '';
+$fallback_db  = 'supidlog_db';
 
 $pdo = null;
 
-// 1. Try Primary Production cPanel Database `myhostzo_sup`
+// 1. Try Production cPanel Credentials
 try {
-    $pdo = new PDO("mysql:host={$db_host};dbname={$primary_db};charset=utf8mb4", $db_user, $db_pass, [
+    $pdo = new PDO("mysql:host={$db_host};dbname={$primary_db};charset=utf8mb4", $cpanel_user, $cpanel_pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
-} catch (PDOException $ePrimary) {
-    // 2. Try Fallback Local Database `supidlog_db`
+} catch (PDOException $eCpanel) {
+    // 2. Try Local XAMPP Credentials
     try {
-        $pdo = new PDO("mysql:host={$db_host};dbname={$fallback_db};charset=utf8mb4", $db_user, $db_pass, [
+        $pdo = new PDO("mysql:host={$db_host};dbname={$fallback_db};charset=utf8mb4", $local_user, $local_pass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
         ]);
-    } catch (PDOException $eFallback) {
-        http_response_code(500);
+    } catch (PDOException $eLocal) {
+        // Return clear JSON error message instead of 500 server crash
         echo json_encode([
             'success' => false,
-            'message' => 'Database Connection Failed: ' . $ePrimary->getMessage(),
-            'hint' => "Pastikan database 'myhostzo_sup' atau 'supidlog_db' sudah dibuat dan di-import."
+            'message' => 'Gagal Konek MySQL: ' . $eCpanel->getMessage(),
+            'hint' => 'Pastikan User & Password MySQL cPanel di api/db_config.php sudah diisi.'
         ]);
         exit();
     }
