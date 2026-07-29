@@ -28,16 +28,16 @@ CREATE TABLE `users` (
   `role` VARCHAR(20) DEFAULT 'user', -- 'user' or 'super_admin'
   `status` VARCHAR(20) DEFAULT 'approved', -- 'approved' or 'pending'
   `level` VARCHAR(50) DEFAULT 'Explorer',
-  `community_rank` INT DEFAULT 15,
-  `favorite_spot` VARCHAR(100) DEFAULT 'Bosowa',
-  `total_distance_km` DECIMAL(8,2) DEFAULT 1842.00,
+  `community_rank` INT DEFAULT 1,
+  `favorite_spot` VARCHAR(100) DEFAULT 'Bosowa Beach',
+  `total_distance_km` DECIMAL(8,2) DEFAULT 45.80,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Insert Default Demo Users (Super Admin Ferdhy & User Sapril)
 INSERT INTO `users` (`id`, `email`, `password_hash`, `name`, `role`, `status`, `level`, `community_rank`, `favorite_spot`, `total_distance_km`) VALUES
-(1, 'ahmadferdy66@gmail.com', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'ferdhy', 'super_admin', 'approved', 'Super Admin 👑', 1, 'All Spots', 2450.00),
-(2, 'sapril@sup.id', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sapril', 'user', 'approved', 'Explorer', 2, 'Bosowa Beach', 1842.00);
+(1, 'ahmadferdy66@gmail.com', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'ferdhy', 'super_admin', 'approved', 'Super Admin 👑', 1, 'Bosowa Beach', 120.50),
+(2, 'sapril@sup.id', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sapril', 'user', 'approved', 'Explorer', 2, 'Samalona Island', 45.80);
 
 -- --------------------------------------------------------
 -- 2. Table structure for `spots`
@@ -82,6 +82,14 @@ CREATE TABLE `activities` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Seed Initial Demo Activity Rows for Users
+INSERT INTO `activities` (`user_id`, `spot_name`, `distance_km`, `duration_formatted`, `calories`, `avg_speed`, `weather`, `water_condition`, `gps_coords`) VALUES
+(2, 'Samalona Island', 12.40, '01:15:30', 480, '6.2 km/h', '☀ Cerah 31°C', 'Ocean Tour 🌊', '-5.1234, 119.3456'),
+(2, 'Bosowa Beach', 8.50, '00:45:10', 320, '5.8 km/h', '⛅ Cerah Berawan 29°C', 'Flat Water 🌊', '-5.1478, 119.4154'),
+(2, 'Rammang-Rammang', 24.90, '02:30:00', 950, '7.1 km/h', '☀ Cerah 32°C', 'River Cruise 🚣', '-4.9234, 119.6456'),
+(1, 'Bosowa Beach', 45.50, '03:45:00', 1650, '8.4 km/h', '☀ Cerah 30°C', 'Flat Water 🌊', '-5.1478, 119.4154'),
+(1, 'Danau Toba', 75.00, '05:12:00', 2800, '9.1 km/h', '⛅ Sejuk 24°C', 'Deep Water 🌊', '2.6845, 98.8756');
+
 -- --------------------------------------------------------
 -- 4. Table structure for `passport_stamps`
 -- --------------------------------------------------------
@@ -94,6 +102,11 @@ CREATE TABLE `passport_stamps` (
   `unlocked_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `passport_stamps` (`user_id`, `spot_name`, `unlocked`) VALUES
+(2, 'Samalona Island', 1),
+(2, 'Bosowa Beach', 1),
+(2, 'Rammang-Rammang', 1);
 
 -- --------------------------------------------------------
 -- 5. Table structure for `saved_spots`
@@ -141,6 +154,10 @@ CREATE TABLE `community_posts` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `community_posts` (`user_id`, `user_name`, `spot_name`, `title`, `distance_km`, `image_url`, `likes_count`, `comments_count`) VALUES
+(2, 'Sapril', 'Samalona Island', 'Dayung pagi ombak tenang Samalona!', '12.4 km', '', 12, 3),
+(1, 'ferdhy', 'Bosowa Beach', 'Sesi latihan interval ombak landai Bosowa Sunset', '45.5 km', '', 28, 7);
 
 -- --------------------------------------------------------
 -- 8. Table structure for `post_likes`

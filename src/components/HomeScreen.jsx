@@ -16,6 +16,36 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
   });
 
   const [loading, setLoading] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [pwaInstalled, setPwaInstalled] = useState(false);
+
+  // Catch PWA Install Prompt
+  useEffect(() => {
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setPwaInstalled(true);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setPwaInstalled(true);
+      }
+    } else {
+      alert('📲 UNTUK INSTALL APLIKASI PWA SUPID LOG DI HP:\n\n1. Buka menu Browser (titik 3 di kanan atas Chrome / tombol Share di Safari).\n2. Pilih "Tambahkan ke Layar Utama" / "Add to Home Screen" / "Install App".\n\nAplikasi SUPID Log akan terpasang di HP Anda!');
+    }
+  };
 
   // 1. Fetch real GPS Location & Live Open-Meteo Weather API
   useEffect(() => {
@@ -74,7 +104,6 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
   // 2. Fetch user dashboard data from MySQL PHP API ONLY if user is logged in
   useEffect(() => {
     if (!userId) {
-      // Guest Mode: Reset metrics to 0
       setDashboardData({
         today: { distance: '0.0', calories: 0, time: '00:00' },
         goal: { target: 100, current: 0, percent: 0 },
@@ -89,10 +118,6 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
         const res = await fetch(`/api/get_user_dashboard.php?user_id=${userId}`);
         const data = await res.json();
         if (data.success && data.today) {
-          if (parseFloat(data.today.distance) === 0) {
-            data.today.calories = 0;
-            data.today.time = '00:00';
-          }
           setDashboardData(data);
         }
       } catch (err) {
@@ -108,8 +133,8 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
   const isGuest = !userId;
 
   const displayDistance = isGuest ? '0.0' : (today ? today.distance : '0.0');
-  const displayCalories = isGuest ? 0 : ((today && parseFloat(displayDistance) > 0) ? today.calories : 0);
-  const displayTime = isGuest ? '00:00' : ((today && parseFloat(displayDistance) > 0) ? today.time : '00:00');
+  const displayCalories = isGuest ? 0 : (today ? today.calories : 0);
+  const displayTime = isGuest ? '00:00' : (today ? today.time : '00:00');
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -123,9 +148,26 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             </p>
             <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{userName} 👋</h2>
           </div>
-          <span style={{ fontSize: '1.75rem', background: 'rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '14px' }}>
-            🏄‍♂️
-          </span>
+          
+          <button 
+            onClick={handleInstallClick}
+            style={{ 
+              background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
+              color: '#000',
+              border: 'none',
+              padding: '8px 14px',
+              borderRadius: '20px',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              boxShadow: '0 4px 12px rgba(0, 242, 254, 0.4)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>📲</span> {pwaInstalled ? 'PWA Active' : 'Install App'}
+          </button>
         </div>
 
         {/* Guest Warning Banner if not logged in */}
@@ -152,115 +194,77 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
         </div>
       </div>
 
-      {/* TODAY Metrics Box (0.0 KM -> 0 kcal -> 00:00 for Guests) */}
-      <div className="card-clean" style={{ borderLeft: '4px solid var(--ocean-blue)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            HARI INI (TODAY)
-          </h3>
-          <span style={{ fontSize: '0.75rem', color: 'var(--ocean-blue)', fontWeight: 600 }}>
-            {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </span>
+      {/* Today's Activity Summary */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Today's Paddling</h3>
+          <span style={{ fontSize: '0.8rem', color: 'var(--ocean-primary)', fontWeight: 600 }}>{new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', textAlign: 'center' }}>
-          <div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Distance</span>
-            <strong style={{ fontSize: '1.35rem', fontFamily: 'var(--font-heading)', color: 'var(--ocean-blue)' }}>
-              {displayDistance} <span style={{ fontSize: '0.75rem' }}>km</span>
-            </strong>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <span style={{ fontSize: '1.5rem' }}>📏</span>
+            <div className="stat-value">{displayDistance}</div>
+            <div className="stat-label">Distance (km)</div>
           </div>
-          <div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Calories</span>
-            <strong style={{ fontSize: '1.35rem', fontFamily: 'var(--font-heading)', color: 'var(--emergency-orange)' }}>
-              {displayCalories} <span style={{ fontSize: '0.75rem' }}>kcal</span>
-            </strong>
+          <div className="stat-card">
+            <span style={{ fontSize: '1.5rem' }}>🔥</span>
+            <div className="stat-value">{displayCalories}</div>
+            <div className="stat-label">Calories (kcal)</div>
           </div>
-          <div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Time</span>
-            <strong style={{ fontSize: '1.35rem', fontFamily: 'var(--font-heading)', color: 'var(--text-main)' }}>
-              {displayTime}
-            </strong>
+          <div className="stat-card">
+            <span style={{ fontSize: '1.5rem' }}>⏱️</span>
+            <div className="stat-value">{displayTime}</div>
+            <div className="stat-label">Duration (m:s)</div>
           </div>
         </div>
       </div>
 
-      {/* Jumbo Start Paddling Action Button */}
-      <button className="btn-cta-jumbo" onClick={onStartPaddle}>
-        <span style={{ fontSize: '1.5rem' }}>🏄‍♂️</span>
-        <span>START PADDLING</span>
-      </button>
-
-      {/* Your Next Goal Progress Box */}
-      <div className="card-clean">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.2rem' }}>🎯</span>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Your Next Goal</h3>
-          </div>
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--ocean-blue)', fontFamily: 'var(--font-heading)' }}>
-            {isGuest ? 0 : (goal ? goal.current : 0)} / 100 km
-          </span>
+      {/* Goal Progress Banner */}
+      <div className="glass-panel" style={{ padding: '16px', borderRadius: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🎯 Monthly Target (100 km)</span>
+          <span style={{ fontWeight: 700, color: 'var(--ocean-primary)', fontSize: '0.85rem' }}>{goal.percent}%</span>
         </div>
-
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
-          □ Paddle 100 km Target Indonesia SUP
-        </p>
-
-        <div style={{ height: '10px', background: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-          <div 
-            style={{ 
-              width: `${isGuest ? 0 : (goal ? goal.percent : 0)}%`, 
-              height: '100%', 
-              background: 'linear-gradient(90deg, var(--ocean-blue) 0%, var(--aqua) 100%)', 
-              borderRadius: '9999px',
-              transition: 'width 0.5s ease'
-            }} 
-          />
+        <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ width: `${goal.percent}%`, height: '100%', background: 'linear-gradient(90deg, #00f2fe, #4facfe)', transition: 'width 0.5s ease' }} />
         </div>
       </div>
 
-      {/* Recent Activity List */}
+      {/* Recent Activity Log */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>Recent Activity</h3>
-          {!isGuest && (
-            <span 
-              onClick={onOpenAllActivities}
-              style={{ fontSize: '0.8rem', color: 'var(--ocean-blue)', fontWeight: 700, cursor: 'pointer' }}
-            >
-              Lihat Semua ➔
-            </span>
-          )}
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Recent Paddles</h3>
+          <button 
+            onClick={onOpenAllActivities} 
+            style={{ background: 'none', border: 'none', color: 'var(--ocean-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            See All
+          </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {!isGuest && recentActivities && recentActivities.length > 0 ? (
-            recentActivities.map((act, i) => (
-              <div key={act.id || i} className="card-clean" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--aqua-light)', color: 'var(--ocean-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
-                    📍
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.98rem', fontWeight: 700 }}>{act.spot}</h4>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{act.type || 'Paddle Session'} • {act.date || 'Terbaru'}</span>
-                  </div>
+        {recentActivities.length === 0 ? (
+          <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', borderRadius: '16px', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🏄‍♂️</p>
+            <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>Belum ada aktivitas tercatat</p>
+            <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Tekan tombol 🏄 di bawah untuk memulai sesi paddle pertama Anda!</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {recentActivities.map((act) => (
+              <div key={act.id} className="glass-panel" style={{ padding: '12px 16px', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{act.spot}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{act.date} • {act.type || 'Flat Water'}</div>
                 </div>
-
                 <div style={{ textAlign: 'right' }}>
-                  <strong style={{ fontSize: '1.1rem', fontFamily: 'var(--font-heading)', color: 'var(--ocean-blue)', display: 'block' }}>
-                    {act.distance}
-                  </strong>
+                  <div style={{ fontWeight: 800, color: 'var(--ocean-primary)', fontSize: '1rem' }}>{act.distance}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{act.duration_formatted}</div>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="card-clean" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', padding: '20px' }}>
-              {isGuest ? '🔒 Anda sedang menggunakan Mode Guest. Silakan Login untuk menyimpan & melihat riwayat aktivitas paddle Anda!' : 'Belum ada aktivitas terdaftar hari ini. Tekan START PADDLING untuk memulai!'}
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>
