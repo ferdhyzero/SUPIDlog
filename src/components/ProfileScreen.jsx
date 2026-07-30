@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import EditProfileModal from './EditProfileModal';
 
 export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNavigate }) {
   const isGuest = !currentUser;
+  const [showEditModal, setShowEditModal] = useState(false);
   
   const [profileStats, setProfileStats] = useState({
     name: currentUser ? currentUser.name : 'Guest SUPer',
@@ -52,7 +53,29 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
     <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
       {/* Profile Header */}
-      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7', padding: '20px 16px' }}>
+      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7', padding: '20px 16px', position: 'relative' }}>
+        
+        {!isGuest && (
+          <button
+            onClick={() => setShowEditModal(true)}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '4px 10px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Edit Profil ✏️
+          </button>
+        )}
+
         <div 
           style={{
             width: '68px',
@@ -90,6 +113,16 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
           </div>
         )}
       </div>
+
+      {showEditModal && (
+        <EditProfileModal
+          user={currentUser || { id: 1, name: profileStats.name }}
+          onClose={() => setShowEditModal(false)}
+          onSaveSuccess={(updated) => {
+            setProfileStats(prev => ({ ...prev, name: updated.name }));
+          }}
+        />
+      )}
 
       {/* Super Admin Quick Access Card */}
       {isSuperAdmin && (

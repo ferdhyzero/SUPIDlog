@@ -152,13 +152,41 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
           </div>
         </div>
 
-        {/* Save CTA */}
-        <button 
-          className="btn-cta-jumbo"
-          onClick={handleSave}
-        >
-          <span>SAVE ACTIVITY 💾</span>
-        </button>
+        {/* Save CTA Buttons */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button 
+            className="btn-cta-jumbo"
+            onClick={async () => {
+              await handleSave();
+              // Also share to community feed
+              try {
+                await fetch('/api/create_post.php', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    user_id: userId || 1,
+                    user_name: userName || 'SUPer',
+                    spot_name: spotName || 'Samalona',
+                    title: `Sesi Dayung Baru: ${stats.distance} (${stats.timeFormatted})`,
+                    distance: stats.distance,
+                    image_url: ''
+                  })
+                });
+                alert(' Sesi dayung Anda berhasil disimpan dan dibagikan ke Feed Komunitas!');
+              } catch (e) {}
+            }}
+            style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' }}
+          >
+            <span>BAGIKAN KE FEED KOMUNITAS 👥</span>
+          </button>
+
+          <button 
+            onClick={handleSave}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px', background: '#f1f5f9', color: '#0f172a', fontWeight: 700, border: 'none', cursor: 'pointer' }}
+          >
+            SIMPAN HANYA KE PASPOR LOG 💾
+          </button>
+        </div>
       </div>
     </div>
   );

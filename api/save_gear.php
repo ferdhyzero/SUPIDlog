@@ -5,9 +5,18 @@ $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
 
 $userId = (int)($data['user_id'] ?? 2);
-$action = trim($data['action'] ?? 'add'); // 'add' or 'maintain'
+$action = trim($data['action'] ?? 'add'); // 'add', 'maintain', 'delete', 'update'
 
 try {
+    if ($action === 'delete') {
+        $gearId = (int)($data['gear_id'] ?? 0);
+        $stmtDel = $pdo->prepare("DELETE FROM gear_locker WHERE id = :gid AND user_id = :uid");
+        $stmtDel->execute(['gid' => $gearId, 'uid' => $userId]);
+
+        echo json_encode(['success' => true, 'message' => 'Peralatan berhasil dihapus dari Gear Locker!']);
+        exit();
+    }
+
     if ($action === 'maintain') {
         $gearId = (int)($data['gear_id'] ?? 0);
         $stmtM = $pdo->prepare("UPDATE gear_locker SET sessions_count = sessions_count + 1, condition_status = 'Maintained ✨' WHERE id = :gid AND user_id = :uid");

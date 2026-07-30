@@ -78,6 +78,28 @@ export default function GearLockerScreen({ userId = 2 }) {
     }
   };
 
+  // Handle Delete Gear
+  const handleDeleteGear = async (gearId, gearName) => {
+    if (!window.confirm(`Hapus '${gearName}' dari Gear Locker?`)) return;
+
+    try {
+      const res = await fetch('/api/save_gear.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          action: 'delete',
+          gear_id: gearId
+        })
+      });
+      const data = await res.json();
+      alert(data.message || 'Peralatan dihapus!');
+      loadGear();
+    } catch (e) {
+      loadGear();
+    }
+  };
+
   return (
     <div style={{ width: '100%', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
       
@@ -144,12 +166,20 @@ export default function GearLockerScreen({ userId = 2 }) {
 
             <div style={{ fontSize: '0.78rem', color: '#B45309', background: '#FEF3C7', padding: '8px 12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>💡 {item.reminder}</span>
-              <button 
-                onClick={() => handleMaintenance(item.id)}
-                style={{ background: '#F59E0B', color: 'white', border: 'none', padding: '4px 10px', borderRadius: '8px', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}
-              >
-                🧼 Cuci Air Tawar
-              </button>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button 
+                  onClick={() => handleMaintenance(item.id)}
+                  style={{ background: '#F59E0B', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '8px', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}
+                >
+                  🧼 Cuci
+                </button>
+                <button 
+                  onClick={() => handleDeleteGear(item.id, item.name)}
+                  style={{ background: '#EF4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '8px', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}
+                >
+                  🗑️ Hapus
+                </button>
+              </div>
             </div>
           </div>
         ))}
