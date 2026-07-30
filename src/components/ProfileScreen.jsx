@@ -102,7 +102,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
-            isSuperAdmin ? '👑' : (isGuest ? '👤' : <img src="/sup-paddle-icon-blue.png" alt="SUP Paddle" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />)
+            isSuperAdmin ? '👑' : (isGuest ? '👤' : <img src="/logo-icon-app-blue.png" alt="SUP Paddle Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />)
           )}
         </div>
 

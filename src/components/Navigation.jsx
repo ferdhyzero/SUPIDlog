@@ -37,8 +37,8 @@ export default function Navigation({ activeTab, setActiveTab, onStartPaddleClick
             title="Start Paddling"
           >
             <img 
-              src="/sup-paddle-icon-white.png" 
-              alt="SUP Paddle" 
+              src="/logo-icon-app-white.png" 
+              alt="SUP Paddle Logo" 
               style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
             />
           </button>
