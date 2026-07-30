@@ -7,16 +7,22 @@ $data = json_decode($rawInput, true);
 $action = trim($_GET['action'] ?? $data['action'] ?? 'list');
 
 try {
-    // Ensure status & plain_password columns exist in users table
+    // Ensure status, plain_password, reset_status, requested_password columns exist
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'approved'");
     } catch (Exception $exCol) {}
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN plain_password VARCHAR(255) DEFAULT ''");
     } catch (Exception $exCol2) {}
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN reset_status VARCHAR(20) DEFAULT NULL");
+    } catch (Exception $e1) {}
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN requested_password VARCHAR(255) DEFAULT NULL");
+    } catch (Exception $e2) {}
 
     if ($action === 'list') {
-        $stmt = $pdo->query("SELECT id, name, email, role, status, level, community_rank, total_distance_km, plain_password, DATE_FORMAT(created_at, '%d %b %Y %H:%i') as formatted_date FROM users ORDER BY status DESC, id DESC");
+        $stmt = $pdo->query("SELECT id, name, email, role, status, reset_status, requested_password, level, community_rank, total_distance_km, plain_password, DATE_FORMAT(created_at, '%d %b %Y %H:%i') as formatted_date FROM users ORDER BY reset_status DESC, status DESC, id DESC");
         $users = $stmt->fetchAll();
 
         foreach ($users as &$u) {
@@ -32,6 +38,29 @@ try {
         exit();
     }
 
+    if ($action === 'approve_reset') {
+        $targetUserId = (int)($data['user_id'] ?? 0);
+        $stmtGet = $pdo->prepare("SELECT requested_password, name, email FROM users WHERE id = :uid LIMIT 1");
+        $stmtGet->execute(['uid' => $targetUserId]);
+        $targetUser = $stmtGet->fetch();
+
+        if (!$targetUser || empty($targetUser['requested_password'])) {
+            echo json_encode(['success' => false, 'message' => 'Tidak ada permintaan reset password untuk user ini!']);
+            exit();
+        }
+
+        $newPass = $targetUser['requested_password'];
+        $hash = password_hash($newPass, PASSWORD_BCRYPT);
+        $stmt = $pdo->prepare("UPDATE users SET password_hash = :hash, plain_password = :plain, reset_status = NULL, requested_password = NULL WHERE id = :uid");
+        $stmt->execute(['hash' => $hash, 'plain' => $newPass, 'uid' => $targetUserId]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => "🔑 VERIFIKASI LUPA PASSWORD DISETUJUI! Password akun " . $targetUser['name'] . " berhasil diperbarui menjadi '$newPass'!"
+        ]);
+        exit();
+    }
+
     if ($action === 'reset_password') {
         $targetUserId = (int)($data['user_id'] ?? 0);
         $newPassword = trim($data['new_password'] ?? '');
@@ -42,7 +71,7 @@ try {
         }
 
         $hash = password_hash($newPassword, PASSWORD_BCRYPT);
-        $stmt = $pdo->prepare("UPDATE users SET password_hash = :hash, plain_password = :plain WHERE id = :uid");
+        $stmt = $pdo->prepare("UPDATE users SET password_hash = :hash, plain_password = :plain, reset_status = NULL, requested_password = NULL WHERE id = :uid");
         $stmt->execute(['hash' => $hash, 'plain' => $newPassword, 'uid' => $targetUserId]);
 
         echo json_encode([

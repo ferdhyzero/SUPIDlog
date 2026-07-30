@@ -38,7 +38,29 @@ export default function AdminDashboardScreen({ currentUser }) {
     setShowPasswordMap(prev => ({ ...prev, [userId]: !prev[userId] }));
   };
 
-  // Handle Super Admin Reset User Password
+  // Approve Reset Password Request
+  const handleApproveResetPassword = async (userId, userName) => {
+    if (!window.confirm(`Setujui & Verifikasi Reset Password untuk akun '${userName}' (ID #${userId})?`)) return;
+
+    try {
+      const res = await fetch('/api/admin_users.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'approve_reset',
+          user_id: userId
+        })
+      });
+      const data = await res.json();
+      setMsgNotice(data.message || 'Verifikasi reset password disetujui!');
+      loadUsers();
+    } catch (e) {
+      alert('Verifikasi reset password disetujui!');
+      loadUsers();
+    }
+  };
+
+  // Handle Super Admin Manual Reset User Password
   const handleAdminResetPassword = async (userId, userName) => {
     const newPass = window.prompt(`Masukkan Password Baru untuk Akun '${userName}' (ID #${userId}):`);
     if (!newPass) return;
@@ -85,7 +107,7 @@ export default function AdminDashboardScreen({ currentUser }) {
 
   // Approve / Verify Pending User
   const handleApproveUser = async (userId, userName) => {
-    if (!window.confirm(`Setujui & Verifikasi akun '${userName}' (ID #${userId})?`)) return;
+    if (!window.confirm(`Setujui & Verifikasi pendaftaran akun '${userName}' (ID #${userId})?`)) return;
 
     try {
       const res = await fetch('/api/admin_users.php', {
@@ -148,6 +170,7 @@ export default function AdminDashboardScreen({ currentUser }) {
   };
 
   const pendingUsersCount = usersList.filter(u => u.status === 'pending').length;
+  const pendingResetCount = usersList.filter(u => u.reset_status === 'reset_pending').length;
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -172,18 +195,25 @@ export default function AdminDashboardScreen({ currentUser }) {
           <span style={{ fontSize: '2rem' }}>👑</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.12)', padding: '12px 16px', borderRadius: '16px' }}>
-            <span style={{ fontSize: '0.72rem', opacity: 0.8, display: 'block' }}>Total Pengguna Terdaftar</span>
-            <strong style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.12)', padding: '10px 12px', borderRadius: '14px' }}>
+            <span style={{ fontSize: '0.7rem', opacity: 0.8, display: 'block' }}>Total User</span>
+            <strong style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)' }}>
               {usersList.length} User
             </strong>
           </div>
 
-          <div style={{ background: pendingUsersCount > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.12)', padding: '12px 16px', borderRadius: '16px', border: pendingUsersCount > 0 ? '1.5px solid #F59E0B' : 'none' }}>
-            <span style={{ fontSize: '0.72rem', opacity: 0.9, display: 'block' }}>Menunggu Verifikasi</span>
-            <strong style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', color: pendingUsersCount > 0 ? '#FBBF24' : '#34D399' }}>
-              {pendingUsersCount} User {pendingUsersCount > 0 ? '⏳' : '✔'}
+          <div style={{ background: pendingUsersCount > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.12)', padding: '10px 12px', borderRadius: '14px', border: pendingUsersCount > 0 ? '1px solid #F59E0B' : 'none' }}>
+            <span style={{ fontSize: '0.7rem', opacity: 0.9, display: 'block' }}>Verifikasi Daftar</span>
+            <strong style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: pendingUsersCount > 0 ? '#FBBF24' : '#34D399' }}>
+              {pendingUsersCount} {pendingUsersCount > 0 ? '⏳' : '✔'}
+            </strong>
+          </div>
+
+          <div style={{ background: pendingResetCount > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.12)', padding: '10px 12px', borderRadius: '14px', border: pendingResetCount > 0 ? '1px solid #EF4444' : 'none' }}>
+            <span style={{ fontSize: '0.7rem', opacity: 0.9, display: 'block' }}>Reset Password</span>
+            <strong style={{ fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: pendingResetCount > 0 ? '#FCA5A5' : '#34D399' }}>
+              {pendingResetCount} {pendingResetCount > 0 ? '🔑' : '✔'}
             </strong>
           </div>
         </div>
@@ -197,11 +227,12 @@ export default function AdminDashboardScreen({ currentUser }) {
 
       {/* User Management List */}
       <div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Pengaturan Akun, Password & Verifikasi Admin</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Pengaturan Akun, Verifikasi & Reset Password</h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {usersList.map((userItem) => {
-            const isPending = userItem.status === 'pending';
+            const isPendingReg = userItem.status === 'pending';
+            const isPendingReset = userItem.reset_status === 'reset_pending';
             const isTargetAdmin = userItem.role === 'super_admin';
             const isShowingPass = !!showPasswordMap[userItem.id];
 
@@ -213,14 +244,14 @@ export default function AdminDashboardScreen({ currentUser }) {
                   display: 'flex', 
                   flexDirection: 'column', 
                   gap: '12px',
-                  border: isPending ? '2px solid #F59E0B' : '1px solid #E2E8F0',
-                  background: isPending ? '#FFFBEB' : 'white'
+                  border: isPendingReset ? '2px solid #EF4444' : (isPendingReg ? '2px solid #F59E0B' : '1px solid #E2E8F0'),
+                  background: isPendingReset ? '#FEF2F2' : (isPendingReg ? '#FFFBEB' : 'white')
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: isTargetAdmin ? '#FEF3C7' : (isPending ? '#FEF3C7' : '#E0F2FE'), color: isTargetAdmin ? '#B45309' : (isPending ? '#B45309' : '#0284C7'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
-                      {isTargetAdmin ? '👑' : (isPending ? '⏳' : '👤')}
+                    <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: isTargetAdmin ? '#FEF3C7' : (isPendingReset ? '#FEE2E2' : (isPendingReg ? '#FEF3C7' : '#E0F2FE')), color: isTargetAdmin ? '#B45309' : (isPendingReset ? '#DC2626' : (isPendingReg ? '#B45309' : '#0284C7')), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
+                      {isTargetAdmin ? '👑' : (isPendingReset ? '🔑' : (isPendingReg ? '⏳' : '👤'))}
                     </div>
 
                     <div>
@@ -239,18 +270,34 @@ export default function AdminDashboardScreen({ currentUser }) {
                   {/* Status Badge */}
                   <span 
                     style={{
-                      fontSize: '0.75rem',
+                      fontSize: '0.72rem',
                       fontWeight: 800,
                       padding: '4px 10px',
                       borderRadius: '9999px',
-                      background: isPending ? '#FEF3C7' : '#D1FAE5',
-                      color: isPending ? '#B45309' : '#059669',
-                      border: `1px solid ${isPending ? '#F59E0B' : '#10B981'}`
+                      background: isPendingReset ? '#FEE2E2' : (isPendingReg ? '#FEF3C7' : '#D1FAE5'),
+                      color: isPendingReset ? '#DC2626' : (isPendingReg ? '#B45309' : '#059669'),
+                      border: `1px solid ${isPendingReset ? '#EF4444' : (isPendingReg ? '#F59E0B' : '#10B981')}`
                     }}
                   >
-                    {isPending ? '⏳ MENUNGGU VERIFIKASI' : '✔ TERVERIFIKASI'}
+                    {isPendingReset ? '🔑 MEMINTA RESET PASSWORD' : (isPendingReg ? '⏳ MENUNGGU VERIFIKASI DAFTAR' : '✔ AKUN TERVERIFIKASI')}
                   </span>
                 </div>
+
+                {/* VERIFIKASI RESET PASSWORD BANNER */}
+                {isPendingReset && (
+                  <div style={{ background: '#FEF2F2', border: '1.5px solid #EF4444', padding: '10px 12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#991B1B' }}>
+                      <strong>⚠️ Permintaan Reset Password:</strong><br />
+                      Password Baru Diminta: <code style={{ background: 'white', padding: '2px 6px', borderRadius: '4px', border: '1px solid #FCA5A5' }}>{userItem.requested_password}</code>
+                    </div>
+                    <button 
+                      onClick={() => handleApproveResetPassword(userItem.id, userItem.name)}
+                      style={{ background: '#DC2626', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      ✔ SETUJUI RESET
+                    </button>
+                  </div>
+                )}
 
                 {/* PASSWORD DISPLAY & ADMIN RESET ROW */}
                 <div style={{ background: '#F1F5F9', padding: '8px 12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
@@ -272,7 +319,7 @@ export default function AdminDashboardScreen({ currentUser }) {
                       onClick={() => handleAdminResetPassword(userItem.id, userItem.name)}
                       style={{ background: '#0284C7', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
                     >
-                      🔑 Reset
+                      🔑 Reset Manual
                     </button>
                   </div>
                 </div>
@@ -304,7 +351,7 @@ export default function AdminDashboardScreen({ currentUser }) {
 
                 {/* VERIFICATION & MANAGEMENT BUTTONS */}
                 <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #E2E8F0', paddingTop: '10px' }}>
-                  {isPending ? (
+                  {isPendingReg ? (
                     <button 
                       onClick={() => handleApproveUser(userItem.id, userItem.name)}
                       style={{
@@ -320,7 +367,7 @@ export default function AdminDashboardScreen({ currentUser }) {
                         boxShadow: 'var(--shadow-sm)'
                       }}
                     >
-                      ✔ VERIFIKASI & SETUJUI AKUN
+                      ✔ VERIFIKASI & SETUJUI DAFTAR AKUN
                     </button>
                   ) : (
                     <button 

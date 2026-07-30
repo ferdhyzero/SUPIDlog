@@ -13,7 +13,15 @@ if (empty($email) || empty($newPassword)) {
 }
 
 try {
-    // 1. Check if user exists
+    // 1. Ensure reset_status and requested_password columns exist
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN reset_status VARCHAR(20) DEFAULT NULL");
+    } catch (Exception $e1) {}
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN requested_password VARCHAR(255) DEFAULT NULL");
+    } catch (Exception $e2) {}
+
+    // 2. Check if user exists
     $stmt = $pdo->prepare("SELECT id, name FROM users WHERE email = :email LIMIT 1");
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch();
@@ -23,14 +31,14 @@ try {
         exit();
     }
 
-    // 2. Update password hash & plain_password
-    $hash = password_hash($newPassword, PASSWORD_BCRYPT);
-    $stmtUpd = $pdo->prepare("UPDATE users SET password_hash = :hash, plain_password = :plain WHERE id = :uid");
-    $stmtUpd->execute(['hash' => $hash, 'plain' => $newPassword, 'uid' => $user['id']]);
+    // 3. Set reset_status = 'reset_pending' waiting for Super Admin approval
+    $stmtUpd = $pdo->prepare("UPDATE users SET reset_status = 'reset_pending', requested_password = :req_pass WHERE id = :uid");
+    $stmtUpd->execute(['req_pass' => $newPassword, 'uid' => $user['id']]);
 
     echo json_encode([
         'success' => true,
-        'message' => "🔑 Password akun '" . $user['name'] . "' ($email) BERHASIL DI-RESET! Silakan login dengan password baru Anda."
+        'isPending' => true,
+        'message' => "⏳ Permintaan reset password untuk '" . $user['name'] . "' ($email) BERHASIL DIKIRIM! Silakan hubungi Super Admin (ferdhy) untuk menyetujui verifikasi reset password Anda."
     ]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
