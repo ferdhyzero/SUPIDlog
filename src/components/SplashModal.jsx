@@ -51,9 +51,9 @@ export default function SplashModal({ onClose }) {
           }}
         >
           <img 
-            src="/logo.png" 
+            src="/sup-paddle-icon-blue.png" 
             alt="Paddle ID Logo" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '16px' }} 
           />
         </div>
 
