@@ -57,8 +57,8 @@ export default function SplashModal({ onClose }) {
           />
         </div>
 
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '6px' }}>
-          PaddleLog
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '6px' }}>
+          Stand Up PaddleLog
         </h1>
         
         <p style={{ fontSize: '1rem', opacity: 0.9, fontWeight: 500, fontStyle: 'italic', marginBottom: '28px' }}>

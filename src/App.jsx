@@ -175,7 +175,7 @@ export default function App() {
               }} 
             />
             <div>
-              <h1 style={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.1 }}>PaddleLog</h1>
+              <h1 style={{ fontSize: '0.98rem', fontWeight: 800, lineHeight: 1.1 }}>Stand Up PaddleLog</h1>
               <span style={{ fontSize: '0.65rem', opacity: 0.85, fontWeight: 600, letterSpacing: '0.04em' }}>SUP.ID INDONESIA</span>
             </div>
           </div>
