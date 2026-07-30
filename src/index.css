@@ -59,6 +59,7 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: calc(var(--nav-height) + 10px);
+  box-sizing: border-box;
 }
 
 /* Typography Helpers - Ultra Clean & Proportioned */
@@ -70,6 +71,8 @@ p, span { line-height: 1.4; }
 
 /* Clean Ocean Blue Header */
 .header-glass {
+  width: 100%;
+  box-sizing: border-box;
   background: var(--ocean-blue);
   color: white;
   padding: 10px 14px;
@@ -81,10 +84,12 @@ p, span { line-height: 1.4; }
 
 /* Hero Background Card - Solid Bright Blue (No Gradients) */
 .hero-card {
+  width: 100%;
+  box-sizing: border-box;
   background-color: var(--ocean-blue);
   color: white;
   border-radius: var(--radius-lg);
-  padding: 14px 12px;
+  padding: 16px 14px;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-md);
@@ -93,6 +98,7 @@ p, span { line-height: 1.4; }
 /* Jumbo CTA Button - Clean Solid Bright Blue */
 .btn-cta-jumbo {
   width: 100%;
+  box-sizing: border-box;
   padding: 12px 16px;
   border-radius: var(--radius-md);
   background-color: var(--aqua);
@@ -118,14 +124,18 @@ p, span { line-height: 1.4; }
 
 /* Clean Cards */
 .card-clean {
+  width: 100%;
+  box-sizing: border-box;
   background: var(--card-bg);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 12px 14px;
   box-shadow: var(--shadow-sm);
   border: 1px solid #f1f5f9;
 }
 
 .glass-panel {
+  width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   border-radius: var(--radius-md);
   border: 1px solid #f1f5f9;
@@ -134,15 +144,19 @@ p, span { line-height: 1.4; }
 
 /* Stats Grid Layout */
 .stats-grid {
+  width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .stat-card {
+  width: 100%;
+  box-sizing: border-box;
   background: white;
   border-radius: var(--radius-md);
-  padding: 8px 6px;
+  padding: 10px 8px;
   text-align: center;
   border: 1px solid #f1f5f9;
   box-shadow: var(--shadow-sm);
@@ -184,6 +198,7 @@ p, span { line-height: 1.4; }
   align-items: center;
   z-index: 50;
   padding: 0 4px;
+  box-sizing: border-box;
 }
 
 .nav-item {
@@ -254,6 +269,7 @@ p, span { line-height: 1.4; }
   flex-direction: column;
   justify-content: space-between;
   padding: 16px;
+  box-sizing: border-box;
 }
 
 .metric-jumbo {
@@ -276,6 +292,7 @@ p, span { line-height: 1.4; }
   align-items: center;
   justify-content: center;
   padding: 14px;
+  box-sizing: border-box;
 }
 
 .stamp-badge-container, .modal-sheet-content {
@@ -287,6 +304,7 @@ p, span { line-height: 1.4; }
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 /* Filter Tag Pills */

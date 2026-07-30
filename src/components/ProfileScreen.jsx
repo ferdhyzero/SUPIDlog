@@ -49,7 +49,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
   };
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ width: '100%', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
       
       {/* Profile Header */}
       <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7', padding: '20px 16px' }}>
