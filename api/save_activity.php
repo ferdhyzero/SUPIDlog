@@ -6,19 +6,16 @@ $data = json_decode($rawInput, true);
 
 $userId = (int)($data['user_id'] ?? 1);
 $spotName = trim($data['spotName'] ?? 'Samalona');
-$distance = (float)($data['rawDistance'] ?? 8.4);
-$duration = trim($data['timeFormatted'] ?? '1h 55m');
+$distance = (float)($data['rawDistance'] ?? $data['distance_km'] ?? 8.4);
+$duration = trim($data['timeFormatted'] ?? $data['duration_formatted'] ?? '1h 55m');
 $calories = (int)($data['calories'] ?? 693);
-$avgSpeed = trim($data['avgSpeed'] ?? '4.8 km/h');
-$strokes = (int)($data['strokes'] ?? 3890);
-$weather = trim($data['weather'] ?? '☀ Sunny');
-$water = trim($data['water'] ?? 'Flat Water');
-$wind = trim($data['wind'] ?? '6 knot');
-$notes = trim($data['notes'] ?? '');
+$avgSpeed = trim($data['avgSpeed'] ?? $data['avg_speed'] ?? '4.8 km/h');
+$weather = trim($data['weather'] ?? '☀ Sunny 30°C');
+$water = trim($data['water'] ?? 'Flat Water 🌊');
 
 try {
     // 1. Insert into activities table
-    $stmt = $pdo->prepare("INSERT INTO activities (user_id, spot_name, distance_km, duration_formatted, calories, avg_speed, strokes, weather, water_condition, wind, notes) VALUES (:uid, :spot, :dist, :dur, :cal, :spd, :str, :wea, :wat, :wnd, :notes)");
+    $stmt = $pdo->prepare("INSERT INTO activities (user_id, spot_name, distance_km, duration_formatted, calories, avg_speed, weather, water_condition) VALUES (:uid, :spot, :dist, :dur, :cal, :spd, :wea, :wat)");
     $stmt->execute([
         'uid' => $userId,
         'spot' => $spotName,
@@ -26,24 +23,23 @@ try {
         'dur' => $duration,
         'cal' => $calories,
         'spd' => $avgSpeed,
-        'str' => $strokes,
         'wea' => $weather,
-        'wat' => $water,
-        'wnd' => $wind,
-        'notes' => $notes
+        'wat' => $water
     ]);
 
     // 2. Unlock stamp in passport_stamps table
-    $stmtStamp = $pdo->prepare("INSERT INTO passport_stamps (user_id, spot_name) VALUES (:uid, :spot) ON DUPLICATE KEY UPDATE unlocked_at = CURRENT_TIMESTAMP");
-    $stmtStamp->execute(['uid' => $userId, 'spot' => $spotName]);
+    try {
+        $stmtStamp = $pdo->prepare("INSERT INTO passport_stamps (user_id, spot_name, unlocked) VALUES (:uid, :spot, 1)");
+        $stmtStamp->execute(['uid' => $userId, 'spot' => $spotName]);
+    } catch (Exception $exStamp) {}
 
-    // 3. Update user total distance & sessions
-    $stmtUser = $pdo->prepare("UPDATE users SET total_distance_km = total_distance_km + :dist, total_sessions = total_sessions + 1 WHERE id = :uid");
+    // 3. Update user total distance
+    $stmtUser = $pdo->prepare("UPDATE users SET total_distance_km = total_distance_km + :dist WHERE id = :uid");
     $stmtUser->execute(['dist' => $distance, 'uid' => $userId]);
 
     echo json_encode([
         'success' => true,
-        'message' => 'Sesi paddle berhasil disimpan ke Database MySQL server!',
+        'message' => 'Sesi paddle berhasil disimpan ke Database MySQL cPanel!',
         'unlockedSpot' => $spotName
     ]);
 } catch (Exception $e) {

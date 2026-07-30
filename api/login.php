@@ -19,7 +19,7 @@ try {
     } catch (Exception $exCol) {}
 
     // 2. Search user by email or name in MySQL
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email OR name = :name LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, email, name, role, status, level, community_rank, favorite_spot, total_distance_km FROM users WHERE email = :email OR name = :name LIMIT 1");
     $stmt->execute(['email' => $email, 'name' => $email]);
     $user = $stmt->fetch();
 
@@ -34,7 +34,15 @@ try {
             exit();
         }
 
-        unset($user['password_hash']);
+        // Dynamically calculate distance & sessions
+        $uid = $user['id'];
+        $stmtDist = $pdo->prepare("SELECT COALESCE(SUM(distance_km), 0) as tot_dist, COUNT(id) as tot_sess FROM activities WHERE user_id = :uid");
+        $stmtDist->execute(['uid' => $uid]);
+        $distRow = $stmtDist->fetch();
+        
+        $user['total_distance_km'] = (float)($distRow['tot_dist'] ?? $user['total_distance_km']);
+        $user['total_sessions'] = (int)($distRow['tot_sess'] ?? 0);
+
         echo json_encode([
             'success' => true,
             'message' => 'Login berhasil! Selamat mendayung 🏄‍♂️',
@@ -56,8 +64,9 @@ try {
                 'status' => 'approved',
                 'level' => 'Super Admin 👑',
                 'community_rank' => 1,
-                'total_distance_km' => 2450.00,
-                'total_sessions' => 410
+                'favorite_spot' => 'Bosowa Beach',
+                'total_distance_km' => 120.50,
+                'total_sessions' => 1
             ]
         ]);
         exit();
@@ -75,9 +84,10 @@ try {
                 'role' => 'user',
                 'status' => 'approved',
                 'level' => 'Explorer',
-                'community_rank' => 15,
-                'total_distance_km' => 1842.00,
-                'total_sessions' => 324
+                'community_rank' => 2,
+                'favorite_spot' => 'Samalona Island',
+                'total_distance_km' => 45.80,
+                'total_sessions' => 3
             ]
         ]);
         exit();
