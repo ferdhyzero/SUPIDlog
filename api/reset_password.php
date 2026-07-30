@@ -4,11 +4,11 @@ require_once __DIR__ . '/db_config.php';
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
 
-$email = trim($data['email'] ?? '');
+$identifier = trim($data['email'] ?? $data['identifier'] ?? '');
 $newPassword = trim($data['new_password'] ?? '');
 
-if (empty($email) || empty($newPassword)) {
-    echo json_encode(['success' => false, 'message' => 'Email dan Password Baru wajib diisi!']);
+if (empty($identifier) || empty($newPassword)) {
+    echo json_encode(['success' => false, 'message' => 'Email / Username dan Password Baru wajib diisi!']);
     exit();
 }
 
@@ -21,13 +21,13 @@ try {
         $pdo->exec("ALTER TABLE users ADD COLUMN requested_password VARCHAR(255) DEFAULT NULL");
     } catch (Exception $e2) {}
 
-    // 2. Check if user exists
-    $stmt = $pdo->prepare("SELECT id, name FROM users WHERE email = :email LIMIT 1");
-    $stmt->execute(['email' => $email]);
+    // 2. Check if user exists by Email or Username
+    $stmt = $pdo->prepare("SELECT id, name, email FROM users WHERE email = :id OR name = :id LIMIT 1");
+    $stmt->execute(['id' => $identifier]);
     $user = $stmt->fetch();
 
     if (!$user) {
-        echo json_encode(['success' => false, 'message' => 'Email tidak ditemukan di sistem database SUPID!']);
+        echo json_encode(['success' => false, 'message' => 'Email atau Username tidak ditemukan di database!']);
         exit();
     }
 
@@ -38,7 +38,7 @@ try {
     echo json_encode([
         'success' => true,
         'isPending' => true,
-        'message' => "⏳ Permintaan reset password untuk '" . $user['name'] . "' ($email) BERHASIL DIKIRIM! Silakan hubungi Super Admin (ferdhy) untuk menyetujui verifikasi reset password Anda."
+        'message' => "⏳ Permintaan reset password untuk '" . $user['name'] . "' (" . $user['email'] . ") BERHASIL DIKIRIM! Silakan hubungi Super Admin (ferdhy) untuk menyetujui verifikasi reset password Anda."
     ]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);

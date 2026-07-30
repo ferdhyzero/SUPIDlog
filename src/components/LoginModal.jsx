@@ -170,11 +170,11 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
 
           <div>
             <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
-              Email Terdaftar
+              Email / Username
             </label>
             <input 
-              type="email" 
-              placeholder="ahmadferdy66@gmail.com atau sapril@sup.id"
+              type="text" 
+              placeholder="Email atau Username (misal: ferdhy)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
