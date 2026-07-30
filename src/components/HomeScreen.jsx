@@ -141,7 +141,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
       
       {/* Hero Greeting & Weather Card */}
       <div className="hero-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
             <p style={{ fontSize: '0.85rem', opacity: 0.85, fontWeight: 500 }}>
               {isGuest ? 'Mode Tamu (Guest)' : 'Good Morning,'}
@@ -149,25 +149,32 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{userName} 👋</h2>
           </div>
           
-          <button 
-            onClick={handleInstallClick}
-            style={{ 
-              background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-              color: '#000',
-              border: 'none',
-              padding: '8px 14px',
-              borderRadius: '20px',
-              fontWeight: 800,
-              fontSize: '0.8rem',
-              boxShadow: '0 4px 12px rgba(0, 242, 254, 0.4)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <span>📲</span> {pwaInstalled ? 'PWA Active' : 'Install App'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img 
+              src="/logo.png" 
+              alt="SUP.ID Logo" 
+              style={{ height: '38px', width: 'auto', borderRadius: '8px', objectFit: 'contain' }} 
+            />
+            <button 
+              onClick={handleInstallClick}
+              style={{ 
+                background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
+                color: '#000',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                fontWeight: 800,
+                fontSize: '0.75rem',
+                boxShadow: '0 4px 12px rgba(0, 242, 254, 0.4)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>📲</span> {pwaInstalled ? 'PWA Active' : 'Install App'}
+            </button>
+          </div>
         </div>
 
         {/* Guest Warning Banner if not logged in */}
