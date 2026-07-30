@@ -121,13 +121,13 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             </p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
               <button 
-                onClick={onOpenLogin}
+                onClick={() => onOpenLogin(false)}
                 style={{ flex: 1, background: 'white', color: '#0284c7', border: 'none', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
               >
                 🔑 MASUK AKUN
               </button>
               <button 
-                onClick={onOpenLogin}
+                onClick={() => onOpenLogin(true)}
                 style={{ flex: 1, background: 'rgba(255,255,255,0.25)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}
               >
                 📝 DAFTAR BARU

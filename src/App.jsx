@@ -28,6 +28,12 @@ export default function App() {
 
   const [showSplash, setShowSplash] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalInitialRegister, setLoginModalInitialRegister] = useState(false);
+
+  const handleOpenLogin = (isRegMode = false) => {
+    setLoginModalInitialRegister(isRegMode === true);
+    setShowLoginModal(true);
+  };
   const [showSafetyCheck, setShowSafetyCheck] = useState(false);
   const [isActivePaddle, setIsActivePaddle] = useState(false);
   const [workoutSession, setWorkoutSession] = useState(null);
@@ -276,7 +282,7 @@ export default function App() {
         {activeTab === 'profile' && (
           <ProfileScreen 
             currentUser={currentUser}
-            onOpenLogin={() => setShowLoginModal(true)}
+            onOpenLogin={(isReg) => handleOpenLogin(isReg)}
             onLogout={handleLogout}
             onNavigate={(tab) => setActiveTab(tab)}
           />
@@ -368,6 +374,7 @@ export default function App() {
       {/* Login / Register Modal */}
       {showLoginModal && !currentUser && (
         <LoginModal 
+          initialRegister={loginModalInitialRegister}
           onClose={() => setShowLoginModal(false)}
           onLoginSuccess={handleLoginSuccess}
         />

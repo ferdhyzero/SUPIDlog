@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-export default function LoginModal({ onClose, onLoginSuccess }) {
-  const [isRegister, setIsRegister] = useState(false);
+export default function LoginModal({ onClose, onLoginSuccess, initialRegister = false }) {
+  const [isRegister, setIsRegister] = useState(initialRegister);
   const [isForgotPass, setIsForgotPass] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
