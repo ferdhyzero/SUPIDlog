@@ -50,7 +50,7 @@ export default function StatisticsScreen({ userId = 2 }) {
   }, [userId]);
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ width: '100%', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
       
       {/* Header */}
       <div>

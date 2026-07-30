@@ -173,7 +173,7 @@ export default function AdminDashboardScreen({ currentUser }) {
   const pendingResetCount = usersList.filter(u => u.reset_status === 'reset_pending').length;
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ width: '100%', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
       
       {/* Super Admin Hero Banner */}
       <div 
