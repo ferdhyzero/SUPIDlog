@@ -16,8 +16,8 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS
 $db_host = 'localhost';
 
 // cPanel Production Credentials vs Local XAMPP Fallback
-$cpanel_user = 'myhostzo_sup'; // Ubah dengan Username MySQL cPanel Anda
-$cpanel_pass = '';             // Ubah dengan Password MySQL cPanel Anda
+$cpanel_user = 'myhostzo_sup'; // Username MySQL cPanel
+$cpanel_pass = 'Sup!D2026@#$'; // Password MySQL cPanel
 $primary_db  = 'myhostzo_sup';
 
 $local_user   = 'root';
