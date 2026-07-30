@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLogin }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [viewMode, setViewMode] = useState('map'); // Default to map view for instant Google Maps experience
   const [mapType, setMapType] = useState('roadmap'); // 'roadmap' or 'k' (satellite)
@@ -107,14 +108,22 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
   const filters = ['All', 'Flat Water', 'River', 'Ocean', 'Lake', 'Race', 'Surf', 'Camping'];
 
+  // Debounce search query to prevent Google Maps iframe flickering on every keystroke
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 600);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   const filteredSpots = spots.filter((spot) => {
     const matchesSearch = spot.name.toLowerCase().includes(searchQuery.toLowerCase()) || spot.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === 'All' || spot.category === activeFilter || spot.tag === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
-  const googleMapsSearchUrl = searchQuery 
-    ? `https://maps.google.com/maps?q=${encodeURIComponent(searchQuery + ' SUP Indonesia')}&t=${mapType}&z=13&output=embed`
+  const googleMapsSearchUrl = debouncedSearchQuery 
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(debouncedSearchQuery + ' SUP Indonesia')}&t=${mapType}&z=13&output=embed`
     : `https://maps.google.com/maps?q=-5.1478,119.4154&t=${mapType}&z=10&output=embed`;
 
   return (

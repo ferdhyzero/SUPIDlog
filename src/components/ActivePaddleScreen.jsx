@@ -70,12 +70,16 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
 
           // Append to GPS path trajectory history for canvas vector drawing
           setPathHistory((prev) => {
+            if (prev.length === 0) return [newPt];
             const last = prev[prev.length - 1];
-            if (!last || last.lat !== newPt.lat || last.lng !== newPt.lng) {
+            if (Math.abs(last.lat - newPt.lat) > 0.00005 || Math.abs(last.lng - newPt.lng) > 0.00005) {
               return [...prev, newPt];
             }
             return prev;
           });
+
+          // Speed calculation & GPS Jitter Filter (Ignore noise under 10 meters and under 0.8 km/h)
+          const currentSpeedKmH = (gpsSpeed !== null && gpsSpeed !== undefined && gpsSpeed > 0.2) ? +(gpsSpeed * 3.6).toFixed(1) : 0.0;
 
           if (prevCoordsRef.current) {
             const distDelta = calculateDistance(
@@ -85,17 +89,16 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
               longitude
             );
 
-            // Only add realistic paddle delta (prevent GPS jitter under 3 meters)
-            if (distDelta > 0.003 && distDelta < 0.5) {
+            // Strict Filter: Only add distance if movement is > 10 meters AND speed > 0.8 km/h
+            if (distDelta >= 0.010 && distDelta < 0.5 && currentSpeedKmH >= 0.8) {
               setDistance((prev) => +(prev + distDelta).toFixed(2));
+              prevCoordsRef.current = { latitude, longitude };
             }
+          } else {
+            prevCoordsRef.current = { latitude, longitude };
           }
 
-          prevCoordsRef.current = { latitude, longitude };
-
-          // Real GPS Speed in km/h if available from browser hardware
-          if (gpsSpeed !== null && gpsSpeed !== undefined && gpsSpeed > 0.3) {
-            const currentSpeedKmH = +(gpsSpeed * 3.6).toFixed(1);
+          if (currentSpeedKmH >= 0.8) {
             setSpeed(currentSpeedKmH);
             setMaxSpeed((prev) => Math.max(prev, currentSpeedKmH));
           } else {
@@ -265,10 +268,15 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
     return `${pad(mins)}:${pad(secs)}`;
   };
 
-  // Google Maps Real-time Embed URL centered on user GPS coordinates
-  const googleMapsUrl = `https://maps.google.com/maps?q=${currentCoords.lat},${currentCoords.lng}&t=${mapType === 'satellite' ? 'k' : 'm'}&z=16&output=embed`;
+  // Google Maps Real-time Embed URL (rounded to 3 decimals ~100m to prevent iframe flickering on micro GPS drift)
+  const mapLat = (+currentCoords.lat || -5.14378).toFixed(3);
+  const mapLng = (+currentCoords.lng || 119.45851).toFixed(3);
+  const googleMapsUrl = `https://maps.google.com/maps?q=${mapLat},${mapLng}&t=${mapType === 'satellite' ? 'k' : 'm'}&z=15&output=embed`;
 
-  const handleStopClick = () => {
+  const handleStopClick = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+
     onStop({
       distance: `${distance.toFixed(1)} km`,
       rawDistance: distance,
@@ -583,10 +591,11 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
       )}
 
       {/* Control Action Buttons (STOP, PAUSE, PHOTO) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', position: 'relative', zIndex: 100 }}>
         {/* STOP BUTTON */}
         <button 
           onClick={handleStopClick}
+          onTouchEnd={handleStopClick}
           style={{
             background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)',
             color: 'white',
@@ -597,6 +606,8 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
             fontSize: '1rem',
             fontWeight: 800,
             cursor: 'pointer',
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent',
             boxShadow: '0 8px 20px rgba(239, 68, 68, 0.4)'
           }}
         >
@@ -606,6 +617,10 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
         {/* PAUSE BUTTON */}
         <button 
           onClick={() => setIsPaused(!isPaused)}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsPaused(!isPaused);
+          }}
           style={{
             background: isPaused ? 'linear-gradient(135deg, #10B981 0%, #047857 100%)' : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
             color: 'white',
@@ -616,6 +631,8 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
             fontSize: '1rem',
             fontWeight: 800,
             cursor: 'pointer',
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent',
             boxShadow: '0 8px 20px rgba(245, 158, 11, 0.4)'
           }}
         >
@@ -625,6 +642,10 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
         {/* PHOTO BUTTON */}
         <button 
           onClick={onTakePhoto}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            onTakePhoto();
+          }}
           style={{
             background: 'rgba(255, 255, 255, 0.15)',
             border: '1.5px solid rgba(255, 255, 255, 0.3)',
@@ -634,7 +655,9 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
             fontFamily: 'var(--font-heading)',
             fontSize: '1rem',
             fontWeight: 800,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent'
           }}
         >
           📷 PHOTO
