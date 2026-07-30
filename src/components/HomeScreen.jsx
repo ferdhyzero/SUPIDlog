@@ -137,7 +137,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
   const displayTime = isGuest ? '00:00' : (today ? today.time : '00:00');
 
   return (
-    <div style={{ width: '100%', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
       {/* Hero Greeting & Weather Card */}
       <div className="hero-card">

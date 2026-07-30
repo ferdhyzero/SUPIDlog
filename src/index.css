@@ -15,7 +15,7 @@
   --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --app-max-width: 480px;       /* Option A: Centered Framed App Shell Max-Width */
+  --app-max-width: 480px;       /* Framed App Shell Max-Width */
   --nav-height: 60px;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -53,7 +53,7 @@ html, body {
   font-size: 14px;
 }
 
-/* Mobile App Shell Container - Locked to 480px Centered */
+/* Mobile App Shell Container - Exact Width Frame */
 #root {
   width: 100%;
   max-width: var(--app-max-width);
@@ -76,20 +76,20 @@ h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
 h4 { font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
 p, span { line-height: 1.4; }
 
-/* Clean Ocean Blue Header - Bounded to 480px Container */
+/* Clean Ocean Blue Header - Edge-to-Edge inside App Frame */
 .header-glass {
   width: 100%;
   box-sizing: border-box;
   background: var(--ocean-blue);
   color: white;
-  padding: 10px 14px;
+  padding: 12px 14px;
   position: sticky;
   top: 0;
   z-index: 40;
   box-shadow: var(--shadow-sm);
 }
 
-/* Hero Background Card */
+/* Hero Background Card - Fills Full Width of Green Box */
 .hero-card {
   width: 100%;
   box-sizing: border-box;
@@ -129,13 +129,13 @@ p, span { line-height: 1.4; }
   background-color: var(--ocean-dark);
 }
 
-/* Clean Cards */
+/* Clean Cards - Fills Full Width of Green Box */
 .card-clean {
   width: 100%;
   box-sizing: border-box;
   background: var(--card-bg);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 14px;
   box-shadow: var(--shadow-sm);
   border: 1px solid #f1f5f9;
 }
@@ -189,7 +189,7 @@ p, span { line-height: 1.4; }
   letter-spacing: 0.02em;
 }
 
-/* Floating Bottom Navbar Wrapper & Container - Option A: Strictly Bounded to 480px */
+/* Floating Bottom Navbar Wrapper & Container - Edge-to-Edge matching Green Box */
 .bottom-nav-wrapper {
   position: fixed;
   bottom: 0;
@@ -206,7 +206,7 @@ p, span { line-height: 1.4; }
 .bottom-nav {
   pointer-events: auto;
   width: 100%;
-  max-width: var(--app-max-width); /* EXACT 480px MATCHING #root! */
+  max-width: var(--app-max-width);
   height: var(--nav-height);
   background: #ffffff;
   border-top: 1px solid #f1f5f9;
@@ -242,12 +242,6 @@ p, span { line-height: 1.4; }
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-}
-
-.nav-item:focus, .nav-item:focus-visible, .nav-item:active {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
 }
 
 .nav-item.active {

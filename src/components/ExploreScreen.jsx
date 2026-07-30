@@ -107,7 +107,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     : `https://maps.google.com/maps?q=-5.1478,119.4154&z=10&output=embed`;
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
