@@ -5,7 +5,7 @@ $userId = (int)($_GET['user_id'] ?? 2);
 
 try {
     // 1. Fetch User Profile
-    $stmtUser = $pdo->prepare("SELECT id, name, email, role, level, status FROM users WHERE id = :uid LIMIT 1");
+    $stmtUser = $pdo->prepare("SELECT id, name, email, role, level, status, COALESCE(avatar_url, '') as avatar_url, COALESCE(club_name, 'SUP.ID Indonesia') as club_name, COALESCE(emergency_contact, '') as emergency_contact FROM users WHERE id = :uid LIMIT 1");
     $stmtUser->execute(['uid' => $userId]);
     $user = $stmtUser->fetch();
 

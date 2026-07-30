@@ -16,13 +16,32 @@ if (!$userId || !$name) {
 }
 
 try {
-    // Check if columns exist or update user
-    $stmt = $pdo->prepare("UPDATE users SET name = :name WHERE id = :uid");
-    $stmt->execute(['name' => $name, 'uid' => $userId]);
+    // 1. Ensure columns exist dynamically in MySQL
+    try {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `avatar_url` VARCHAR(255) DEFAULT '' AFTER `name`");
+    } catch (Exception $ex) {}
+
+    try {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `club_name` VARCHAR(100) DEFAULT 'SUP.ID Indonesia' AFTER `avatar_url`");
+    } catch (Exception $ex) {}
+
+    try {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `emergency_contact` VARCHAR(50) DEFAULT '' AFTER `club_name`");
+    } catch (Exception $ex) {}
+
+    // 2. Execute UPDATE query
+    $stmt = $pdo->prepare("UPDATE users SET name = :name, avatar_url = :avatar, club_name = :club, emergency_contact = :emergency WHERE id = :uid");
+    $stmt->execute([
+        'name' => $name,
+        'avatar' => $avatarUrl,
+        'club' => $clubName,
+        'emergency' => $emergencyContact,
+        'uid' => $userId
+    ]);
 
     echo json_encode([
         'success' => true,
-        'message' => 'Profil berhasil diperbarui!',
+        'message' => 'Profil & Kontak Darurat SOS berhasil diperbarui ke Database MySQL!',
         'user' => [
             'id' => $userId,
             'name' => $name,

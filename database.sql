@@ -1,186 +1,212 @@
--- ========================================================
--- Database Schema for SUPID Log (PaddleLog by SUP.ID Indonesia)
--- Compatible with MySQL 5.7+ / 8.0+ / MariaDB (cPanel & XAMPP)
--- Database Name: myhostzo_sup
--- ========================================================
+-- Database SQL Dump for SUPIDlog (Local XAMPP & cPanel Sync)
+-- Target Database: supidlog_db / myhostzo_sup
 
-CREATE DATABASE IF NOT EXISTS `myhostzo_sup` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `myhostzo_sup`;
+SET FOREIGN_KEY_CHECKS=0;
 
-DROP TABLE IF EXISTS `post_comments`;
-DROP TABLE IF EXISTS `post_likes`;
-DROP TABLE IF EXISTS `activities`;
-DROP TABLE IF EXISTS `passport_stamps`;
 DROP TABLE IF EXISTS `saved_spots`;
+DROP TABLE IF EXISTS `post_likes`;
+DROP TABLE IF EXISTS `post_comments`;
+DROP TABLE IF EXISTS `passport_stamps`;
 DROP TABLE IF EXISTS `gear_locker`;
 DROP TABLE IF EXISTS `community_posts`;
+DROP TABLE IF EXISTS `activities`;
 DROP TABLE IF EXISTS `spots`;
 DROP TABLE IF EXISTS `users`;
 
+SET FOREIGN_KEY_CHECKS=1;
+
 -- --------------------------------------------------------
--- 1. Table structure for `users`
--- --------------------------------------------------------
+
 CREATE TABLE `users` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `email` VARCHAR(100) NOT NULL UNIQUE,
-  `password_hash` VARCHAR(255) NOT NULL,
-  `plain_password` VARCHAR(255) DEFAULT '',
-  `name` VARCHAR(100) NOT NULL,
-  `role` VARCHAR(20) DEFAULT 'user', -- 'user' or 'super_admin'
-  `status` VARCHAR(20) DEFAULT 'approved', -- 'approved' or 'pending'
-  `level` VARCHAR(50) DEFAULT 'Explorer',
-  `community_rank` INT DEFAULT 1,
-  `favorite_spot` VARCHAR(100) DEFAULT 'Bosowa Beach',
-  `total_distance_km` DECIMAL(8,2) DEFAULT 45.80,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `plain_password` varchar(255) DEFAULT '',
+  `name` varchar(100) NOT NULL,
+  `avatar_url` varchar(255) DEFAULT '',
+  `club_name` varchar(100) DEFAULT 'SUP.ID Indonesia',
+  `emergency_contact` varchar(50) DEFAULT '',
+  `role` varchar(20) DEFAULT 'user',
+  `status` varchar(20) DEFAULT 'approved',
+  `reset_status` varchar(20) DEFAULT NULL,
+  `requested_password` varchar(255) DEFAULT NULL,
+  `level` varchar(50) DEFAULT 'Explorer',
+  `community_rank` int DEFAULT '15',
+  `favorite_spot` varchar(100) DEFAULT 'Bosowa',
+  `total_distance_km` decimal(8,2) DEFAULT '1842.00',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert Default Demo Users (Super Admin Ferdhy & User Sapril)
-INSERT INTO `users` (`id`, `email`, `password_hash`, `plain_password`, `name`, `role`, `status`, `level`, `community_rank`, `favorite_spot`, `total_distance_km`) VALUES
-(1, 'ahmadferdy66@gmail.com', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sup!D2026@#$', 'ferdhy', 'super_admin', 'approved', 'Super Admin 👑', 1, 'Bosowa Beach', 120.50),
-(2, 'sapril@sup.id', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sapril123!', 'Sapril', 'user', 'approved', 'Explorer', 2, 'Samalona Island', 45.80);
+INSERT INTO `users` (`id`, `email`, `password_hash`, `plain_password`, `name`, `role`, `status`, `reset_status`, `requested_password`, `level`, `community_rank`, `favorite_spot`, `total_distance_km`, `created_at`) VALUES
+(1, 'ahmadferdy66@gmail.com', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'admin123', 'ferdhy', 'super_admin', 'approved', NULL, NULL, 'Beginner SUPer', 1, 'Samalona', 0.52, '2026-07-29 12:51:06'),
+(2, 'sapril@sup.id', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', '1234567', 'Sapril', 'user', 'approved', NULL, NULL, 'Advanced SUPer', 2, 'Samalona', 0.00, '2026-07-29 12:51:06'),
+(4, 'musliadi.ptp02@gmail.com', '$2y$10$5LDsi0rVBgQq38kEK/ZJZ.aer13ABM5fjq42k.nDcf.nNCSn2riz.', 'Musliadi12', 'Musliadi', 'user', 'approved', NULL, NULL, 'Beginner SUPer', 3, '-', 0.00, '2026-07-30 02:20:17'),
+(5, 'rezkydewa03@gmail.com', '$2y$10$3sLJ7Q0dIl.hTfpp8lS7vOW3ikj7Cf4UL3r3k8iS2qnvIC0xenWLe', 'RezkyRDS03', 'Andi Rezky Dewa Singke', 'user', 'approved', NULL, NULL, 'Beginner SUPer', 4, '-', 0.00, '2026-07-30 02:39:53');
 
 -- --------------------------------------------------------
--- 2. Table structure for `spots`
--- --------------------------------------------------------
+
 CREATE TABLE `spots` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(100) NOT NULL,
-  `stars` INT DEFAULT 5,
-  `category` VARCHAR(50) DEFAULT 'Flat Water',
-  `tag` VARCHAR(50) DEFAULT '',
-  `season` VARCHAR(50) DEFAULT 'All Year',
-  `difficulty` VARCHAR(50) DEFAULT 'Easy',
-  `water` VARCHAR(50) DEFAULT 'Calm',
-  `visited_count` INT DEFAULT 0,
-  `lat` DECIMAL(10,8) DEFAULT -5.1478,
-  `lng` DECIMAL(11,8) DEFAULT 119.4154,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `stars` int DEFAULT '5',
+  `category` varchar(50) DEFAULT 'Flat Water',
+  `tag` varchar(50) DEFAULT '',
+  `season` varchar(50) DEFAULT 'All Year',
+  `difficulty` varchar(50) DEFAULT 'Easy',
+  `water` varchar(50) DEFAULT 'Calm',
+  `visited_count` int DEFAULT '0',
+  `lat` decimal(10,8) DEFAULT '-5.14780000',
+  `lng` decimal(11,8) DEFAULT '119.41540000',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `spots` (`id`, `name`, `stars`, `category`, `tag`, `season`, `difficulty`, `water`, `visited_count`, `lat`, `lng`) VALUES
-(1, 'Bosowa Beach', 5, 'Flat Water', 'Popular', 'All Year', 'Easy', 'Calm', 512, -5.1478, 119.4154),
-(2, 'Samalona Island', 4, 'Ocean', 'Island Tour', 'May-Oct', 'Medium', 'Clear', 420, -5.1234, 119.3456),
-(3, 'Rammang-Rammang', 5, 'River', 'Nature', 'All Year', 'Easy', 'Flat', 380, -4.9234, 119.6456),
-(4, 'Danau Toba', 5, 'Lake', 'Volcano', 'Jun-Sep', 'Medium', 'Deep Blue', 290, 2.6845, 98.8756),
-(5, 'Wakatobi Marine Park', 5, 'Ocean', 'Surf & Reef', 'Apr-Nov', 'Hard', 'Ultra Clear', 185, -5.3123, 123.5432);
+INSERT INTO `spots` (`id`, `name`, `stars`, `category`, `tag`, `season`, `difficulty`, `water`, `visited_count`, `lat`, `lng`, `created_at`) VALUES
+(1, 'Bosowa Beach', 5, 'Flat Water', 'Popular', 'All Year', 'Easy', 'Calm', 512, -5.14780000, 119.41540000, '2026-07-29 12:51:06'),
+(2, 'Samalona Island', 4, 'Ocean', 'Island Tour', 'May-Oct', 'Medium', 'Clear', 420, -5.12340000, 119.34560000, '2026-07-29 12:51:06'),
+(3, 'Rammang-Rammang', 5, 'River', 'Nature', 'All Year', 'Easy', 'Flat', 380, -4.92340000, 119.64560000, '2026-07-29 12:51:06'),
+(4, 'Danau Toba', 5, 'Lake', 'Volcano', 'Jun-Sep', 'Medium', 'Deep Blue', 290, 2.68450000, 98.87560000, '2026-07-29 12:51:06'),
+(5, 'Wakatobi Marine Park', 5, 'Ocean', 'Surf & Reef', 'Apr-Nov', 'Hard', 'Ultra Clear', 185, -5.31230000, 123.54320000, '2026-07-29 12:51:06'),
+(6, 'Pantai bira', 5, 'Custom Spot', '', 'All Year', 'Easy', 'Clear', 1, -5.14780000, 119.41540000, '2026-07-30 02:15:09'),
+(7, 'Pantai indah bosowa', 5, 'Custom Spot', '', 'All Year', 'Easy', 'Clear', 1, -5.14780000, 119.41540000, '2026-07-30 02:48:45');
 
 -- --------------------------------------------------------
--- 3. Table structure for `activities`
--- --------------------------------------------------------
+
 CREATE TABLE `activities` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `spot_name` VARCHAR(100) NOT NULL,
-  `distance_km` DECIMAL(8,2) NOT NULL,
-  `duration_formatted` VARCHAR(50) NOT NULL,
-  `calories` INT DEFAULT 0,
-  `avg_speed` VARCHAR(50) DEFAULT '0.0 km/h',
-  `weather` VARCHAR(100) DEFAULT 'Cerah 30°C',
-  `water_condition` VARCHAR(100) DEFAULT 'Flat Water 🌊',
-  `gps_coords` VARCHAR(100) DEFAULT '',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `spot_name` varchar(100) NOT NULL,
+  `distance_km` decimal(8,2) NOT NULL,
+  `duration_formatted` varchar(50) NOT NULL,
+  `calories` int DEFAULT '0',
+  `avg_speed` varchar(50) DEFAULT '0.0 km/h',
+  `weather` varchar(100) DEFAULT 'Cerah 30°C',
+  `water_condition` varchar(100) DEFAULT 'Flat Water',
+  `gps_coords` varchar(100) DEFAULT '',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `activities_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Seed Initial Demo Activity Rows for Users
-INSERT INTO `activities` (`user_id`, `spot_name`, `distance_km`, `duration_formatted`, `calories`, `avg_speed`, `weather`, `water_condition`, `gps_coords`) VALUES
-(2, 'Samalona Island', 12.40, '01:15:30', 480, '6.2 km/h', '☀ Cerah 31°C', 'Ocean Tour 🌊', '-5.1234, 119.3456'),
-(2, 'Bosowa Beach', 8.50, '00:45:10', 320, '5.8 km/h', '⛅ Cerah Berawan 29°C', 'Flat Water 🌊', '-5.1478, 119.4154'),
-(2, 'Rammang-Rammang', 24.90, '02:30:00', 950, '7.1 km/h', '☀ Cerah 32°C', 'River Cruise 🚣', '-4.9234, 119.6456'),
-(1, 'Bosowa Beach', 45.50, '03:45:00', 1650, '8.4 km/h', '☀ Cerah 30°C', 'Flat Water 🌊', '-5.1478, 119.4154'),
-(1, 'Danau Toba', 75.00, '05:12:00', 2800, '9.1 km/h', '⛅ Sejuk 24°C', 'Deep Water 🌊', '2.6845, 98.8756');
-
--- --------------------------------------------------------
--- 4. Table structure for `passport_stamps`
--- --------------------------------------------------------
-CREATE TABLE `passport_stamps` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `spot_id` INT DEFAULT NULL,
-  `spot_name` VARCHAR(100) NOT NULL,
-  `unlocked` TINYINT(1) DEFAULT 1,
-  `unlocked_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO `passport_stamps` (`user_id`, `spot_name`, `unlocked`) VALUES
-(2, 'Samalona Island', 1),
-(2, 'Bosowa Beach', 1),
-(2, 'Rammang-Rammang', 1);
+INSERT INTO `activities` (`id`, `user_id`, `spot_name`, `distance_km`, `duration_formatted`, `calories`, `avg_speed`, `weather`, `water_condition`, `gps_coords`, `created_at`) VALUES
+(1, 1, 'Samalona', 0.00, '00:07', 693, '0.0 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 01:16:23'),
+(2, 1, 'Samalona', 0.00, '00:35', 693, '0.0 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 01:34:04'),
+(3, 1, 'Bili-Bili', 0.01, '00:27', 693, '1.3 km/h', '🌧 Rain', 'Wave', '', '2026-07-30 01:34:06'),
+(4, 1, 'Samalona', 0.06, '00:41', 693, '5.3 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:09:05'),
+(5, 1, 'Samalona', 0.00, '00:10', 693, '0.0 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:13:14'),
+(6, 1, 'Samalona', 0.08, '00:40', 693, '7.2 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:13:44'),
+(7, 1, 'Samalona', 0.08, '00:40', 693, '7.2 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:13:44'),
+(8, 1, 'Samalona', 0.08, '00:40', 693, '7.2 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:13:44'),
+(9, 1, 'Raja Ampat', 0.21, '00:09', 693, '84.0 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:14:39'),
+(10, 2, 'Samalona', 0.00, '00:10', 693, '0.0 km/h', '☀ Sunny', 'Flat', '', '2026-07-30 02:49:50');
 
 -- --------------------------------------------------------
--- 5. Table structure for `saved_spots`
--- --------------------------------------------------------
-CREATE TABLE `saved_spots` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `spot_name` VARCHAR(100) NOT NULL,
-  `location_address` VARCHAR(255) DEFAULT '',
-  `planned_date` DATE NOT NULL,
-  `notes` TEXT,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  UNIQUE KEY `user_planned_spot` (`user_id`, `spot_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
--- 6. Table structure for `gear_locker`
--- --------------------------------------------------------
-CREATE TABLE `gear_locker` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `gear_name` VARCHAR(100) NOT NULL,
-  `brand` VARCHAR(100) DEFAULT '',
-  `category` VARCHAR(50) DEFAULT 'Board',
-  `usage_km` DECIMAL(8,2) DEFAULT 0.00,
-  `last_maintained` DATE DEFAULT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
--- 7. Table structure for `community_posts`
--- --------------------------------------------------------
 CREATE TABLE `community_posts` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `user_name` VARCHAR(100) NOT NULL,
-  `spot_name` VARCHAR(100) NOT NULL,
-  `title` VARCHAR(255) NOT NULL,
-  `distance_km` VARCHAR(50) NOT NULL,
-  `image_url` VARCHAR(255) DEFAULT '',
-  `likes_count` INT DEFAULT 0,
-  `comments_count` INT DEFAULT 0,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO `community_posts` (`user_id`, `user_name`, `spot_name`, `title`, `distance_km`, `image_url`, `likes_count`, `comments_count`) VALUES
-(2, 'Sapril', 'Samalona Island', 'Dayung pagi ombak tenang Samalona!', '12.4 km', '', 12, 3),
-(1, 'ferdhy', 'Bosowa Beach', 'Sesi latihan interval ombak landai Bosowa Sunset', '45.5 km', '', 28, 7);
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `user_name` varchar(100) NOT NULL,
+  `spot_name` varchar(100) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `distance_km` varchar(50) NOT NULL,
+  `image_url` varchar(255) DEFAULT '',
+  `likes_count` int DEFAULT '0',
+  `comments_count` int DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `community_posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- 8. Table structure for `post_likes`
--- --------------------------------------------------------
-CREATE TABLE `post_likes` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT NOT NULL,
-  `post_id` INT NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY `user_post_like` (`user_id`, `post_id`),
-  FOREIGN KEY (`post_id`) REFERENCES `community_posts`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `gear_locker` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `gear_name` varchar(100) NOT NULL,
+  `brand` varchar(100) DEFAULT '',
+  `category` varchar(50) DEFAULT 'Board',
+  `usage_km` decimal(8,2) DEFAULT '0.00',
+  `last_maintained` date DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `gear_locker_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- 9. Table structure for `post_comments`
+
+CREATE TABLE `passport_stamps` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `spot_id` int DEFAULT NULL,
+  `spot_name` varchar(100) NOT NULL,
+  `unlocked` tinyint(1) DEFAULT '1',
+  `unlocked_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `passport_stamps_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `passport_stamps` (`id`, `user_id`, `spot_id`, `spot_name`, `unlocked`, `unlocked_at`) VALUES
+(1, 1, NULL, 'Samalona', 1, '2026-07-30 01:16:23'),
+(2, 1, NULL, 'Samalona', 1, '2026-07-30 01:34:04'),
+(3, 1, NULL, 'Bili-Bili', 1, '2026-07-30 01:34:06'),
+(4, 1, NULL, 'Samalona', 1, '2026-07-30 02:09:05'),
+(5, 1, NULL, 'Samalona', 1, '2026-07-30 02:13:14'),
+(6, 1, NULL, 'Samalona', 1, '2026-07-30 02:13:44'),
+(7, 1, NULL, 'Samalona', 1, '2026-07-30 02:13:44'),
+(8, 1, NULL, 'Samalona', 1, '2026-07-30 02:13:44'),
+(9, 1, NULL, 'Raja Ampat', 1, '2026-07-30 02:14:39'),
+(10, 2, NULL, 'Samalona', 1, '2026-07-30 02:49:50');
+
 -- --------------------------------------------------------
+
 CREATE TABLE `post_comments` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `post_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
-  `user_name` VARCHAR(100) NOT NULL,
-  `comment_text` TEXT NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`post_id`) REFERENCES `community_posts`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `post_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `user_name` varchar(100) NOT NULL,
+  `comment_text` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `post_id` (`post_id`),
+  CONSTRAINT `post_comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `community_posts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `post_likes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `post_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_post_like` (`user_id`,`post_id`),
+  KEY `post_id` (`post_id`),
+  CONSTRAINT `post_likes_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `community_posts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `saved_spots` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `spot_name` varchar(100) NOT NULL,
+  `location_address` varchar(255) DEFAULT '',
+  `planned_date` date NOT NULL,
+  `notes` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_planned_spot` (`user_id`,`spot_name`),
+  CONSTRAINT `saved_spots_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `saved_spots` (`id`, `user_id`, `spot_name`, `location_address`, `planned_date`, `notes`, `created_at`) VALUES
+(1, 1, 'Bosowa Beach', '', '2026-08-05', 'Rencana paddle trip ke Bosowa Beach', '2026-07-29 14:00:45'),
+(2, 1, 'Samalona Island', '', '2026-08-06', 'Rencana paddle trip ke Samalona Island', '2026-07-30 01:14:38'),
+(3, 1, 'Pantai bira', 'Hasil Pencarian: Pantai bira', '2026-07-30', 'Rencana paddle trip ke Pantai bira', '2026-07-30 02:15:09'),
+(4, 2, 'Pantai indah bosowa', 'Hasil Pencarian: Pantai indah bosowa', '2026-08-06', 'Rencana paddle trip ke Pantai indah bosowa', '2026-07-30 02:48:45');
