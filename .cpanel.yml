@@ -4,5 +4,6 @@ deployment:
     - export DEPLOYPATH=/home/myhostzo/public_html/supid.myhostzone.biz.id
     - /bin/mkdir -p $DEPLOYPATH/api
     - /bin/cp -Rf dist/* $DEPLOYPATH/
+    - /bin/cp -Rf .htaccess $DEPLOYPATH/
     - /bin/cp -Rf api/* $DEPLOYPATH/api/
     - /bin/cp -f database.sql $DEPLOYPATH/

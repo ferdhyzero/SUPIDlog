@@ -1,0 +1,18 @@
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Allow public access to all web assets & images
+<FilesMatch "\.(png|jpe?g|svg|json|js|css|ico)$">
+    Require all granted
+</FilesMatch>
+
+# Fallback index.html for Single Page Application routing
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.html$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.html [L]
+</IfModule>
