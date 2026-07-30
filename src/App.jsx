@@ -6,6 +6,7 @@ import PassportScreen from './components/PassportScreen';
 import ProfileScreen from './components/ProfileScreen';
 import GearLockerScreen from './components/GearLockerScreen';
 import CommunityScreen from './components/CommunityScreen';
+import StatisticsScreen from './components/StatisticsScreen';
 import AdminDashboardScreen from './components/AdminDashboardScreen';
 import ActivePaddleScreen from './components/ActivePaddleScreen';
 import SpotDetailModal from './components/SpotDetailModal';
@@ -55,7 +56,7 @@ export default function App() {
     const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
     events.forEach((evt) => window.addEventListener(evt, resetTimer));
 
-    resetTimer(); // Initialize timer
+    resetTimer();
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
@@ -242,7 +243,7 @@ export default function App() {
       </header>
 
       {/* Main View Switcher */}
-      <main style={{ flex: 1 }}>
+      <main style={{ flex: 1, width: '100%' }}>
         {activeTab === 'home' && (
           <HomeScreen 
             userId={userId}
@@ -279,6 +280,10 @@ export default function App() {
             onLogout={handleLogout}
             onNavigate={(tab) => setActiveTab(tab)}
           />
+        )}
+
+        {activeTab === 'stats' && (
+          <StatisticsScreen userId={userId || 2} />
         )}
 
         {activeTab === 'gear' && (
