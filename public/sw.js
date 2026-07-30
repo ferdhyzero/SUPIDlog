@@ -1,5 +1,5 @@
 // PWA Service Worker for SUPID Log - Network First Cache Engine
-const CACHE_NAME = 'supidlog-v8';
+const CACHE_NAME = 'supidlog-v9';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
