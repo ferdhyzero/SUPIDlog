@@ -15,7 +15,7 @@
   --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --app-max-width: 100%;        /* 100% Full Width Fluid */
+  --app-max-width: 480px;       /* Option A: Centered Framed App Shell Max-Width */
   --nav-height: 60px;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -46,24 +46,26 @@ html, body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   overflow-x: hidden;
   font-size: 14px;
 }
 
-/* Mobile & Desktop Fluid App Shell Container - 100% Full Width */
+/* Mobile App Shell Container - Locked to 480px Centered */
 #root {
   width: 100%;
-  max-width: 100%;
+  max-width: var(--app-max-width);
   min-height: 100vh;
   background-color: var(--bg-soft);
   position: relative;
-  box-shadow: none;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: calc(var(--nav-height) + 16px);
+  padding-bottom: calc(var(--nav-height) + 12px);
   box-sizing: border-box;
 }
 
@@ -74,20 +76,20 @@ h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
 h4 { font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
 p, span { line-height: 1.4; }
 
-/* Clean Ocean Blue Header - 100% Full Width */
+/* Clean Ocean Blue Header - Bounded to 480px Container */
 .header-glass {
   width: 100%;
   box-sizing: border-box;
   background: var(--ocean-blue);
   color: white;
-  padding: 12px 16px;
+  padding: 10px 14px;
   position: sticky;
   top: 0;
   z-index: 40;
   box-shadow: var(--shadow-sm);
 }
 
-/* Hero Background Card - 100% Full Width */
+/* Hero Background Card */
 .hero-card {
   width: 100%;
   box-sizing: border-box;
@@ -100,7 +102,7 @@ p, span { line-height: 1.4; }
   box-shadow: var(--shadow-md);
 }
 
-/* Jumbo CTA Button - 100% Full Width */
+/* Jumbo CTA Button */
 .btn-cta-jumbo {
   width: 100%;
   box-sizing: border-box;
@@ -127,7 +129,7 @@ p, span { line-height: 1.4; }
   background-color: var(--ocean-dark);
 }
 
-/* Clean Cards - 100% Full Width */
+/* Clean Cards */
 .card-clean {
   width: 100%;
   box-sizing: border-box;
@@ -147,7 +149,7 @@ p, span { line-height: 1.4; }
   box-shadow: var(--shadow-sm);
 }
 
-/* Stats Grid Layout - 100% Full Width */
+/* Stats Grid Layout */
 .stats-grid {
   width: 100%;
   box-sizing: border-box;
@@ -187,31 +189,33 @@ p, span { line-height: 1.4; }
   letter-spacing: 0.02em;
 }
 
-/* Floating Bottom Navbar Wrapper & Container - 100% Full Width */
+/* Floating Bottom Navbar Wrapper & Container - Option A: Strictly Bounded to 480px */
 .bottom-nav-wrapper {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 50;
+  pointer-events: none;
   display: flex;
   justify-content: center;
   width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #f1f5f9;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  background: transparent;
 }
 
 .bottom-nav {
+  pointer-events: auto;
   width: 100%;
-  max-width: 100%;
+  max-width: var(--app-max-width); /* EXACT 480px MATCHING #root! */
   height: var(--nav-height);
   background: #ffffff;
+  border-top: 1px solid #f1f5f9;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 8px;
   box-sizing: border-box;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .nav-item {
@@ -250,7 +254,7 @@ p, span { line-height: 1.4; }
   color: var(--ocean-blue);
 }
 
-/* Center Large Paddle FAB - Solid Bright Blue */
+/* Center Large Paddle FAB */
 .nav-fab-wrapper {
   position: relative;
   top: -12px;
@@ -282,7 +286,7 @@ p, span { line-height: 1.4; }
   position: fixed;
   inset: 0;
   width: 100%;
-  max-width: 100%;
+  max-width: var(--app-max-width);
   margin: 0 auto;
   background: #0f172a;
   color: white;
@@ -306,7 +310,7 @@ p, span { line-height: 1.4; }
   position: fixed;
   inset: 0;
   width: 100%;
-  max-width: 100%;
+  max-width: var(--app-max-width);
   margin: 0 auto;
   background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(4px);
@@ -323,7 +327,7 @@ p, span { line-height: 1.4; }
   border-radius: var(--radius-lg);
   padding: 16px;
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
