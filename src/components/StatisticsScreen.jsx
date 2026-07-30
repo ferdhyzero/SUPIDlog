@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 export default function StatisticsScreen({ userId = 2 }) {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [timeFilter, setTimeFilter] = useState('all_time');
   const [userRankInfo, setUserRankInfo] = useState({ rank: 1, totalKm: '0.0' });
 
   const [stats, setStats] = useState({
@@ -73,12 +74,44 @@ export default function StatisticsScreen({ userId = 2 }) {
 
       {/* NATIONAL SUP LEADERBOARD TABLE */}
       <div className="card-clean" style={{ border: '2px solid var(--ocean-blue)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '1.3rem' }}>🏆</span>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>Leaderboard SUP Indonesia</h3>
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--ocean-blue)', fontWeight: 700 }}>Otomatis dari Aktifitas</span>
+          
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button
+              onClick={() => setTimeFilter('all_time')}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '12px',
+                border: 'none',
+                background: timeFilter === 'all_time' ? '#0284c7' : '#f1f5f9',
+                color: timeFilter === 'all_time' ? 'white' : '#64748b',
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                cursor: 'pointer'
+              }}
+            >
+              All-Time
+            </button>
+            <button
+              onClick={() => setTimeFilter('this_month')}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '12px',
+                border: 'none',
+                background: timeFilter === 'this_month' ? '#0284c7' : '#f1f5f9',
+                color: timeFilter === 'this_month' ? 'white' : '#64748b',
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                cursor: 'pointer'
+              }}
+            >
+              Bulan Ini
+            </button>
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

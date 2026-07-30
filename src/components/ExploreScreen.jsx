@@ -112,43 +112,79 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0284c7' }}>Explore Indonesia 🇮🇩</h2>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Pencarian Google Maps & Sematkan Rencana Trip</p>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0284c7' }}>Explore Spots 📍</h2>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Peta & Destinasi Paddle Terbaik Indonesia</p>
         </div>
 
-        {/* View Switcher: Google Maps vs Lista */}
-        <div style={{ display: 'flex', background: '#e2e8f0', padding: '2px', borderRadius: '10px' }}>
-          <button 
-            onClick={() => setViewMode('map')}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <button
+            onClick={() => {
+              const spotName = prompt('Masukkan nama spot dayung baru yang ingin Anda rekomendasikan:');
+              if (spotName) {
+                const newSpotObj = {
+                  id: spots.length + 1,
+                  name: spotName,
+                  stars: 5,
+                  category: 'Custom Spot',
+                  season: 'All Year',
+                  difficulty: 'Easy',
+                  water: 'Clear',
+                  visitedCount: 1,
+                  lat: -5.1478,
+                  lng: 119.4154
+                };
+                setSpots([newSpotObj, ...spots]);
+                alert(`Spot '${spotName}' berhasil direkomendasikan dan disematkan ke Peta!`);
+              }
+            }}
             style={{
               padding: '5px 10px',
               borderRadius: '8px',
               border: 'none',
               fontSize: '0.75rem',
               fontWeight: 800,
-              background: viewMode === 'map' ? '#0284c7' : 'transparent',
-              color: viewMode === 'map' ? 'white' : 'var(--text-muted)',
+              background: '#0284c7',
+              color: 'white',
               cursor: 'pointer'
             }}
           >
-            🗺️ Maps
+            ➕ Spot Baru
           </button>
 
-          <button 
-            onClick={() => setViewMode('list')}
-            style={{
-              padding: '5px 10px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              background: viewMode === 'list' ? 'white' : 'transparent',
-              color: viewMode === 'list' ? '#0284c7' : 'var(--text-muted)',
-              cursor: 'pointer'
-            }}
-          >
-            📋 Lista
-          </button>
+          {/* View Switcher: Google Maps vs Lista */}
+          <div style={{ display: 'flex', background: '#e2e8f0', padding: '2px', borderRadius: '10px' }}>
+            <button 
+              onClick={() => setViewMode('map')}
+              style={{
+                padding: '5px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                background: viewMode === 'map' ? '#0284c7' : 'transparent',
+                color: viewMode === 'map' ? 'white' : 'var(--text-muted)',
+                cursor: 'pointer'
+              }}
+            >
+              🗺️ Maps
+            </button>
+
+            <button 
+              onClick={() => setViewMode('list')}
+              style={{
+                padding: '5px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                background: viewMode === 'list' ? 'white' : 'transparent',
+                color: viewMode === 'list' ? '#0284c7' : 'var(--text-muted)',
+                cursor: 'pointer'
+              }}
+            >
+              📋 List
+            </button>
+          </div>
         </div>
       </div>
 

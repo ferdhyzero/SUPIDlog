@@ -80,9 +80,49 @@ export default function PassportScreen({ userId = null, onRequireLogin, onTestSt
         </div>
 
         {/* Progress Bar */}
-        <div style={{ height: '8px', background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', overflow: 'hidden' }}>
+        <div style={{ height: '8px', background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', overflow: 'hidden', marginBottom: '14px' }}>
           <div style={{ width: `${completedPercent}%`, height: '100%', background: '#00B4D8', borderRadius: '9999px', transition: 'width 0.5s ease' }} />
         </div>
+
+        {!isGuest && (
+          <button
+            onClick={() => {
+              const canvas = document.createElement('canvas');
+              canvas.width = 600;
+              canvas.height = 400;
+              const ctx = canvas.getContext('2d');
+
+              // Draw certificate background
+              ctx.fillStyle = '#0284c7';
+              ctx.fillRect(0, 0, 600, 400);
+
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 24px sans-serif';
+              ctx.fillText('STAND UP PADDLELOG INDONESIA', 40, 50);
+
+              ctx.font = '16px sans-serif';
+              ctx.fillText('OFFICIAL DIGITAL PASSPORT CERTIFICATE', 40, 80);
+
+              ctx.font = 'bold 32px sans-serif';
+              ctx.fillText(`VISITED SPOTS: ${visitedCount} SPOTS`, 40, 160);
+
+              ctx.font = '20px sans-serif';
+              ctx.fillText(`COMPLETED PROGRESS: ${completedPercent}%`, 40, 210);
+
+              ctx.font = '14px sans-serif';
+              ctx.fillText('Verified by Stand Up PaddleLog Indonesia System', 40, 320);
+              ctx.fillText(new Date().toLocaleDateString('id-ID'), 40, 345);
+
+              const link = document.createElement('a');
+              link.download = `Passport_SUP_Indonesia_${visitedCount}_Spots.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+            }}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.25)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', padding: '8px', borderRadius: '10px', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer' }}
+          >
+            📜 Unduh Sertifikat Paspor (PNG)
+          </button>
+        )}
       </div>
 
       {/* Guest Mode Banner */}
