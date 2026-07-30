@@ -110,23 +110,23 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--ocean-dark)' }}>Explore Indonesia 🇮🇩</h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Pencarian Google Maps & Sematkan Rencana Trip</p>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0284c7' }}>Explore Indonesia 🇮🇩</h2>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Pencarian Google Maps & Sematkan Rencana Trip</p>
         </div>
 
         {/* View Switcher: Google Maps vs Lista */}
-        <div style={{ display: 'flex', background: '#E2E8F0', padding: '3px', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', background: '#e2e8f0', padding: '2px', borderRadius: '10px' }}>
           <button 
             onClick={() => setViewMode('map')}
             style={{
-              padding: '6px 12px',
-              borderRadius: '9px',
+              padding: '5px 10px',
+              borderRadius: '8px',
               border: 'none',
-              fontSize: '0.78rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
-              background: viewMode === 'map' ? 'var(--ocean-blue)' : 'transparent',
+              background: viewMode === 'map' ? '#0284c7' : 'transparent',
               color: viewMode === 'map' ? 'white' : 'var(--text-muted)',
               cursor: 'pointer'
             }}
@@ -137,13 +137,13 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           <button 
             onClick={() => setViewMode('list')}
             style={{
-              padding: '6px 12px',
-              borderRadius: '9px',
+              padding: '5px 10px',
+              borderRadius: '8px',
               border: 'none',
-              fontSize: '0.78rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
               background: viewMode === 'list' ? 'white' : 'transparent',
-              color: viewMode === 'list' ? 'var(--ocean-blue)' : 'var(--text-muted)',
+              color: viewMode === 'list' ? '#0284c7' : 'var(--text-muted)',
               cursor: 'pointer'
             }}
           >
@@ -154,10 +154,10 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* Rencana Kunjungan Saya (Planned Trip Reminders Card) */}
       {userId && savedPlans && savedPlans.length > 0 && (
-        <div className="card-clean" style={{ background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)', border: '2px solid #F59E0B' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '1.2rem' }}>📌</span>
-            <strong style={{ fontSize: '0.95rem', color: '#92400E' }}>Rencana Paddle Trip Disematkan (Pengingat)</strong>
+        <div className="card-clean" style={{ background: '#fef3c7', border: '1px solid #f59e0b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+            <span style={{ fontSize: '1.1rem' }}>📌</span>
+            <strong style={{ fontSize: '0.85rem', color: '#92400e' }}>Rencana Paddle Trip Disematkan (Pengingat)</strong>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

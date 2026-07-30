@@ -126,11 +126,11 @@ export default function AdminDashboardScreen({ currentUser }) {
       {/* Super Admin Hero Banner */}
       <div 
         style={{
-          background: 'linear-gradient(135deg, #0F172A 0%, #312E81 100%)',
+          background: '#0f172a',
           color: 'white',
-          borderRadius: '24px',
-          padding: '24px',
-          boxShadow: 'var(--shadow-lg)'
+          borderRadius: '16px',
+          padding: '16px',
+          boxShadow: 'var(--shadow-md)'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>

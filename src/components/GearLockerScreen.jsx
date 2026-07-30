@@ -84,22 +84,21 @@ export default function GearLockerScreen({ userId = 2 }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--ocean-dark)' }}>Gear Locker 🎒</h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Manajemen & Log Perawatan Peralatan SUP</p>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0284c7' }}>Gear Locker 🎒</h2>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Manajemen & Log Perawatan Peralatan SUP</p>
         </div>
 
         <button 
           onClick={() => setShowAddModal(true)}
           style={{
-            background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
+            background: '#0284c7',
             color: 'white',
             border: 'none',
-            padding: '8px 14px',
-            borderRadius: '12px',
-            fontSize: '0.82rem',
+            padding: '6px 12px',
+            borderRadius: '10px',
+            fontSize: '0.78rem',
             fontWeight: 800,
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-sm)'
+            cursor: 'pointer'
           }}
         >
           ➕ Tambah Gear

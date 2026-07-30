@@ -52,7 +52,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* Profile Header */}
-      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? 'linear-gradient(135deg, #0F172A 0%, #312E81 100%)' : undefined }}>
+      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7' }}>
         <div 
           style={{
             width: '80px',

@@ -48,11 +48,11 @@ export default function PassportScreen({ userId = null, onRequireLogin, onTestSt
       {/* Passport Hero Banner */}
       <div 
         style={{
-          background: 'linear-gradient(135deg, #03045E 0%, #0077B6 60%, #00B4D8 100%)',
+          background: '#0284c7',
           color: 'white',
-          borderRadius: '24px',
-          padding: '24px',
-          boxShadow: 'var(--shadow-lg)',
+          borderRadius: '16px',
+          padding: '16px',
+          boxShadow: 'var(--shadow-md)',
           position: 'relative',
           overflow: 'hidden'
         }}
