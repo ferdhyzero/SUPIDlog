@@ -207,16 +207,11 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
           <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
         </div>
 
-        <div className="stats-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
           <div className="stat-card">
             <span style={{ fontSize: '1.2rem' }}>📏</span>
             <div className="stat-value">{displayDistance}</div>
             <div className="stat-label">Distance (km)</div>
-          </div>
-          <div className="stat-card">
-            <span style={{ fontSize: '1.2rem' }}>🔥</span>
-            <div className="stat-value">{displayCalories}</div>
-            <div className="stat-label">Calories (kcal)</div>
           </div>
           <div className="stat-card">
             <span style={{ fontSize: '1.2rem' }}>⏱️</span>
