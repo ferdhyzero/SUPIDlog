@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClose }) {
+export default function WorkoutSummaryModal({ session, sessionData, onSave, onSaveActivity, onClose }) {
   const [notes, setNotes] = useState('Sunrise paddle mantap bersama teman-teman SUP.ID!');
   const [spotName, setSpotName] = useState('Samalona');
   const [weather, setWeather] = useState('☀ Sunny');
@@ -10,7 +10,7 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
   const [localTips, setLocalTips] = useState('Waktu terbaik jam 06:00 WITA, perairan tenang & jernih');
   const [sharedToCommunity, setSharedToCommunity] = useState(true);
 
-  const stats = sessionData || {
+  const stats = sessionData || session || {
     distance: '8.4 km',
     timeFormatted: '1h 55m',
     avgSpeed: '4.8 km/h',
@@ -20,17 +20,20 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
   };
 
   const handleSave = (shareFlag = sharedToCommunity) => {
-    onSaveActivity({
-      ...stats,
-      spotName,
-      notes,
-      weather,
-      water,
-      wind,
-      shared_to_community: shareFlag ? 1 : 0,
-      local_tips: localTips,
-      date: 'Hari ini',
-    });
+    const saveFn = onSaveActivity || onSave;
+    if (typeof saveFn === 'function') {
+      saveFn({
+        ...stats,
+        spotName,
+        notes,
+        weather,
+        water,
+        wind,
+        shared_to_community: shareFlag ? 1 : 0,
+        local_tips: localTips,
+        date: 'Hari ini',
+      });
+    }
   };
 
   return (

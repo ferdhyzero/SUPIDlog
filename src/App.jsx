@@ -326,6 +326,7 @@ export default function App() {
 
       {isActivePaddle && (
         <ActivePaddleScreen 
+          onStop={handleStopWorkout}
           onStopWorkout={handleStopWorkout}
         />
       )}
@@ -333,8 +334,10 @@ export default function App() {
       {showWorkoutSummary && workoutSession && (
         <WorkoutSummaryModal 
           session={workoutSession}
+          sessionData={workoutSession}
           onClose={() => setShowWorkoutSummary(false)}
           onSave={handleSaveWorkoutActivity}
+          onSaveActivity={handleSaveWorkoutActivity}
         />
       )}
 

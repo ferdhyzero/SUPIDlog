@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
+export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto }) {
   const [seconds, setSeconds] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [distance, setDistance] = useState(0.0);
@@ -277,15 +277,20 @@ export default function ActivePaddleScreen({ onStop, onTakePhoto }) {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
 
-    onStop({
-      distance: `${distance.toFixed(1)} km`,
-      rawDistance: distance,
-      timeFormatted: formatTime(seconds),
-      seconds,
-      avgSpeed: `${calculateAvgSpeed()} km/h`,
-      maxSpeed: `${maxSpeed.toFixed(1)} km/h`,
-      gpsCoords: `${currentCoords.lat}, ${currentCoords.lng}`,
-    });
+    const stopFn = onStop || onStopWorkout;
+    if (typeof stopFn === 'function') {
+      stopFn({
+        distance: `${distance.toFixed(1)} km`,
+        rawDistance: distance,
+        timeFormatted: formatTime(seconds),
+        seconds,
+        avgSpeed: `${calculateAvgSpeed()} km/h`,
+        maxSpeed: `${maxSpeed.toFixed(1)} km/h`,
+        gpsCoords: `${currentCoords.lat}, ${currentCoords.lng}`,
+      });
+    } else {
+      console.warn('onStop / onStopWorkout prop not provided');
+    }
   };
 
   return (
