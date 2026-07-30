@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import EditProfileModal from './EditProfileModal';
 
 export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNavigate }) {
