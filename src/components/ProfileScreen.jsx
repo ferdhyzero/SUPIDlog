@@ -49,159 +49,148 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
   };
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       
       {/* Profile Header */}
-      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7' }}>
+      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7', padding: '20px 16px' }}>
         <div 
           style={{
-            width: '80px',
-            height: '80px',
+            width: '68px',
+            height: '68px',
             borderRadius: '50%',
             background: 'white',
-            color: isSuperAdmin ? '#F59E0B' : 'var(--ocean-blue)',
-            fontSize: '2.5rem',
+            color: isSuperAdmin ? '#f59e0b' : '#0284c7',
+            fontSize: '2rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 12px',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+            margin: '0 auto 10px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
           }}
         >
           {isSuperAdmin ? '👑' : (isGuest ? '👤' : '🏄‍♂️')}
         </div>
 
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white' }}>
           {isGuest ? 'Guest SUPer' : profileStats.name}
         </h2>
         
-        <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', padding: '4px 14px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 700, marginTop: '4px' }}>
+        <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
           {isSuperAdmin ? '🛡️ Super Admin System' : (isGuest ? '🔒 Mode Tamu (Belum Terdaftar)' : `Level: ${profileStats.level} 🧭 • Rank #${profileStats.community_rank}`)}
         </div>
 
-        <div style={{ marginTop: '16px' }}>
-          {!isGuest ? (
-            <button 
-              onClick={onLogout}
-              style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: 'white', padding: '6px 16px', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-            >
-              🚪 Keluar (Logout)
-            </button>
-          ) : (
+        {isGuest && (
+          <div style={{ marginTop: '12px' }}>
             <button 
               onClick={onOpenLogin}
-              style={{ background: 'var(--aqua)', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 800, cursor: 'pointer' }}
+              style={{ background: 'white', color: '#0284c7', border: 'none', padding: '6px 16px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
             >
               🔑 Masuk / Daftar Akun
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Super Admin Quick Access Panel Card */}
+      {/* Super Admin Quick Access Card */}
       {isSuperAdmin && (
         <div 
           onClick={() => onNavigate('admin')}
           style={{
-            background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-            border: '2px solid #F59E0B',
-            borderRadius: '18px',
-            padding: '16px',
+            background: '#fef3c7',
+            border: '1px solid #f59e0b',
+            borderRadius: '12px',
+            padding: '12px 14px',
             display: 'flex',
-            justify: 'space-between',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-md)'
+            cursor: 'pointer'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '2rem' }}>🛡️</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.5rem' }}>🛡️</span>
             <div>
-              <strong style={{ fontSize: '1rem', color: '#92400E', display: 'block' }}>Super Admin Panel</strong>
-              <span style={{ fontSize: '0.8rem', color: '#B45309', fontWeight: 600 }}>Kelola Akses User & Level</span>
+              <strong style={{ fontSize: '0.9rem', color: '#92400e', display: 'block' }}>Super Admin Panel</strong>
+              <span style={{ fontSize: '0.75rem', color: '#b45309', fontWeight: 600 }}>Kelola Akses User & Level</span>
             </div>
           </div>
-          <span style={{ fontSize: '1.2rem', color: '#B45309', fontWeight: 800 }}>➔</span>
+          <span style={{ fontSize: '1rem', color: '#b45309', fontWeight: 800 }}>➔</span>
         </div>
       )}
 
-      {/* Profile Stats Grid (Dynamic MySQL Accumulation, No Static Session Column) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+      {/* Profile Stats Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
         <div className="card-clean">
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Total Distance (All-Time)</span>
-          <strong style={{ fontSize: '1.35rem', fontFamily: 'var(--font-heading)', color: 'var(--ocean-blue)' }}>
-            {isGuest ? '0.0' : profileStats.alltime_dist} <span style={{ fontSize: '0.75rem' }}>km</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Jarak Tempuh</span>
+          <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#0284c7' }}>
+            {isGuest ? '0.0' : profileStats.alltime_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
           </strong>
         </div>
 
         <div className="card-clean">
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Jarak Tempuh Bulan Ini</span>
-          <strong style={{ fontSize: '1.35rem', fontFamily: 'var(--font-heading)', color: '#059669' }}>
-            {isGuest ? '0.0' : profileStats.monthly_dist} <span style={{ fontSize: '0.75rem' }}>km</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Jarak Bulan Ini</span>
+          <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#059669' }}>
+            {isGuest ? '0.0' : profileStats.monthly_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
           </strong>
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>🔄 Reset otomatis tiap awal bulan</span>
         </div>
 
         <div className="card-clean">
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Favorite Spot (Spot Tersering)</span>
-          <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>{isGuest ? '-' : profileStats.favorite_spot}</strong>
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>📍 Dihitung dari frekuensi aktifitas</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Spot Tersering</span>
+          <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block', wordBreak: 'break-word' }}>{isGuest ? '-' : profileStats.favorite_spot}</strong>
         </div>
 
         <div className="card-clean">
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Peringkat Komunitas</span>
-          <strong style={{ fontSize: '1.1rem', color: 'var(--ocean-blue)' }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Peringkat Komunitas</span>
+          <strong style={{ fontSize: '0.95rem', color: '#0284c7', display: 'block' }}>
             {isGuest ? '-' : `Rank #${profileStats.community_rank} 🏆`}
           </strong>
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>🇮🇩 SUP Indonesia Leaderboard</span>
         </div>
       </div>
 
       {/* Quick Access Menu Items */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <button 
           className="card-clean" 
           onClick={() => handleProtectedNavigate('gear')}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: '1px solid #e2e8f0', cursor: 'pointer', textAlign: 'left', padding: '12px' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.4rem' }}>⚙️</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.2rem' }}>⚙️</span>
             <div>
-              <strong style={{ fontSize: '0.98rem', display: 'block' }}>Gear Locker</strong>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Manajemen Equipment</span>
+              <strong style={{ fontSize: '0.88rem', display: 'block' }}>Gear Locker</strong>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Manajemen Equipment</span>
             </div>
           </div>
-          <span style={{ fontSize: '1.1rem', color: 'var(--ocean-blue)' }}>➔</span>
+          <span style={{ fontSize: '1rem', color: '#0284c7' }}>➔</span>
         </button>
 
         <button 
           className="card-clean" 
           onClick={() => handleProtectedNavigate('stats')}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: '1px solid #e2e8f0', cursor: 'pointer', textAlign: 'left', padding: '12px' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.4rem' }}>📊</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.2rem' }}>📊</span>
             <div>
-              <strong style={{ fontSize: '0.98rem', display: 'block' }}>Peringkat & Achievements</strong>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Leaderboard & Medali</span>
+              <strong style={{ fontSize: '0.88rem', display: 'block' }}>Peringkat & Achievements</strong>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Leaderboard & Medali</span>
             </div>
           </div>
-          <span style={{ fontSize: '1.1rem', color: 'var(--ocean-blue)' }}>➔</span>
+          <span style={{ fontSize: '1rem', color: '#0284c7' }}>➔</span>
         </button>
 
         <button 
           className="card-clean" 
           onClick={() => handleProtectedNavigate('community')}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: '1px solid #e2e8f0', cursor: 'pointer', textAlign: 'left', padding: '12px' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.4rem' }}>👥</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.2rem' }}>👥</span>
             <div>
-              <strong style={{ fontSize: '0.98rem', display: 'block' }}>Community Feed</strong>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>SUP Indonesia Community</span>
+              <strong style={{ fontSize: '0.88rem', display: 'block' }}>Community Feed</strong>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Komunitas SUP Indonesia</span>
             </div>
           </div>
-          <span style={{ fontSize: '1.1rem', color: 'var(--ocean-blue)' }}>➔</span>
+          <span style={{ fontSize: '1rem', color: '#0284c7' }}>➔</span>
         </button>
       </div>
 

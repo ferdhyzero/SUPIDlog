@@ -162,24 +162,21 @@ export default function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           
           {/* Header Brand with Official PADDLE ID Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img 
               src="/logo.png" 
               alt="Paddle ID Logo" 
               style={{ 
-                width: '36px', 
-                height: '36px', 
-                borderRadius: '10px', 
-                border: '2px solid #ffffff',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '8px', 
+                border: '1.5px solid #ffffff',
                 objectFit: 'cover'
               }} 
             />
             <div>
-              <h1 style={{ fontSize: '1.15rem', fontWeight: 800, lineHeight: 1.1 }}>
-                {isSuperAdmin ? 'SUPID Admin' : 'PaddleLog'}
-              </h1>
-              <span style={{ fontSize: '0.68rem', opacity: 0.85, fontWeight: 600, letterSpacing: '0.04em' }}>SUP.ID INDONESIA</span>
+              <h1 style={{ fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.1 }}>PaddleLog</h1>
+              <span style={{ fontSize: '0.65rem', opacity: 0.85, fontWeight: 600, letterSpacing: '0.04em' }}>SUP.ID INDONESIA</span>
             </div>
           </div>
 
@@ -191,39 +188,38 @@ export default function App() {
                   background: '#f59e0b',
                   color: 'white',
                   border: 'none',
-                  padding: '5px 10px',
-                  borderRadius: '20px',
+                  padding: '4px 8px',
+                  borderRadius: '16px',
                   fontSize: '0.72rem',
                   fontWeight: 800,
                   cursor: 'pointer'
                 }}
               >
-                🛡️ Admin
+                👑 Admin
               </button>
             )}
 
             {currentUser ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'white', background: 'rgba(255,255,255,0.2)', padding: '5px 10px', borderRadius: '20px' }}>
-                  👤 {currentUser.name}
-                </span>
-                <button 
-                  onClick={handleLogout}
-                  style={{
-                    background: '#ef4444',
-                    color: 'white',
-                    border: 'none',
-                    padding: '5px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
-                  title="Keluar Akun"
-                >
-                  🚪 Logout
-                </button>
-              </div>
+              <button 
+                onClick={handleLogout}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  color: 'white',
+                  padding: '4px 10px',
+                  borderRadius: '16px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                title="Klik untuk Keluar Akun"
+              >
+                <span>👤 {currentUser.name}</span>
+                <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>🚪</span>
+              </button>
             ) : (
               <button 
                 onClick={() => setShowLoginModal(true)}
@@ -231,9 +227,9 @@ export default function App() {
                   background: 'rgba(255,255,255,0.2)',
                   border: '1px solid rgba(255,255,255,0.4)',
                   color: 'white',
-                  padding: '5px 12px',
-                  borderRadius: '20px',
-                  fontSize: '0.78rem',
+                  padding: '4px 12px',
+                  borderRadius: '16px',
+                  fontSize: '0.75rem',
                   fontWeight: 700,
                   cursor: 'pointer'
                 }}
