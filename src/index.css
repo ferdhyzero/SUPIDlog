@@ -172,6 +172,8 @@ p, span { line-height: 1.4; }
 .bottom-nav {
   position: fixed;
   bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
   height: var(--nav-height);
@@ -191,13 +193,21 @@ p, span { line-height: 1.4; }
   justify-content: center;
   gap: 2px;
   background: none;
-  border: none;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: var(--text-muted);
   font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
   flex: 1;
   height: 100%;
+}
+
+.nav-item:focus, .nav-item:focus-visible, .nav-item:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .nav-item.active {
