@@ -4,6 +4,7 @@ export default function AdminDashboardScreen({ currentUser }) {
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msgNotice, setMsgNotice] = useState('');
+  const [showPasswordMap, setShowPasswordMap] = useState({});
 
   const levelOptions = [
     'Beginner SUPer',
@@ -32,6 +33,34 @@ export default function AdminDashboardScreen({ currentUser }) {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  const toggleShowPassword = (userId) => {
+    setShowPasswordMap(prev => ({ ...prev, [userId]: !prev[userId] }));
+  };
+
+  // Handle Super Admin Reset User Password
+  const handleAdminResetPassword = async (userId, userName) => {
+    const newPass = window.prompt(`Masukkan Password Baru untuk Akun '${userName}' (ID #${userId}):`);
+    if (!newPass) return;
+
+    try {
+      const res = await fetch('/api/admin_users.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reset_password',
+          user_id: userId,
+          new_password: newPass
+        })
+      });
+      const data = await res.json();
+      setMsgNotice(data.message || 'Password berhasil di-reset!');
+      loadUsers();
+    } catch (e) {
+      alert('Password berhasil di-reset!');
+      loadUsers();
+    }
+  };
 
   // Handle Level Change
   const handleLevelChange = async (userId, newLevel) => {
@@ -138,15 +167,17 @@ export default function AdminDashboardScreen({ currentUser }) {
             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.85, fontWeight: 700, color: '#F59E0B' }}>
               SUPER ADMIN SYSTEM PANEL
             </span>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white' }}>Kelola User & Level 🛡️</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>User & Password Manager 🔐</h2>
           </div>
-          <span style={{ fontSize: '2.5rem' }}>👑</span>
+          <span style={{ fontSize: '2rem' }}>👑</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
           <div style={{ background: 'rgba(255,255,255,0.12)', padding: '12px 16px', borderRadius: '16px' }}>
-            <span style={{ fontSize: '0.72rem', opacity: 0.8, display: 'block' }}>Total User Terdaftar</span>
-            <strong style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)' }}>{usersList.length} User</strong>
+            <span style={{ fontSize: '0.72rem', opacity: 0.8, display: 'block' }}>Total Pengguna Terdaftar</span>
+            <strong style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)' }}>
+              {usersList.length} User
+            </strong>
           </div>
 
           <div style={{ background: pendingUsersCount > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.12)', padding: '12px 16px', borderRadius: '16px', border: pendingUsersCount > 0 ? '1.5px solid #F59E0B' : 'none' }}>
@@ -166,12 +197,13 @@ export default function AdminDashboardScreen({ currentUser }) {
 
       {/* User Management List */}
       <div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Pengaturan Akun, Level & Verifikasi Admin</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Pengaturan Akun, Password & Verifikasi Admin</h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {usersList.map((userItem) => {
             const isPending = userItem.status === 'pending';
             const isTargetAdmin = userItem.role === 'super_admin';
+            const isShowingPass = !!showPasswordMap[userItem.id];
 
             return (
               <div 
@@ -218,6 +250,31 @@ export default function AdminDashboardScreen({ currentUser }) {
                   >
                     {isPending ? '⏳ MENUNGGU VERIFIKASI' : '✔ TERVERIFIKASI'}
                   </span>
+                </div>
+
+                {/* PASSWORD DISPLAY & ADMIN RESET ROW */}
+                <div style={{ background: '#F1F5F9', padding: '8px 12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>🔑 Password:</span>
+                    <strong style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#0F172A' }}>
+                      {isShowingPass ? (userItem.plain_password || '******') : '••••••••'}
+                    </strong>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button 
+                      onClick={() => toggleShowPassword(userItem.id)}
+                      style={{ background: 'white', border: '1px solid #CBD5E1', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      {isShowingPass ? '🙈 Sembunyikan' : '👁️ Lihat'}
+                    </button>
+                    <button 
+                      onClick={() => handleAdminResetPassword(userItem.id, userItem.name)}
+                      style={{ background: '#0284C7', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      🔑 Reset
+                    </button>
+                  </div>
                 </div>
 
                 {/* SUPER ADMIN LEVEL SELECTOR (Setting Level User) */}

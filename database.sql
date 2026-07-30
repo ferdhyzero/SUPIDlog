@@ -24,6 +24,7 @@ CREATE TABLE `users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `email` VARCHAR(100) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
+  `plain_password` VARCHAR(255) DEFAULT '',
   `name` VARCHAR(100) NOT NULL,
   `role` VARCHAR(20) DEFAULT 'user', -- 'user' or 'super_admin'
   `status` VARCHAR(20) DEFAULT 'approved', -- 'approved' or 'pending'
@@ -35,9 +36,9 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Insert Default Demo Users (Super Admin Ferdhy & User Sapril)
-INSERT INTO `users` (`id`, `email`, `password_hash`, `name`, `role`, `status`, `level`, `community_rank`, `favorite_spot`, `total_distance_km`) VALUES
-(1, 'ahmadferdy66@gmail.com', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'ferdhy', 'super_admin', 'approved', 'Super Admin 👑', 1, 'Bosowa Beach', 120.50),
-(2, 'sapril@sup.id', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sapril', 'user', 'approved', 'Explorer', 2, 'Samalona Island', 45.80);
+INSERT INTO `users` (`id`, `email`, `password_hash`, `plain_password`, `name`, `role`, `status`, `level`, `community_rank`, `favorite_spot`, `total_distance_km`) VALUES
+(1, 'ahmadferdy66@gmail.com', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sup!D2026@#$', 'ferdhy', 'super_admin', 'approved', 'Super Admin 👑', 1, 'Bosowa Beach', 120.50),
+(2, 'sapril@sup.id', '$2y$10$w6QO8q7GZ2i7n2S6y9ZqeuG7vK7O8g8J1mQ2r3s4t5u6v7w8x9y0z', 'Sapril123!', 'Sapril', 'user', 'approved', 'Explorer', 2, 'Samalona Island', 45.80);
 
 -- --------------------------------------------------------
 -- 2. Table structure for `spots`

@@ -7,22 +7,48 @@ $data = json_decode($rawInput, true);
 $action = trim($_GET['action'] ?? $data['action'] ?? 'list');
 
 try {
-    // Ensure status column exists in users table
+    // Ensure status & plain_password columns exist in users table
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'approved'");
     } catch (Exception $exCol) {}
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN plain_password VARCHAR(255) DEFAULT ''");
+    } catch (Exception $exCol2) {}
 
     if ($action === 'list') {
-        $stmt = $pdo->query("SELECT id, name, email, role, status, level, community_rank, total_distance_km, DATE_FORMAT(created_at, '%d %b %Y %H:%i') as formatted_date FROM users ORDER BY status DESC, id DESC");
+        $stmt = $pdo->query("SELECT id, name, email, role, status, level, community_rank, total_distance_km, plain_password, DATE_FORMAT(created_at, '%d %b %Y %H:%i') as formatted_date FROM users ORDER BY status DESC, id DESC");
         $users = $stmt->fetchAll();
 
         foreach ($users as &$u) {
             $stmtSess = $pdo->prepare("SELECT COUNT(*) as sess_cnt FROM activities WHERE user_id = :uid");
             $stmtSess->execute(['uid' => $u['id']]);
             $u['total_sessions'] = (int)($stmtSess->fetch()['sess_cnt'] ?? 0);
+            if (empty($u['plain_password'])) {
+                $u['plain_password'] = '[Password Encrypted]';
+            }
         }
 
         echo json_encode(['success' => true, 'users' => $users]);
+        exit();
+    }
+
+    if ($action === 'reset_password') {
+        $targetUserId = (int)($data['user_id'] ?? 0);
+        $newPassword = trim($data['new_password'] ?? '');
+
+        if ($targetUserId <= 0 || empty($newPassword)) {
+            echo json_encode(['success' => false, 'message' => 'User ID dan Password Baru wajib diisi!']);
+            exit();
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $pdo->prepare("UPDATE users SET password_hash = :hash, plain_password = :plain WHERE id = :uid");
+        $stmt->execute(['hash' => $hash, 'plain' => $newPassword, 'uid' => $targetUserId]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => "Password akun ID #$targetUserId BERHASIL DI-RESET menjadi '$newPassword'!"
+        ]);
         exit();
     }
 

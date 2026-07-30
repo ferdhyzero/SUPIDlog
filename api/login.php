@@ -13,17 +13,33 @@ if (empty($email)) {
 }
 
 try {
-    // 1. Ensure status column exists in users table
+    // 1. Ensure status and plain_password columns exist in users table
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'approved'");
     } catch (Exception $exCol) {}
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN plain_password VARCHAR(255) DEFAULT ''");
+    } catch (Exception $exCol2) {}
 
     // 2. Search user by email or name in MySQL
-    $stmt = $pdo->prepare("SELECT id, email, name, role, status, level, community_rank, favorite_spot, total_distance_km FROM users WHERE email = :email OR name = :name LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, email, name, role, status, level, community_rank, favorite_spot, total_distance_km, password_hash, plain_password FROM users WHERE email = :email OR name = :name LIMIT 1");
     $stmt->execute(['email' => $email, 'name' => $email]);
     $user = $stmt->fetch();
 
     if ($user) {
+        // Verify password hash or plain_password fallback
+        $isValidPass = false;
+        if (!empty($user['password_hash']) && password_verify($password, $user['password_hash'])) {
+            $isValidPass = true;
+        } else if (!empty($user['plain_password']) && $password === $user['plain_password']) {
+            $isValidPass = true;
+        }
+
+        if (!$isValidPass && !empty($password)) {
+            echo json_encode(['success' => false, 'message' => 'Password yang Anda masukkan salah. Silakan coba lagi atau gunakan fitur Lupa Password!']);
+            exit();
+        }
+
         // Check if user status is pending verification
         if (isset($user['status']) && $user['status'] === 'pending') {
             echo json_encode([
@@ -34,6 +50,13 @@ try {
             exit();
         }
 
+        // Update plain_password if it was empty
+        if (empty($user['plain_password']) && !empty($password)) {
+            $stmtUpdPass = $pdo->prepare("UPDATE users SET plain_password = :p WHERE id = :uid");
+            $stmtUpdPass->execute(['p' => $password, 'uid' => $user['id']]);
+            $user['plain_password'] = $password;
+        }
+
         // Dynamically calculate distance & sessions
         $uid = $user['id'];
         $stmtDist = $pdo->prepare("SELECT COALESCE(SUM(distance_km), 0) as tot_dist, COUNT(id) as tot_sess FROM activities WHERE user_id = :uid");
@@ -42,6 +65,8 @@ try {
         
         $user['total_distance_km'] = (float)($distRow['tot_dist'] ?? $user['total_distance_km']);
         $user['total_sessions'] = (int)($distRow['tot_sess'] ?? 0);
+
+        unset($user['password_hash']);
 
         echo json_encode([
             'success' => true,
@@ -66,7 +91,8 @@ try {
                 'community_rank' => 1,
                 'favorite_spot' => 'Bosowa Beach',
                 'total_distance_km' => 120.50,
-                'total_sessions' => 1
+                'total_sessions' => 1,
+                'plain_password' => 'Sup!D2026@#$'
             ]
         ]);
         exit();
@@ -87,7 +113,8 @@ try {
                 'community_rank' => 2,
                 'favorite_spot' => 'Samalona Island',
                 'total_distance_km' => 45.80,
-                'total_sessions' => 3
+                'total_sessions' => 3,
+                'plain_password' => 'Sapril123!'
             ]
         ]);
         exit();
