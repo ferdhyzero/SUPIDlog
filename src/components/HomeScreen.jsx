@@ -141,86 +141,85 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
       
       {/* Hero Greeting & Weather Card */}
       <div className="hero-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <div>
-            <p style={{ fontSize: '0.85rem', opacity: 0.85, fontWeight: 500 }}>
+            <p style={{ fontSize: '0.78rem', opacity: 0.9, fontWeight: 500 }}>
               {isGuest ? 'Mode Tamu (Guest)' : 'Good Morning,'}
             </p>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{userName} 👋</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{userName} 👋</h2>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img 
               src="/logo.png" 
               alt="SUP.ID Logo" 
-              style={{ height: '38px', width: 'auto', borderRadius: '8px', objectFit: 'contain' }} 
+              style={{ height: '32px', width: 'auto', borderRadius: '6px', objectFit: 'contain' }} 
             />
             <button 
               onClick={handleInstallClick}
               style={{ 
-                background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-                color: '#000',
+                background: '#ffffff',
+                color: '#0284c7',
                 border: 'none',
-                padding: '6px 12px',
-                borderRadius: '20px',
+                padding: '5px 10px',
+                borderRadius: '16px',
                 fontWeight: 800,
-                fontSize: '0.75rem',
-                boxShadow: '0 4px 12px rgba(0, 242, 254, 0.4)',
+                fontSize: '0.72rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px'
               }}
             >
-              <span>📲</span> {pwaInstalled ? 'PWA Active' : 'Install App'}
+              <span>📲</span> {pwaInstalled ? 'Active' : 'Install'}
             </button>
           </div>
         </div>
 
         {/* Guest Warning Banner if not logged in */}
         {isGuest && (
-          <div style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', padding: '8px 12px', borderRadius: '12px', marginBottom: '12px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>🔒 Silakan login untuk menyimpan hasil sesi paddle Anda ke database.</span>
-            <button onClick={onRequireLogin} style={{ background: 'white', color: 'var(--ocean-dark)', border: 'none', padding: '4px 10px', borderRadius: '8px', fontWeight: 800, cursor: 'pointer', fontSize: '0.72rem' }}>
+          <div style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', padding: '8px 12px', borderRadius: '10px', marginBottom: '12px', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>🔒 Silakan login untuk menyimpan hasil sesi paddle ke database.</span>
+            <button onClick={onRequireLogin} style={{ background: 'white', color: '#0284c7', border: 'none', padding: '4px 8px', borderRadius: '6px', fontWeight: 800, cursor: 'pointer', fontSize: '0.7rem' }}>
               🔑 Login
             </button>
           </div>
         )}
 
         {/* Live GPS Weather Forecast Chips */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.8rem', fontWeight: 600 }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.22)', backdropFilter: 'blur(6px)', padding: '6px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)' }}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 600 }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)' }}>
             {weather.temp}
           </div>
-          <div style={{ background: 'rgba(255, 255, 255, 0.22)', backdropFilter: 'blur(6px)', padding: '6px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)' }}>
             {weather.wind}
           </div>
-          <div style={{ background: 'rgba(255, 255, 255, 0.22)', backdropFilter: 'blur(6px)', padding: '6px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)' }}>
             {weather.water}
           </div>
         </div>
       </div>
 
       {/* Today's Activity Summary */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Today's Paddling</h3>
-          <span style={{ fontSize: '0.8rem', color: 'var(--ocean-primary)', fontWeight: 600 }}>{new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+          <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Today's Paddling</h3>
+          <span style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600 }}>{new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
         </div>
 
         <div className="stats-grid">
           <div className="stat-card">
-            <span style={{ fontSize: '1.5rem' }}>📏</span>
+            <span style={{ fontSize: '1.2rem' }}>📏</span>
             <div className="stat-value">{displayDistance}</div>
             <div className="stat-label">Distance (km)</div>
           </div>
           <div className="stat-card">
-            <span style={{ fontSize: '1.5rem' }}>🔥</span>
+            <span style={{ fontSize: '1.2rem' }}>🔥</span>
             <div className="stat-value">{displayCalories}</div>
             <div className="stat-label">Calories (kcal)</div>
           </div>
           <div className="stat-card">
-            <span style={{ fontSize: '1.5rem' }}>⏱️</span>
+            <span style={{ fontSize: '1.2rem' }}>⏱️</span>
             <div className="stat-value">{displayTime}</div>
             <div className="stat-label">Duration (m:s)</div>
           </div>
@@ -228,13 +227,13 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
       </div>
 
       {/* Goal Progress Banner */}
-      <div className="glass-panel" style={{ padding: '16px', borderRadius: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🎯 Monthly Target (100 km)</span>
-          <span style={{ fontWeight: 700, color: 'var(--ocean-primary)', fontSize: '0.85rem' }}>{goal.percent}%</span>
+      <div className="glass-panel" style={{ padding: '14px', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span style={{ fontWeight: 600, fontSize: '0.82rem' }}>🎯 Monthly Target (100 km)</span>
+          <span style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.8rem' }}>{goal.percent}%</span>
         </div>
-        <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ width: `${goal.percent}%`, height: '100%', background: 'linear-gradient(90deg, #00f2fe, #4facfe)', transition: 'width 0.5s ease' }} />
+        <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ width: `${goal.percent}%`, height: '100%', background: '#0284c7', transition: 'width 0.5s ease' }} />
         </div>
       </div>
 
