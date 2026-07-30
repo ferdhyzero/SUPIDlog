@@ -191,6 +191,13 @@ export default function CommunityScreen({ userId = 2, userName = 'Sapril SUPer' 
 
             <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: '2px 0' }}>{post.title}</h4>
 
+            {/* Local Knowledge Guide Tips Badge */}
+            {post.local_tips && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #86efac', color: '#166534', padding: '6px 10px', borderRadius: '10px', fontSize: '0.78rem', margin: '4px 0 8px', fontWeight: 600 }}>
+                💡 <strong>Tips Lokal:</strong> {post.local_tips}
+              </div>
+            )}
+
             {/* Attached Photo Image if available */}
             {post.image_url && (
               <div style={{ width: '100%', maxHeight: '220px', borderRadius: '14px', overflow: 'hidden', margin: '4px 0' }}>
@@ -198,27 +205,27 @@ export default function CommunityScreen({ userId = 2, userName = 'Sapril SUPer' 
               </div>
             )}
 
-            {/* Like & Comment Action Buttons */}
-            <div style={{ display: 'flex', gap: '16px', borderTop: '1px solid #F1F5F9', paddingTop: '10px', marginTop: '4px' }}>
-              {/* Toggle Like Button (Red filled when liked, Outline when unliked) */}
+            {/* Like, Comment & WhatsApp Share Action Buttons */}
+            <div style={{ display: 'flex', gap: '10px', borderTop: '1px solid #F1F5F9', paddingTop: '10px', marginTop: '4px', alignItems: 'center' }}>
+              {/* Toggle Like Button */}
               <button 
                 onClick={() => handleToggleLike(post.id)}
                 style={{ 
                   background: post.is_liked_by_me ? '#FEF2F2' : 'transparent', 
-                  border: post.is_liked_by_me ? '1px solid #FCA5A5' : 'none', 
+                  border: post.is_liked_by_me ? '1px solid #FCA5A5' : '1px solid #E2E8F0', 
                   padding: '4px 10px',
                   borderRadius: '9999px',
                   color: post.is_liked_by_me ? '#EF4444' : 'var(--text-muted)', 
                   fontWeight: 800, 
-                  fontSize: '0.85rem', 
+                  fontSize: '0.78rem', 
                   cursor: 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '6px' 
+                  gap: '4px' 
                 }}
               >
                 <span>{post.is_liked_by_me ? '❤️' : '🤍'}</span>
-                <span>{post.likes_count} Suka</span>
+                <span>{post.likes_count}</span>
               </button>
 
               {/* Open Comments Drawer Button */}
@@ -227,18 +234,42 @@ export default function CommunityScreen({ userId = 2, userName = 'Sapril SUPer' 
                 style={{ 
                   background: 'rgba(0,180,216,0.1)', 
                   border: '1px solid rgba(0,180,216,0.3)', 
-                  padding: '4px 12px',
+                  padding: '4px 10px',
                   borderRadius: '9999px',
                   color: 'var(--ocean-blue)', 
                   fontWeight: 800, 
-                  fontSize: '0.85rem', 
+                  fontSize: '0.78rem', 
                   cursor: 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '6px' 
+                  gap: '4px' 
                 }}
               >
-                💬 {post.comments_count} Komentar
+                💬 {post.comments_count}
+              </button>
+
+              {/* 1-Click WhatsApp Share Button */}
+              <button
+                onClick={() => {
+                  const shareText = `🏄‍♂️ Lihat Sesi Dayung SUP.ID!\n📍 Lokasi: ${post.spot_name} (${post.distance_km})\n👤 Pendayung: ${post.user_name}\n💡 Tips: ${post.local_tips || 'Keren!'}\n\nhttps://supid.myhostzone.biz.id`;
+                  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+                }}
+                style={{
+                  background: '#dcfce7',
+                  border: '1px solid #86efac',
+                  color: '#15803d',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
+                  fontWeight: 800,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginLeft: 'auto'
+                }}
+              >
+                📲 WhatsApp
               </button>
             </div>
           </div>

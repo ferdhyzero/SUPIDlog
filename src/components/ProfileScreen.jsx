@@ -15,9 +15,25 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
     community_rank: 1
   });
 
+  // Timeframe Analytics state: 'monthly', 'weekly', 'yearly'
+  const [analyticsPeriod, setAnalyticsPeriod] = useState('monthly');
+  const [analyticsData, setAnalyticsData] = useState({
+    total_sessions: 0,
+    total_distance_km: '0.0',
+    top_speed_kmh: '0.0',
+    total_calories: 0
+  });
+
+  // Bucket List state
+  const [bucketList, setBucketList] = useState([]);
+  const [showAddBucketModal, setShowAddBucketModal] = useState(false);
+  const [newBucketSpot, setNewBucketSpot] = useState('');
+  const [newBucketMonth, setNewBucketMonth] = useState('Agustus 2026');
+  const [newBucketNotes, setNewBucketNotes] = useState('Rencana paddle trip impian');
+
   const isSuperAdmin = !isGuest && (currentUser.role === 'super_admin' || currentUser.email === 'ahmadferdy66@gmail.com' || currentUser.name === 'ferdhy');
 
-  // Fetch dynamic stats from MySQL
+  // Fetch dynamic stats & timeframe analytics from MySQL
   useEffect(() => {
     if (isGuest) return;
 
@@ -36,17 +52,84 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             community_rank: data.user.community_rank || 1
           });
         }
-      } catch (e) {
-        console.log('Profile stats fallback:', e);
-      }
+      } catch (e) {}
+
+      // Fetch Timeframe Analytics
+      try {
+        const resA = await fetch(`/api/get_user_analytics.php?user_id=${currentUser.id}&period=${analyticsPeriod}`);
+        const dataA = await resA.json();
+        if (dataA.success && dataA.stats) {
+          setAnalyticsData(dataA.stats);
+        }
+      } catch (e) {}
+
+      // Fetch Bucket List
+      try {
+        const resB = await fetch(`/api/bucket_list.php?action=list&user_id=${currentUser.id}`);
+        const dataB = await resB.json();
+        if (dataB.success) {
+          setBucketList(dataB.bucket_list);
+        }
+      } catch (e) {}
     }
     loadStats();
-  }, [currentUser]);
+  }, [currentUser, analyticsPeriod]);
+
+  const handleAddBucketItem = async (e) => {
+    e.preventDefault();
+    if (!newBucketSpot.trim()) return;
+
+    try {
+      const res = await fetch('/api/bucket_list.php?action=add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          spot_name: newBucketSpot,
+          target_month: newBucketMonth,
+          notes: newBucketNotes
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        setShowAddBucketModal(false);
+        setNewBucketSpot('');
+        // Reload bucket list
+        const resB = await fetch(`/api/bucket_list.php?action=list&user_id=${currentUser.id}`);
+        const dataB = await resB.json();
+        if (dataB.success) setBucketList(dataB.bucket_list);
+      }
+    } catch (err) {
+      alert('Gagal menambah spot impian.');
+    }
+  };
+
+  const handleCompleteBucketItem = async (item) => {
+    if (confirm(`Selamat! Apakah Anda sudah menyelesaikan sesi dayung di '${item.spot_name}'? Stempel Paspor Digital akan otomatis terbuka!`)) {
+      try {
+        const res = await fetch('/api/bucket_list.php?action=complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: item.id,
+            user_id: currentUser.id,
+            spot_name: item.spot_name
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message);
+          setBucketList(bucketList.map(b => b.id === item.id ? { ...b, is_completed: 1 } : b));
+        }
+      } catch (e) {}
+    }
+  };
 
   const handleProtectedNavigate = (tab) => {
     if (isGuest && (tab === 'gear' || tab === 'stats' || tab === 'community' || tab === 'admin')) {
       alert('🔒 Silakan Login / Daftar terlebih dahulu untuk menguji fitur ini!');
-      onOpenLogin();
+      onOpenLogin(false);
       return;
     }
     onNavigate(tab);
@@ -173,33 +256,213 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
         </div>
       )}
 
-      {/* Profile Stats Grid (Only Shown for Logged-in Users) */}
+      {/* Logged-in User Full Dashboard Modules */}
       {!isGuest && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-          <div className="card-clean">
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Jarak Tempuh</span>
-            <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#0284c7' }}>
-              {profileStats.alltime_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
-            </strong>
+        <>
+          {/* 1. Timeframe Analytics Jurnal Dayung (Mingguan, Bulanan, Tahunan) */}
+          <div className="card-clean" style={{ padding: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div>
+                <strong style={{ fontSize: '0.95rem', display: 'block' }}>📖 Jurnal Dayung Saya</strong>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Analitik Statistik Berdasar Periode</span>
+              </div>
+
+              {/* Timeframe Filter Tabs */}
+              <div style={{ display: 'flex', background: '#f1f5f9', padding: '2px', borderRadius: '10px' }}>
+                <button
+                  onClick={() => setAnalyticsPeriod('weekly')}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    background: analyticsPeriod === 'weekly' ? '#0284c7' : 'transparent',
+                    color: analyticsPeriod === 'weekly' ? 'white' : '#64748b',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Minggu Ini
+                </button>
+                <button
+                  onClick={() => setAnalyticsPeriod('monthly')}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    background: analyticsPeriod === 'monthly' ? '#0284c7' : 'transparent',
+                    color: analyticsPeriod === 'monthly' ? 'white' : '#64748b',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Bulan Ini
+                </button>
+                <button
+                  onClick={() => setAnalyticsPeriod('yearly')}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    background: analyticsPeriod === 'yearly' ? '#0284c7' : 'transparent',
+                    color: analyticsPeriod === 'yearly' ? 'white' : '#64748b',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Tahun Ini
+                </button>
+              </div>
+            </div>
+
+            {/* Analytics Metric Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Jarak Tempuh</span>
+                <strong style={{ fontSize: '1.15rem', color: '#0284c7', fontFamily: 'var(--font-heading)' }}>
+                  {analyticsData.total_distance_km} <span style={{ fontSize: '0.7rem' }}>km</span>
+                </strong>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Sesi Paddle</span>
+                <strong style={{ fontSize: '1.15rem', color: '#059669', fontFamily: 'var(--font-heading)' }}>
+                  {analyticsData.total_sessions} <span style={{ fontSize: '0.7rem' }}>sesi</span>
+                </strong>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Top Speed</span>
+                <strong style={{ fontSize: '1.05rem', color: '#d97706', fontFamily: 'var(--font-heading)' }}>
+                  {analyticsData.top_speed_kmh} <span style={{ fontSize: '0.7rem' }}>km/h</span>
+                </strong>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Spot Tersering</span>
+                <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {profileStats.favorite_spot}
+                </strong>
+              </div>
+            </div>
           </div>
 
-          <div className="card-clean">
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Jarak Bulan Ini</span>
-            <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#059669' }}>
-              {profileStats.monthly_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
-            </strong>
-          </div>
+          {/* 2. Bucket List / Spot Impian Manager */}
+          <div className="card-clean" style={{ padding: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div>
+                <strong style={{ fontSize: '0.95rem', display: 'block' }}>🎯 Bucket List / Spot Impian</strong>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Target Lokasi Dayung Yang Ingin Dikunjungi</span>
+              </div>
+              <button
+                onClick={() => setShowAddBucketModal(true)}
+                style={{ background: '#0284c7', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
+              >
+                ➕ Tambah
+              </button>
+            </div>
 
-          <div className="card-clean">
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Spot Tersering</span>
-            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block', wordBreak: 'break-word' }}>{profileStats.favorite_spot}</strong>
-          </div>
+            {/* Bucket List Items */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {bucketList && bucketList.length > 0 ? (
+                bucketList.map((item) => {
+                  const isDone = item.is_completed == 1;
+                  return (
+                    <div 
+                      key={item.id} 
+                      style={{ 
+                        background: isDone ? '#f0fdf4' : '#f8fafc', 
+                        border: isDone ? '1px solid #86efac' : '1px solid #e2e8f0', 
+                        padding: '10px 12px', 
+                        borderRadius: '10px', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center' 
+                      }}
+                    >
+                      <div>
+                        <strong style={{ fontSize: '0.88rem', color: isDone ? '#166534' : 'var(--text-main)', textDecoration: isDone ? 'line-through' : 'none', display: 'block' }}>
+                          {item.spot_name}
+                        </strong>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>🗓️ Target: {item.target_month || 'Agustus 2026'} • {item.notes}</span>
+                      </div>
 
-          <div className="card-clean">
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Peringkat Komunitas</span>
-            <strong style={{ fontSize: '0.95rem', color: '#0284c7', display: 'block' }}>
-              Rank #{profileStats.community_rank} 🏆
-            </strong>
+                      {isDone ? (
+                        <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 8px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800 }}>
+                          🏆 Dikunjungi
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleCompleteBucketItem(item)}
+                          style={{ background: '#0284c7', color: 'white', border: 'none', padding: '4px 10px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          ✔ Tandai Selesai
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '12px' }}>
+                  Belum ada spot impian. Klik ➕ Tambah untuk membuat target trip dayung Anda!
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Add Bucket List Item Modal */}
+      {showAddBucketModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ padding: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>🎯 Tambah Spot Impian (Bucket List)</h3>
+            <form onSubmit={handleAddBucketItem} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Spot Impian</label>
+                <input 
+                  type="text" 
+                  placeholder="Contoh: Raja Ampat, Danau Toba, Sanur..." 
+                  value={newBucketSpot} 
+                  onChange={(e) => setNewBucketSpot(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }} 
+                  required 
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Target Waktu Trip</label>
+                <input 
+                  type="text" 
+                  placeholder="Contoh: Agustus 2026" 
+                  value={newBucketMonth} 
+                  onChange={(e) => setNewBucketMonth(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }} 
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Catatan Perjalanan</label>
+                <input 
+                  type="text" 
+                  placeholder="Catatan trip atau perlengkapan yang disiapkan..." 
+                  value={newBucketNotes} 
+                  onChange={(e) => setNewBucketNotes(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }} 
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setShowAddBucketModal(false)} style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#e2e8f0', color: '#475569', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                  Batal
+                </button>
+                <button type="submit" style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#0284c7', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                  Simpan Target 🎯
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

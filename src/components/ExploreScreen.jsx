@@ -4,6 +4,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [viewMode, setViewMode] = useState('map'); // Default to map view for instant Google Maps experience
+  const [mapType, setMapType] = useState('roadmap'); // 'roadmap' or 'k' (satellite)
   const [savedPlans, setSavedPlans] = useState([]);
   const [selectedPlanSpot, setSelectedPlanSpot] = useState(null);
 
@@ -113,8 +114,8 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   });
 
   const googleMapsSearchUrl = searchQuery 
-    ? `https://maps.google.com/maps?q=${encodeURIComponent(searchQuery + ' SUP Indonesia')}&z=13&output=embed`
-    : `https://maps.google.com/maps?q=-5.1478,119.4154&z=10&output=embed`;
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(searchQuery + ' SUP Indonesia')}&t=${mapType}&z=13&output=embed`
+    : `https://maps.google.com/maps?q=-5.1478,119.4154&t=${mapType}&z=10&output=embed`;
 
   return (
     <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
@@ -143,8 +144,26 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             ➕ Spot Baru
           </button>
 
+          {/* Satellite vs Road Map Toggle */}
+          <button
+            onClick={() => setMapType(mapType === 'roadmap' ? 'k' : 'roadmap')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '8px',
+              border: '1px solid #CBD5E1',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              background: mapType === 'k' ? '#0f172a' : '#f8fafc',
+              color: mapType === 'k' ? '#F59E0B' : '#0f172a',
+              cursor: 'pointer'
+            }}
+            title="Ubah Mode Tampilan Peta Satelit / Standard"
+          >
+            {mapType === 'k' ? '🛰️ Satelit' : '🗺️ Peta Standard'}
+          </button>
+
           {/* View Switcher: Google Maps vs Lista */}
-          <div style={{ display: 'flex', background: '#e2e8f0', padding: '2px', borderRadius: '10px' }}>
+          <div style={{ display: 'flex', background: '#f1f5f9', padding: '3px', borderRadius: '10px' }}>
             <button 
               onClick={() => setViewMode('map')}
               style={{

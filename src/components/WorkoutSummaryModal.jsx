@@ -7,6 +7,9 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
   const [water, setWater] = useState('Flat');
   const [wind, setWind] = useState('6 knot');
 
+  const [localTips, setLocalTips] = useState('Waktu terbaik jam 06:00 WITA, perairan tenang & jernih');
+  const [sharedToCommunity, setSharedToCommunity] = useState(true);
+
   const stats = sessionData || {
     distance: '8.4 km',
     timeFormatted: '1h 55m',
@@ -16,7 +19,7 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
     strokes: '3,890',
   };
 
-  const handleSave = () => {
+  const handleSave = (shareFlag = sharedToCommunity) => {
     onSaveActivity({
       ...stats,
       spotName,
@@ -24,6 +27,8 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
       weather,
       water,
       wind,
+      shared_to_community: shareFlag ? 1 : 0,
+      local_tips: localTips,
       date: 'Hari ini',
     });
   };
@@ -113,6 +118,20 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
           />
         </div>
 
+        {/* Local Knowledge & Guide Tips */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>
+            💡 Panduan & Tips Pengetahuan Lokal (Local Knowledge Guide)
+          </label>
+          <input 
+            type="text"
+            value={localTips}
+            onChange={(e) => setLocalTips(e.target.value)}
+            placeholder="Contoh: Waktu terbaik jam 06:00 WITA, perairan tenang & jernih..."
+            style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.82rem' }}
+          />
+        </div>
+
         {/* Environmental Conditions */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '24px' }}>
           <div>
@@ -156,35 +175,19 @@ export default function WorkoutSummaryModal({ sessionData, onSaveActivity, onClo
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <button 
             className="btn-cta-jumbo"
-            onClick={async () => {
-              await handleSave();
-              // Also share to community feed
-              try {
-                await fetch('/api/create_post.php', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    user_id: userId || 1,
-                    user_name: userName || 'SUPer',
-                    spot_name: spotName || 'Samalona',
-                    title: `Sesi Dayung Baru: ${stats.distance} (${stats.timeFormatted})`,
-                    distance: stats.distance,
-                    image_url: ''
-                  })
-                });
-                alert(' Sesi dayung Anda berhasil disimpan dan dibagikan ke Feed Komunitas!');
-              } catch (e) {}
+            onClick={() => {
+              handleSave(true);
             }}
             style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' }}
           >
-            <span>BAGIKAN KE FEED KOMUNITAS 👥</span>
+            <span>🚀 BAGIKAN 1-KLIK & PANDUAN LOKAL KE KOMUNITAS 👥</span>
           </button>
 
           <button 
-            onClick={handleSave}
+            onClick={() => handleSave(false)}
             style={{ width: '100%', padding: '12px', borderRadius: '10px', background: '#f1f5f9', color: '#0f172a', fontWeight: 700, border: 'none', cursor: 'pointer' }}
           >
-            SIMPAN HANYA KE PASPOR LOG 💾
+            💾 SIMPAN HANYA KE JURNAL PASPOR LOG
           </button>
         </div>
       </div>
