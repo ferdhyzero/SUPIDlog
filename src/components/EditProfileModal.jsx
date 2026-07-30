@@ -61,14 +61,56 @@ export default function EditProfileModal({ user, onClose, onSaveSuccess }) {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-muted)' }}>URL Foto Avatar / Gambar</label>
-            <input 
-              type="text"
-              placeholder="https://..."
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-            />
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, marginBottom: '4px', color: 'var(--text-muted)' }}>Foto Avatar Profil</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input 
+                type="text"
+                placeholder="https://... atau Unggah dari HP"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+              />
+              <label 
+                style={{ 
+                  background: '#0284c7', 
+                  color: 'white', 
+                  padding: '10px 12px', 
+                  borderRadius: '8px', 
+                  fontSize: '0.78rem', 
+                  fontWeight: 700, 
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                📷 Upload
+                <input 
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    try {
+                      const res = await fetch('/api/upload_image.php', {
+                        method: 'POST',
+                        body: formData
+                      });
+                      const data = await res.json();
+                      if (data.success && data.image_url) {
+                        setAvatarUrl(data.image_url);
+                        alert('📷 Foto avatar berhasil diunggah!');
+                      } else {
+                        alert(data.message || 'Gagal mengunggah foto.');
+                      }
+                    } catch (err) {
+                      alert('Gagal mengunggah foto.');
+                    }
+                  }}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
           </div>
 
           <div>

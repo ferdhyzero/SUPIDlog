@@ -8,6 +8,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
   const [profileStats, setProfileStats] = useState({
     name: currentUser ? currentUser.name : 'Guest SUPer',
     level: currentUser ? (currentUser.level || 'Explorer') : 'Pengunjung Mode Tamu',
+    avatar_url: currentUser ? (currentUser.avatar_url || '') : '',
     alltime_dist: '0.0',
     monthly_dist: '0.0',
     favorite_spot: '-',
@@ -28,6 +29,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
           setProfileStats({
             name: data.user.name,
             level: data.user.level || 'Explorer',
+            avatar_url: data.user.avatar_url || '',
             alltime_dist: data.user.total_distance_km || '0.0',
             monthly_dist: data.user.monthly_distance_km || '0.0',
             favorite_spot: data.user.favorite_spot || '-',
@@ -89,10 +91,19 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 10px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            overflow: 'hidden'
           }}
         >
-          {isSuperAdmin ? '👑' : (isGuest ? '👤' : '🏄‍♂️')}
+          {profileStats.avatar_url ? (
+            <img 
+              src={profileStats.avatar_url} 
+              alt={profileStats.name} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            isSuperAdmin ? '👑' : (isGuest ? '👤' : '🏄‍♂️')
+          )}
         </div>
 
         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white' }}>
