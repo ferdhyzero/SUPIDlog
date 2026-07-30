@@ -209,45 +209,6 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
           </button>
         </form>
 
-        {/* Quick Demo Login Option */}
-        <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>Quick Demo Login:</p>
-          
-          <button 
-            onClick={handleDemoSuperAdmin}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '12px',
-              background: '#FEF3C7',
-              color: '#B45309',
-              border: '1.5px solid #F59E0B',
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              cursor: 'pointer'
-            }}
-          >
-            👑 Super Admin (ferdhy - ahmadferdy66@gmail.com)
-          </button>
-
-          <button 
-            onClick={handleDemoSapril}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '12px',
-              background: 'rgba(0,180,216,0.12)',
-              color: 'var(--ocean-blue)',
-              border: '1.5px dashed var(--aqua)',
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              cursor: 'pointer'
-            }}
-          >
-            🏄‍♂️ Peserta SUPer (Sapril - sapril@sup.id)
-          </button>
-        </div>
-
       </div>
     </div>
   );
