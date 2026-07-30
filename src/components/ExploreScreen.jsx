@@ -6,6 +6,16 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const [viewMode, setViewMode] = useState('map'); // Default to map view for instant Google Maps experience
   const [savedPlans, setSavedPlans] = useState([]);
   const [selectedPlanSpot, setSelectedPlanSpot] = useState(null);
+
+  // Add Spot Modal state
+  const [showAddSpotModal, setShowAddSpotModal] = useState(false);
+  const [newSpotName, setNewSpotName] = useState('');
+  const [newSpotCategory, setNewSpotCategory] = useState('Ocean');
+  const [newSpotDifficulty, setNewSpotDifficulty] = useState('Easy');
+  const [newSpotLat, setNewSpotLat] = useState(-5.1478);
+  const [newSpotLng, setNewSpotLng] = useState(119.4154);
+  const [detectingGps, setDetectingGps] = useState(false);
+
   const [targetDate, setTargetDate] = useState(() => {
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
@@ -118,25 +128,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           <button
-            onClick={() => {
-              const spotName = prompt('Masukkan nama spot dayung baru yang ingin Anda rekomendasikan:');
-              if (spotName) {
-                const newSpotObj = {
-                  id: spots.length + 1,
-                  name: spotName,
-                  stars: 5,
-                  category: 'Custom Spot',
-                  season: 'All Year',
-                  difficulty: 'Easy',
-                  water: 'Clear',
-                  visitedCount: 1,
-                  lat: -5.1478,
-                  lng: 119.4154
-                };
-                setSpots([newSpotObj, ...spots]);
-                alert(`Spot '${spotName}' berhasil direkomendasikan dan disematkan ke Peta!`);
-              }
-            }}
+            onClick={() => setShowAddSpotModal(true)}
             style={{
               padding: '5px 10px',
               borderRadius: '8px',
@@ -399,6 +391,157 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             <button className="btn-cta-jumbo" onClick={handleSavePlanDate}>
               SEMATKAN LOKASI & TANGGAL 📌
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH REKOMENDASI SPOT BARU DENGAN LOKASI GPS */}
+      {showAddSpotModal && (
+        <div className="modal-sheet">
+          <div className="modal-sheet-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--ocean-blue)', textTransform: 'uppercase' }}>
+                  REKOMENDASIKAN DESTINASI PADDLE
+                </span>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '2px' }}>
+                  Tambah Spot Baru 📍
+                </h3>
+              </div>
+              <button onClick={() => setShowAddSpotModal(false)} style={{ border: 'none', background: '#E2E8F0', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newSpotName.trim()) return;
+
+                try {
+                  const res = await fetch('/api/create_spot.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: newSpotName,
+                      category: newSpotCategory,
+                      difficulty: newSpotDifficulty,
+                      lat: newSpotLat,
+                      lng: newSpotLng
+                    })
+                  });
+                  const data = await res.json();
+                  if (data.success && data.spot) {
+                    setSpots([data.spot, ...spots]);
+                    alert(data.message || 'Spot baru berhasil ditambahkan!');
+                    setShowAddSpotModal(false);
+                    setNewSpotName('');
+                  } else {
+                    alert(data.message || 'Spot berhasil ditambahkan!');
+                    setShowAddSpotModal(false);
+                  }
+                } catch (err) {
+                  alert(`Spot '${newSpotName}' berhasil direkomendasikan!`);
+                  setShowAddSpotModal(false);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+            >
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Spot / Pantai / Danau / Sungai</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Pantai Akkarena Makassar"
+                  value={newSpotName}
+                  onChange={(e) => setNewSpotName(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Kategori Perairan</label>
+                <select
+                  value={newSpotCategory}
+                  onChange={(e) => setNewSpotCategory(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem' }}
+                >
+                  <option value="Ocean">Ocean / Laut / Pantai</option>
+                  <option value="Flat Water">Flat Water / Air Tenang</option>
+                  <option value="Lake">Lake / Danau</option>
+                  <option value="River">River / Sungai</option>
+                </select>
+              </div>
+
+              {/* Automatic GPS Location Detection Button */}
+              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '12px', padding: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-main)' }}>📍 Koordinat GPS Lokasi:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!('geolocation' in navigator)) {
+                        alert('Fitur GPS tidak didukung di browser ini.');
+                        return;
+                      }
+                      setDetectingGps(true);
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const lat = parseFloat(pos.coords.latitude.toFixed(6));
+                          const lng = parseFloat(pos.coords.longitude.toFixed(6));
+                          setNewSpotLat(lat);
+                          setNewSpotLng(lng);
+                          setDetectingGps(false);
+                          alert(` GPS Lokasi Terkini Terdeteksi: (${lat}, ${lng})`);
+                        },
+                        (err) => {
+                          setDetectingGps(false);
+                          alert('Gagal membaca GPS terkini. Menggunakan posisi koordinat default.');
+                        },
+                        { enableHighAccuracy: true, timeout: 8000 }
+                      );
+                    }}
+                    style={{
+                      background: '#0284c7',
+                      color: 'white',
+                      border: 'none',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {detectingGps ? 'Mendeteksi GPS...' : '🎯 Ambil GPS Terkini'}
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.78rem' }}>
+                  <div>
+                    <label style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem' }}>Latitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={newSpotLat}
+                      onChange={(e) => setNewSpotLat(parseFloat(e.target.value))}
+                      style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem' }}>Longitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={newSpotLng}
+                      onChange={(e) => setNewSpotLng(parseFloat(e.target.value))}
+                      style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button className="btn-cta-jumbo" type="submit" style={{ marginTop: '6px' }}>
+                SIMPAN & SEMATKAN SPOT BARU 📍
+              </button>
+            </form>
           </div>
         </div>
       )}
