@@ -29,7 +29,7 @@ try {
 
     // 3. Insert new user with status = 'pending'
     $hash = password_hash($password, PASSWORD_BCRYPT);
-    $stmtIns = $pdo->prepare("INSERT INTO users (name, email, password_hash, role, level, community_rank, status, total_distance_km, total_sessions) VALUES (:name, :email, :hash, 'user', 'Beginner SUPer', 99, 'pending', 0.00, 0)");
+    $stmtIns = $pdo->prepare("INSERT INTO users (name, email, password_hash, role, level, community_rank, status, total_distance_km) VALUES (:name, :email, :hash, 'user', 'Beginner SUPer', 99, 'pending', 0.00)");
     $stmtIns->execute(['name' => $name, 'email' => $email, 'hash' => $hash]);
 
     $newId = $pdo->lastInsertId();
