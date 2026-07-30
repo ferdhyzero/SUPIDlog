@@ -13,8 +13,14 @@ try {
     } catch (Exception $exCol) {}
 
     if ($action === 'list') {
-        $stmt = $pdo->query("SELECT id, name, email, role, status, level, community_rank, total_distance_km, total_sessions, DATE_FORMAT(created_at, '%d %b %Y %H:%i') as formatted_date FROM users ORDER BY status DESC, id DESC");
+        $stmt = $pdo->query("SELECT id, name, email, role, status, level, community_rank, total_distance_km, DATE_FORMAT(created_at, '%d %b %Y %H:%i') as formatted_date FROM users ORDER BY status DESC, id DESC");
         $users = $stmt->fetchAll();
+
+        foreach ($users as &$u) {
+            $stmtSess = $pdo->prepare("SELECT COUNT(*) as sess_cnt FROM activities WHERE user_id = :uid");
+            $stmtSess->execute(['uid' => $u['id']]);
+            $u['total_sessions'] = (int)($stmtSess->fetch()['sess_cnt'] ?? 0);
+        }
 
         echo json_encode(['success' => true, 'users' => $users]);
         exit();
