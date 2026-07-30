@@ -8,14 +8,20 @@ $userId = (int)($data['user_id'] ?? 1);
 $spotName = trim($data['spotName'] ?? 'Samalona');
 $distance = (float)($data['rawDistance'] ?? $data['distance_km'] ?? 8.4);
 $duration = trim($data['timeFormatted'] ?? $data['duration_formatted'] ?? '1h 55m');
-$calories = (int)($data['calories'] ?? 693);
+$calories = (int)($data['calories'] ?? 0);
 $avgSpeed = trim($data['avgSpeed'] ?? $data['avg_speed'] ?? '4.8 km/h');
 $weather = trim($data['weather'] ?? '☀ Sunny 30°C');
-$water = trim($data['water'] ?? 'Flat Water 🌊');
+$water = trim($data['water'] ?? 'Flat Water');
+$routeJson = is_array($data['route'] ?? null) ? json_encode($data['route']) : (string)($data['route_json'] ?? '');
 
 try {
+    // Ensure route_json column exists
+    try {
+        $pdo->exec("ALTER TABLE activities ADD COLUMN route_json LONGTEXT DEFAULT NULL AFTER gps_coords");
+    } catch (Exception $exRoute) {}
+
     // 1. Insert into activities table
-    $stmt = $pdo->prepare("INSERT INTO activities (user_id, spot_name, distance_km, duration_formatted, calories, avg_speed, weather, water_condition) VALUES (:uid, :spot, :dist, :dur, :cal, :spd, :wea, :wat)");
+    $stmt = $pdo->prepare("INSERT INTO activities (user_id, spot_name, distance_km, duration_formatted, calories, avg_speed, weather, water_condition, route_json) VALUES (:uid, :spot, :dist, :dur, :cal, :spd, :wea, :wat, :rjson)");
     $stmt->execute([
         'uid' => $userId,
         'spot' => $spotName,
@@ -24,7 +30,8 @@ try {
         'cal' => $calories,
         'spd' => $avgSpeed,
         'wea' => $weather,
-        'wat' => $water
+        'wat' => $water,
+        'rjson' => $routeJson
     ]);
 
     // 2. Unlock stamp in passport_stamps table

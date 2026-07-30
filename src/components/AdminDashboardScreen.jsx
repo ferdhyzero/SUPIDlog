@@ -15,6 +15,9 @@ export default function AdminDashboardScreen({ currentUser }) {
     'Super Admin 👑'
   ];
 
+  const [communityPosts, setCommunityPosts] = useState([]);
+  const [activeTab, setActiveTab] = useState('users'); // 'users' or 'moderation'
+
   // Fetch Users List from MySQL for Super Admin
   const loadUsers = async () => {
     try {
@@ -30,8 +33,19 @@ export default function AdminDashboardScreen({ currentUser }) {
     }
   };
 
+  const loadCommunityPosts = async () => {
+    try {
+      const res = await fetch('/api/get_community.php?user_id=1');
+      const data = await res.json();
+      if (data.success) {
+        setCommunityPosts(data.posts);
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
     loadUsers();
+    loadCommunityPosts();
   }, []);
 
   const toggleShowPassword = (userId) => {
@@ -225,11 +239,48 @@ export default function AdminDashboardScreen({ currentUser }) {
         </div>
       )}
 
-      {/* User Management List */}
-      <div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Pengaturan Akun, Verifikasi & Reset Password</h3>
+      {/* Admin Tab Switcher */}
+      <div style={{ display: 'flex', background: '#e2e8f0', padding: '4px', borderRadius: '12px' }}>
+        <button
+          onClick={() => setActiveTab('users')}
+          style={{
+            flex: 1,
+            padding: '8px',
+            borderRadius: '8px',
+            border: 'none',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+            background: activeTab === 'users' ? '#0284c7' : 'transparent',
+            color: activeTab === 'users' ? 'white' : '#64748b',
+            cursor: 'pointer'
+          }}
+        >
+          🔐 User & Password Manager ({usersList.length})
+        </button>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <button
+          onClick={() => setActiveTab('moderation')}
+          style={{
+            flex: 1,
+            padding: '8px',
+            borderRadius: '8px',
+            border: 'none',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+            background: activeTab === 'moderation' ? '#0284c7' : 'transparent',
+            color: activeTab === 'moderation' ? 'white' : '#64748b',
+            cursor: 'pointer'
+          }}
+        >
+          🛡️ Moderasi Feed Komunitas ({communityPosts.length})
+        </button>
+      </div>
+
+      {activeTab === 'users' ? (
+        <div>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Pengaturan Akun, Verifikasi & Reset Password</h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {usersList.map((userItem) => {
             const isPendingReg = userItem.status === 'pending';
             const isPendingReset = userItem.reset_status === 'reset_pending';
@@ -411,6 +462,48 @@ export default function AdminDashboardScreen({ currentUser }) {
           })}
         </div>
       </div>
+      ) : (
+        <div>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '12px' }}>Moderasi Feed Komunitas SUP Indonesia</h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {communityPosts.length > 0 ? (
+              communityPosts.map((post) => (
+                <div key={post.id} className="card-clean" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ fontSize: '0.95rem', display: 'block' }}>{post.title}</strong>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Oleh: {post.user_name} • 📍 {post.spot_name} ({post.distance_km})</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (confirm(`Apakah Anda yakin ingin menghapus postingan '${post.title}'?`)) {
+                        try {
+                          await fetch('/api/admin_users.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'delete_post', post_id: post.id })
+                          });
+                          setCommunityPosts(communityPosts.filter(p => p.id !== post.id));
+                          setMsgNotice(`Postingan '${post.title}' berhasil dihapus!`);
+                        } catch (e) {
+                          setCommunityPosts(communityPosts.filter(p => p.id !== post.id));
+                        }
+                      }
+                    }}
+                    style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    🗑️ Hapus Post
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', padding: '20px' }}>
+                Tidak ada postingan komunitas untuk dimoderasi.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

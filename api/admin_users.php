@@ -131,6 +131,16 @@ try {
         exit();
     }
 
+    if ($action === 'delete_post') {
+        $postId = (int)($data['post_id'] ?? 0);
+        if ($postId > 0) {
+            $stmt = $pdo->prepare("DELETE FROM community_posts WHERE id = :pid");
+            $stmt->execute(['pid' => $postId]);
+            echo json_encode(['success' => true, 'message' => "Postingan #$postId berhasil dihapus!"]);
+            exit();
+        }
+    }
+
     if ($action === 'delete') {
         $targetUserId = (int)($data['user_id'] ?? 0);
         if ($targetUserId === 1) {

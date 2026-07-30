@@ -322,8 +322,57 @@ export default function CommunityScreen({ userId = 2, userName = 'Sapril SUPer' 
               </div>
 
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🖼️ Foto / Lampiran URL Gambar (Opsional)</label>
-                <input type="url" placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1' }} />
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🖼️ Foto Sesi Paddle (Upload / Link URL)</label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input 
+                    type="text" 
+                    placeholder="https://... atau Unggah dari HP" 
+                    value={imageUrl} 
+                    onChange={(e) => setImageUrl(e.target.value)} 
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }} 
+                  />
+                  <label
+                    style={{
+                      background: '#0284c7',
+                      color: 'white',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    📷 Upload
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        formData.append('category', 'posts');
+                        try {
+                          const res = await fetch('/api/upload_image.php', {
+                            method: 'POST',
+                            body: formData
+                          });
+                          const data = await res.json();
+                          if (data.success && data.image_url) {
+                            setImageUrl(data.image_url);
+                            alert('📷 Foto sesi paddle berhasil diunggah!');
+                          } else {
+                            alert(data.message || 'Gagal mengunggah foto.');
+                          }
+                        } catch (err) {
+                          alert('Gagal mengunggah foto.');
+                        }
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
               </div>
 
               <button type="submit" className="btn-cta-jumbo" style={{ marginTop: '8px' }}>
