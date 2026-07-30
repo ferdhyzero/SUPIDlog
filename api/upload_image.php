@@ -23,25 +23,36 @@ if (!in_array($mimeType, $allowedTypes)) {
     exit;
 }
 
-$uploadDir = __DIR__ . '/../uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+// Categorized Subfolder Organization (avatars, posts, spots)
+$category = trim($_POST['category'] ?? 'posts');
+$subFolder = 'posts/';
+if ($category === 'avatar' || $category === 'avatars') {
+    $subFolder = 'avatars/';
+} elseif ($category === 'spot' || $category === 'spots') {
+    $subFolder = 'spots/';
 }
 
-// Generate unique WebP filename
-$filename = 'img_' . time() . '_' . uniqid() . '.webp';
-$targetWebpPath = $uploadDir . $filename;
+$baseUploadDir = __DIR__ . '/../uploads/';
+$targetDir = $baseUploadDir . $subFolder;
+
+if (!is_dir($targetDir)) {
+    mkdir($targetDir, 0755, true);
+}
+
+// Clean filename prefix matching category
+$prefix = rtrim($subFolder, '/');
+$filename = $prefix . '_' . time() . '_' . uniqid() . '.webp';
+$targetWebpPath = $targetDir . $filename;
 
 // Automatic WebP Compression & Resizing Engine
 function convertAndCompressToWebp($sourcePath, $targetPath, $mime, $maxWidth = 800, $quality = 80) {
     if (!function_exists('imagewebp')) {
-        return false; // GD extension missing fallback
+        return false;
     }
 
     list($width, $height) = getimagesize($sourcePath);
     if (!$width || !$height) return false;
 
-    // Calculate new dimensions (Max width 800px)
     if ($width > $maxWidth) {
         $newWidth = $maxWidth;
         $newHeight = (int)(($height / $width) * $maxWidth);
@@ -50,7 +61,6 @@ function convertAndCompressToWebp($sourcePath, $targetPath, $mime, $maxWidth = 8
         $newHeight = $height;
     }
 
-    // Create GD image resource based on mime type
     switch ($mime) {
         case 'image/jpeg':
             $image = imagecreatefromjpeg($sourcePath);
@@ -70,11 +80,9 @@ function convertAndCompressToWebp($sourcePath, $targetPath, $mime, $maxWidth = 8
 
     if (!$image) return false;
 
-    // Create resampled canvas
     $canvas = imagecreatetruecolor($newWidth, $newHeight);
     imagecopyresampled($canvas, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-    // Save as WEBP format with 80% quality compression
     $success = imagewebp($canvas, $targetPath, $quality);
 
     imagedestroy($image);
@@ -83,28 +91,26 @@ function convertAndCompressToWebp($sourcePath, $targetPath, $mime, $maxWidth = 8
     return $success;
 }
 
-// Try WebP compression engine first
 $converted = convertAndCompressToWebp($tmpPath, $targetWebpPath, $mimeType, 800, 80);
 
 if ($converted) {
-    $publicUrl = '/uploads/' . $filename;
+    $publicUrl = '/uploads/' . $subFolder . $filename;
     $filesizeKb = round(filesize($targetWebpPath) / 1024, 1);
     echo json_encode([
         'success' => true,
-        'message' => "Foto berhasil dikompresi ke WEBP ({$filesizeKb} KB)!",
+        'message' => "Foto berhasil dikompresi ke WEBP ({$filesizeKb} KB) dan tersimpan di folder uploads/{$subFolder}!",
         'image_url' => $publicUrl
     ]);
 } else {
-    // Direct Fallback if GD is missing
     $origExtension = pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'jpg';
-    $fallbackFilename = 'img_' . time() . '_' . uniqid() . '.' . $origExtension;
-    $fallbackPath = $uploadDir . $fallbackFilename;
+    $fallbackFilename = $prefix . '_' . time() . '_' . uniqid() . '.' . $origExtension;
+    $fallbackPath = $targetDir . $fallbackFilename;
 
     if (move_uploaded_file($tmpPath, $fallbackPath)) {
-        $publicUrl = '/uploads/' . $fallbackFilename;
+        $publicUrl = '/uploads/' . $subFolder . $fallbackFilename;
         echo json_encode([
             'success' => true,
-            'message' => 'Foto berhasil diunggah!',
+            'message' => "Foto tersimpan di folder uploads/{$subFolder}!",
             'image_url' => $publicUrl
         ]);
     } else {

@@ -91,6 +91,7 @@ export default function EditProfileModal({ user, onClose, onSaveSuccess }) {
                     if (!file) return;
                     const formData = new FormData();
                     formData.append('image', file);
+                    formData.append('category', 'avatar');
                     try {
                       const res = await fetch('/api/upload_image.php', {
                         method: 'POST',
