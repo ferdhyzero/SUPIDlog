@@ -2,6 +2,7 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/myhostzo/public_html/supid.myhostzone.biz.id
-    - /bin/cp -R dist/* $DEPLOYPATH/
-    - /bin/cp -R api $DEPLOYPATH/
-    - /bin/cp database.sql $DEPLOYPATH/
+    - /bin/mkdir -p $DEPLOYPATH/api
+    - /bin/cp -Rf dist/* $DEPLOYPATH/
+    - /bin/cp -Rf api/* $DEPLOYPATH/api/
+    - /bin/cp -f database.sql $DEPLOYPATH/
