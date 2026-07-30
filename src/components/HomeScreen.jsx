@@ -246,7 +246,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
 
         {recentActivities.length === 0 ? (
           <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', borderRadius: '16px', color: 'var(--text-muted)' }}>
-            <img src="/logo-icon-app-blue.png" alt="SUP Paddle Logo" style={{ width: '48px', height: '48px', margin: '0 auto 8px', display: 'block', objectFit: 'contain' }} />
+            <img src="/start-paddle-bold-blue.png" alt="SUP Paddle" style={{ width: '42px', height: '42px', margin: '0 auto 8px', display: 'block', objectFit: 'contain' }} />
             <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>Belum ada aktivitas tercatat</p>
             <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Tekan tombol paddle di bawah untuk memulai sesi paddle pertama Anda!</p>
           </div>
