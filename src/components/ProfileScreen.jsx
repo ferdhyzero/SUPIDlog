@@ -115,13 +115,24 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
         </div>
 
         {isGuest && (
-          <div style={{ marginTop: '12px' }}>
-            <button 
-              onClick={onOpenLogin}
-              style={{ background: 'white', color: '#0284c7', border: 'none', padding: '6px 16px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
-            >
-              🔑 Masuk / Daftar Akun
-            </button>
+          <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ fontSize: '0.8rem', opacity: 0.95, lineHeight: 1.4, margin: '0 0 4px' }}>
+              Masuk atau daftar akun baru untuk menyimpan statistik sesi dayung, paspor digital, dan garasi peralatan SUP Anda!
+            </p>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <button 
+                onClick={onOpenLogin}
+                style={{ flex: 1, background: 'white', color: '#0284c7', border: 'none', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+              >
+                🔑 MASUK AKUN
+              </button>
+              <button 
+                onClick={onOpenLogin}
+                style={{ flex: 1, background: 'rgba(255,255,255,0.25)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}
+              >
+                📝 DAFTAR BARU
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -162,34 +173,36 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
         </div>
       )}
 
-      {/* Profile Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-        <div className="card-clean">
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Jarak Tempuh</span>
-          <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#0284c7' }}>
-            {isGuest ? '0.0' : profileStats.alltime_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
-          </strong>
-        </div>
+      {/* Profile Stats Grid (Only Shown for Logged-in Users) */}
+      {!isGuest && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+          <div className="card-clean">
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Jarak Tempuh</span>
+            <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#0284c7' }}>
+              {profileStats.alltime_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
+            </strong>
+          </div>
 
-        <div className="card-clean">
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Jarak Bulan Ini</span>
-          <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#059669' }}>
-            {isGuest ? '0.0' : profileStats.monthly_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
-          </strong>
-        </div>
+          <div className="card-clean">
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Jarak Bulan Ini</span>
+            <strong style={{ fontSize: '1.15rem', fontFamily: 'var(--font-heading)', color: '#059669' }}>
+              {profileStats.monthly_dist} <span style={{ fontSize: '0.7rem' }}>km</span>
+            </strong>
+          </div>
 
-        <div className="card-clean">
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Spot Tersering</span>
-          <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block', wordBreak: 'break-word' }}>{isGuest ? '-' : profileStats.favorite_spot}</strong>
-        </div>
+          <div className="card-clean">
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Spot Tersering</span>
+            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block', wordBreak: 'break-word' }}>{profileStats.favorite_spot}</strong>
+          </div>
 
-        <div className="card-clean">
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Peringkat Komunitas</span>
-          <strong style={{ fontSize: '0.95rem', color: '#0284c7', display: 'block' }}>
-            {isGuest ? '-' : `Rank #${profileStats.community_rank} 🏆`}
-          </strong>
+          <div className="card-clean">
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Peringkat Komunitas</span>
+            <strong style={{ fontSize: '0.95rem', color: '#0284c7', display: 'block' }}>
+              Rank #{profileStats.community_rank} 🏆
+            </strong>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quick Access Menu Items */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
