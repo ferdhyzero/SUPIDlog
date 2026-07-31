@@ -149,13 +149,10 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
           padding: '20px 16px' 
         }}
       >
-        {/* Background Stand-Up Paddleboard Action Image (Exact Wikipedia Featured SUP Photo) */}
+        {/* Background Stand-Up Paddleboard Action Image (Bundled Local High-Res Asset) */}
         <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/J%C3%A9r%C3%A9my-Massi%C3%A8re_stand-up-paddle_biscarrosse-2.JPG/1280px-J%C3%A9r%C3%A9my-Massi%C3%A8re_stand-up-paddle_biscarrosse-2.JPG" 
-          alt="Jérémy Massière Stand Up Paddle Boarding Wikipedia"
-          onError={(e) => {
-            e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/4/47/J%C3%A9r%C3%A9my-Massi%C3%A8re_stand-up-paddle_biscarrosse-2.JPG';
-          }}
+          src="/sup-hero-bg.jpg" 
+          alt="Stand Up Paddle Boarding"
           style={{
             position: 'absolute',
             top: 0,
@@ -163,13 +160,13 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 30%',
-            opacity: 0.7,
+            objectPosition: 'center 40%',
+            opacity: 0.65,
             zIndex: 0,
             pointerEvents: 'none'
           }}
         />
-        {/* Transparent Dark Ocean Overlay */}
+        {/* Translucent Dark Ocean Overlay for Maximum Visibility & Text Legibility */}
         <div 
           style={{
             position: 'absolute',
@@ -177,7 +174,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.25) 0%, rgba(15, 23, 42, 0.55) 100%)',
+            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.25) 0%, rgba(3, 105, 161, 0.55) 100%)',
             zIndex: 1,
             pointerEvents: 'none'
           }}
