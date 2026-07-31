@@ -138,46 +138,88 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
   return (
     <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
-      {/* Profile Header */}
-      <div className="hero-card" style={{ textAlign: 'center', background: isSuperAdmin ? '#0f172a' : '#0284c7', padding: '20px 16px', position: 'relative' }}>
-        
-        {!isGuest && (
-          <button
-            onClick={() => setShowEditModal(true)}
-            style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              background: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '4px 10px',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            Edit Profil ✏️
-          </button>
-        )}
-
+      {/* Profile Header with Real Stand-Up Paddleboard (SUP) Action Photo API */}
+      <div 
+        className="hero-card" 
+        style={{ 
+          textAlign: 'center', 
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #070D1B 0%, #0369a1 100%)', 
+          padding: '20px 16px' 
+        }}
+      >
+        {/* Background Stand-Up Paddleboard Action Image */}
+        <img 
+          src="https://images.unsplash.com/photo-1517649763962-0c623266010b?w=800&auto=format&fit=crop" 
+          alt="Stand Up Paddle Boarding"
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&auto=format&fit=crop';
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.38,
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        {/* Ocean Gradient Overlay */}
         <div 
           style={{
-            width: '68px',
-            height: '68px',
-            borderRadius: '50%',
-            background: 'white',
-            color: isSuperAdmin ? '#f59e0b' : '#0284c7',
-            fontSize: '2rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 10px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            overflow: 'hidden'
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(180deg, rgba(2, 132, 199, 0.45) 0%, rgba(3, 105, 161, 0.85) 100%)',
+            zIndex: 1,
+            pointerEvents: 'none'
           }}
-        >
+        />
+
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          {!isGuest && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              style={{
+                position: 'absolute',
+                top: '0px',
+                right: '0px',
+                background: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '4px 10px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Edit Profil ✏️
+            </button>
+          )}
+
+          <div 
+            style={{
+              width: '68px',
+              height: '68px',
+              borderRadius: '50%',
+              background: 'white',
+              color: isSuperAdmin ? '#f59e0b' : '#0284c7',
+              fontSize: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 10px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              overflow: 'hidden'
+            }}
+          >
           {profileStats.avatar_url ? (
             <img 
               src={profileStats.avatar_url} 
@@ -218,6 +260,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {showEditModal && (

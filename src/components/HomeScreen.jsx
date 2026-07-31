@@ -136,99 +136,142 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
   return (
     <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
-      {/* Hero Greeting & Weather Card */}
-      <div className="hero-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <div>
-            <p style={{ fontSize: '0.65rem', opacity: 0.9, fontWeight: 500 }}>
-              {isGuest ? 'Mode Tamu' : 'Good Morning,'}
-            </p>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{userName}</h2>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button 
-              onClick={handleInstallClick}
-              style={{ 
-                background: '#ffffff',
-                color: '#0284c7',
-                border: 'none',
-                padding: '6px 12px',
-                borderRadius: '16px',
-                fontWeight: 800,
-                fontSize: '0.75rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-            >
-              <img 
-                src="/logo.png" 
-                alt="SUP.ID Logo" 
-                style={{ height: '20px', width: 'auto', borderRadius: '4px', objectFit: 'contain' }} 
-              />
-              <span>{pwaInstalled ? 'Active' : 'Install PWA'}</span>
-            </button>
-          </div>
-        </div>
+      {/* Hero Greeting & Weather Card with Real Stand-Up Paddleboard (SUP) Action Photo API */}
+      <div 
+        className="hero-card"
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #070D1B 0%, #0369a1 100%)',
+          padding: '16px 14px'
+        }}
+      >
+        {/* Background Stand-Up Paddleboard Action Image */}
+        <img 
+          src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800&auto=format&fit=crop" 
+          alt="Stand Up Paddle Boarding"
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&auto=format&fit=crop';
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.38,
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        {/* Ocean Gradient Overlay */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(180deg, rgba(2, 132, 199, 0.45) 0%, rgba(3, 105, 161, 0.85) 100%)',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}
+        />
 
-        {/* Guest Warning Banner if not logged in */}
-        {isGuest && (
-          <div style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', padding: '8px 12px', borderRadius: '10px', marginBottom: '12px', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              Silakan login untuk menyimpan hasil sesi paddle.
-            </span>
-            <button 
-              onClick={onRequireLogin} 
-              style={{ 
-                background: 'white', 
-                color: '#0284c7', 
-                border: 'none', 
-                padding: '4px 10px', 
-                borderRadius: '8px', 
-                fontWeight: 800, 
-                cursor: 'pointer', 
-                fontSize: '0.72rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
-              </svg>
-              Login
-            </button>
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div>
+              <p style={{ fontSize: '0.65rem', opacity: 0.9, fontWeight: 500 }}>
+                {isGuest ? 'Mode Tamu' : 'Good Morning,'}
+              </p>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{userName}</h2>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button 
+                onClick={handleInstallClick}
+                style={{ 
+                  background: '#ffffff',
+                  color: '#0284c7',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+              >
+                <img 
+                  src="/logo.png" 
+                  alt="SUP.ID Logo" 
+                  style={{ height: '20px', width: 'auto', borderRadius: '4px', objectFit: 'contain' }} 
+                />
+                <span>{pwaInstalled ? 'Active' : 'Install PWA'}</span>
+              </button>
+            </div>
           </div>
-        )}
 
-        {/* Live GPS Weather Forecast Chips */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 600 }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
-            </svg>
-            {weather.temp}
-          </div>
-          <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
-            </svg>
-            {weather.wind}
-          </div>
-          <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-            </svg>
-            {weather.water}
+          {/* Guest Warning Banner if not logged in */}
+          {isGuest && (
+            <div style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', padding: '8px 12px', borderRadius: '10px', marginBottom: '12px', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Silakan login untuk menyimpan hasil sesi paddle.
+              </span>
+              <button 
+                onClick={onRequireLogin} 
+                style={{ 
+                  background: 'white', 
+                  color: '#0284c7', 
+                  border: 'none', 
+                  padding: '4px 10px', 
+                  borderRadius: '8px', 
+                  fontWeight: 800, 
+                  cursor: 'pointer', 
+                  fontSize: '0.72rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Login
+              </button>
+            </div>
+          )}
+
+          {/* Live GPS Weather Forecast Chips */}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 600 }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+              </svg>
+              {weather.temp}
+            </div>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
+              </svg>
+              {weather.wind}
+            </div>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+              </svg>
+              {weather.water}
+            </div>
           </div>
         </div>
       </div>
