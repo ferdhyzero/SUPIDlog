@@ -17,6 +17,14 @@ if (!$name) {
 }
 
 try {
+    // If default lat/lng passed, auto-generate distinct coordinates based on spot count
+    if (abs($lat - (-5.1478)) < 0.0001 && abs($lng - 119.4154) < 0.0001) {
+        $count = (int)$pdo->query("SELECT COUNT(*) FROM spots")->fetchColumn();
+        $offset = ($count + 1) * 0.015;
+        $lat = -5.1478 - $offset;
+        $lng = 119.4154 + ($offset * 0.8);
+    }
+
     $stmt = $pdo->prepare("INSERT INTO spots (name, category, difficulty, water, lat, lng, stars, visited_count) VALUES (:name, :cat, :diff, :water, :lat, :lng, 5, 1)");
     $stmt->execute([
         'name' => $name,

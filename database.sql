@@ -88,6 +88,8 @@ CREATE TABLE `activities` (
   `max_speed_kmh` decimal(5,2) DEFAULT '0.00',
   `weather` varchar(100) DEFAULT 'Cerah 30°C',
   `water_condition` varchar(100) DEFAULT 'Flat Water',
+  `safety_score` int DEFAULT 100,
+  `safety_items_json` text DEFAULT NULL,
   `gps_coords` varchar(100) DEFAULT '',
   `route_json` longtext DEFAULT NULL,
   `shared_to_community` tinyint(1) DEFAULT 0,

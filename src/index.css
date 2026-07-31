@@ -195,7 +195,7 @@ p, span { line-height: 1.4; }
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  z-index: 9999;
   pointer-events: none;
   display: flex;
   justify-content: center;
@@ -278,18 +278,22 @@ p, span { line-height: 1.4; }
 /* Active Workout Overlay */
 .active-sports-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   max-width: var(--app-max-width);
   margin: 0 auto;
   background: #0f172a;
   color: white;
-  z-index: 100;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px 16px 20px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .metric-jumbo {
@@ -300,7 +304,7 @@ p, span { line-height: 1.4; }
 }
 
 /* Modals */
-.stamp-modal-backdrop, .modal-sheet {
+.stamp-modal-backdrop, .modal-sheet, .modal-backdrop {
   position: fixed;
   inset: 0;
   width: 100%;
@@ -316,7 +320,7 @@ p, span { line-height: 1.4; }
   box-sizing: border-box;
 }
 
-.stamp-badge-container, .modal-sheet-content {
+.stamp-badge-container, .modal-sheet-content, .modal-card {
   background: white;
   border-radius: var(--radius-lg);
   padding: 16px;

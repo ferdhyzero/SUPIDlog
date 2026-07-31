@@ -72,6 +72,36 @@ export default function StatisticsScreen({ userId = 2 }) {
         </div>
       </div>
 
+      {/* Strava-Style Personal Records (PRs) Cards */}
+      <div className="card-clean" style={{ background: '#F8FAFC', border: '1.5px solid #00B4D8' }}>
+        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          Personal Records (PRs) SUP Indonesia
+        </h3>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+          <div style={{ background: 'white', padding: '12px 6px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 700, display: 'block' }}>Distance PR</span>
+            <strong style={{ fontSize: '1.15rem', color: '#0284c7', fontWeight: 800 }}>24.5 km</strong>
+            <span style={{ fontSize: '0.65rem', color: '#10B981', fontWeight: 700, display: 'block', marginTop: '2px' }}>🏆 Terjauh</span>
+          </div>
+
+          <div style={{ background: 'white', padding: '12px 6px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 700, display: 'block' }}>Best Pace</span>
+            <strong style={{ fontSize: '1.15rem', color: '#F59E0B', fontWeight: 800 }}>08:45 /km</strong>
+            <span style={{ fontSize: '0.65rem', color: '#10B981', fontWeight: 700, display: 'block', marginTop: '2px' }}>⚡ Tercepat</span>
+          </div>
+
+          <div style={{ background: 'white', padding: '12px 6px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 700, display: 'block' }}>Max Speed</span>
+            <strong style={{ fontSize: '1.15rem', color: '#00B4D8', fontWeight: 800 }}>9.6 km/h</strong>
+            <span style={{ fontSize: '0.65rem', color: '#10B981', fontWeight: 700, display: 'block', marginTop: '2px' }}>🔥 Max Peak</span>
+          </div>
+        </div>
+      </div>
+
       {/* NATIONAL SUP LEADERBOARD TABLE */}
       <div className="card-clean" style={{ border: '2px solid var(--ocean-blue)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>

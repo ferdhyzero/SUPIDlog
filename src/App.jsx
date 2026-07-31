@@ -100,16 +100,24 @@ export default function App() {
     setShowSafetyCheck(true);
   };
 
-  // Confirm Safety Check -> launches Active Workout Overlay
-  const handleConfirmSafetyStart = () => {
+  const [safetyCheckData, setSafetyCheckData] = useState(null);
+
+  // Confirm Safety Check -> launches Active Workout Overlay with Safety Audit Data
+  const handleConfirmSafetyStart = (items, score) => {
+    setSafetyCheckData({ items, score });
     setShowSafetyCheck(false);
     setIsActivePaddle(true);
   };
 
-  // Stop Workout -> launches Summary Modal
+  // Stop Workout -> launches Summary Modal with Safety Audit Record
   const handleStopWorkout = (sessionStats) => {
     setIsActivePaddle(false);
-    setWorkoutSession(sessionStats);
+    setWorkoutSession({
+      ...sessionStats,
+      safetyScore: safetyCheckData ? safetyCheckData.score : 100,
+      safetyItems: safetyCheckData ? safetyCheckData.items : null,
+      safetyItemsJson: safetyCheckData && safetyCheckData.items ? JSON.stringify(safetyCheckData.items) : null,
+    });
     setShowWorkoutSummary(true);
   };
 
@@ -167,19 +175,19 @@ export default function App() {
       {/* Main Glass Header */}
       <header className="header-glass" style={{ background: isSuperAdmin ? '#0f172a' : undefined }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          
+
           {/* Header Brand with Official PADDLE ID Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img 
-              src="/logo.png" 
-              alt="Paddle ID Logo" 
-              style={{ 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '8px', 
+            <img
+              src="/logo.png"
+              alt="Paddle ID Logo"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
                 border: '1.5px solid #ffffff',
                 objectFit: 'cover'
-              }} 
+              }}
             />
             <div>
               <h1 style={{ fontSize: '0.98rem', fontWeight: 800, lineHeight: 1.1 }}>Stand Up PaddleLog</h1>
@@ -189,7 +197,7 @@ export default function App() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {isSuperAdmin && (
-              <button 
+              <button
                 onClick={() => setActiveTab('admin')}
                 style={{
                   background: '#f59e0b',
@@ -202,12 +210,12 @@ export default function App() {
                   cursor: 'pointer'
                 }}
               >
-                👑 Admin
+                Admin
               </button>
             )}
 
             {currentUser ? (
-              <button 
+              <button
                 onClick={handleLogout}
                 style={{
                   background: 'rgba(255,255,255,0.2)',
@@ -228,7 +236,7 @@ export default function App() {
                 <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>🚪</span>
               </button>
             ) : (
-              <button 
+              <button
                 onClick={() => setShowLoginModal(true)}
                 style={{
                   background: 'rgba(255,255,255,0.2)',
@@ -251,16 +259,17 @@ export default function App() {
       {/* Main View Switcher */}
       <main style={{ flex: 1, width: '100%' }}>
         {activeTab === 'home' && (
-          <HomeScreen 
+          <HomeScreen
             userId={userId}
             userName={userName}
             refreshTrigger={refreshTrigger}
             onRequireLogin={() => setShowLoginModal(true)}
+            onOpenAllActivities={() => setActiveTab('passport')}
           />
         )}
 
         {activeTab === 'explore' && (
-          <ExploreScreen 
+          <ExploreScreen
             userId={userId}
             onSelectSpot={(spot) => setSelectedSpot(spot)}
             onRequireLogin={() => setShowLoginModal(true)}
@@ -268,7 +277,7 @@ export default function App() {
         )}
 
         {activeTab === 'passport' && (
-          <PassportScreen 
+          <PassportScreen
             userId={userId}
             refreshTrigger={refreshTrigger}
             onRequireLogin={() => setShowLoginModal(true)}
@@ -280,7 +289,7 @@ export default function App() {
         )}
 
         {activeTab === 'profile' && (
-          <ProfileScreen 
+          <ProfileScreen
             currentUser={currentUser}
             onOpenLogin={(isReg) => handleOpenLogin(isReg)}
             onLogout={handleLogout}
@@ -297,9 +306,9 @@ export default function App() {
         )}
 
         {activeTab === 'community' && (
-          <CommunityScreen 
-            userId={userId || 2} 
-            userName={userName} 
+          <CommunityScreen
+            userId={userId || 2}
+            userName={userName}
             onRequireLogin={() => setShowLoginModal(true)}
           />
         )}
@@ -310,29 +319,29 @@ export default function App() {
       </main>
 
       {/* Floating Bottom Navigation */}
-      <Navigation 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+      <Navigation
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         onStartPaddleClick={handleStartPaddleClick}
       />
 
       {/* Modals and Overlays */}
       {showSafetyCheck && (
-        <SafetyCheckModal 
+        <SafetyCheckModal
           onClose={() => setShowSafetyCheck(false)}
           onConfirmStart={handleConfirmSafetyStart}
         />
       )}
 
       {isActivePaddle && (
-        <ActivePaddleScreen 
+        <ActivePaddleScreen
           onStop={handleStopWorkout}
           onStopWorkout={handleStopWorkout}
         />
       )}
 
       {showWorkoutSummary && workoutSession && (
-        <WorkoutSummaryModal 
+        <WorkoutSummaryModal
           session={workoutSession}
           sessionData={workoutSession}
           onClose={() => setShowWorkoutSummary(false)}
@@ -354,8 +363,8 @@ export default function App() {
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
               Selamat! Anda telah resmi mendayung dan membuka stempel paspor untuk lokasi <strong>{unlockedSpotName}</strong>.
             </p>
-            <button 
-              className="btn-cta-jumbo" 
+            <button
+              className="btn-cta-jumbo"
               onClick={() => {
                 setShowStampUnlocked(false);
                 setActiveTab('passport');
@@ -367,16 +376,11 @@ export default function App() {
         </div>
       )}
 
-      {selectedSpot && (
-        <SpotDetailModal 
-          spot={selectedSpot} 
-          onClose={() => setSelectedSpot(null)} 
-        />
-      )}
+
 
       {/* Login / Register Modal */}
       {showLoginModal && !currentUser && (
-        <LoginModal 
+        <LoginModal
           initialRegister={loginModalInitialRegister}
           onClose={() => setShowLoginModal(false)}
           onLoginSuccess={handleLoginSuccess}

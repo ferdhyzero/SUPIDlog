@@ -17,6 +17,9 @@ $routeJson = is_array($data['route'] ?? null) ? json_encode($data['route']) : (s
 $sharedToCommunity = (int)($data['shared_to_community'] ?? 0);
 $localTips = trim($data['local_tips'] ?? '');
 
+$safetyScore = (int)($data['safetyScore'] ?? 100);
+$safetyItemsJson = is_array($data['safetyItems'] ?? null) ? json_encode($data['safetyItems']) : (string)($data['safetyItemsJson'] ?? '');
+
 try {
     // Migration guards
     try {
@@ -34,9 +37,15 @@ try {
     try {
         $pdo->exec("ALTER TABLE community_posts ADD COLUMN local_tips TEXT DEFAULT NULL AFTER image_url");
     } catch (Exception $ex5) {}
+    try {
+        $pdo->exec("ALTER TABLE activities ADD COLUMN safety_score INT DEFAULT 100 AFTER water_condition");
+    } catch (Exception $ex6) {}
+    try {
+        $pdo->exec("ALTER TABLE activities ADD COLUMN safety_items_json TEXT DEFAULT NULL AFTER safety_score");
+    } catch (Exception $ex7) {}
 
     // 1. Insert into activities table
-    $stmt = $pdo->prepare("INSERT INTO activities (user_id, spot_name, distance_km, duration_formatted, calories, avg_speed, max_speed_kmh, weather, water_condition, route_json, shared_to_community, local_tips) VALUES (:uid, :spot, :dist, :dur, :cal, :spd, :mspd, :wea, :wat, :rjson, :share, :tips)");
+    $stmt = $pdo->prepare("INSERT INTO activities (user_id, spot_name, distance_km, duration_formatted, calories, avg_speed, max_speed_kmh, weather, water_condition, safety_score, safety_items_json, route_json, shared_to_community, local_tips) VALUES (:uid, :spot, :dist, :dur, :cal, :spd, :mspd, :wea, :wat, :sscore, :sjson, :rjson, :share, :tips)");
     $stmt->execute([
         'uid' => $userId,
         'spot' => $spotName,
@@ -47,15 +56,34 @@ try {
         'mspd' => $maxSpeed,
         'wea' => $weather,
         'wat' => $water,
+        'sscore' => $safetyScore,
+        'sjson' => $safetyItemsJson,
         'rjson' => $routeJson,
         'share' => $sharedToCommunity,
         'tips' => $localTips
     ]);
 
-    // 2. Unlock stamp in passport_stamps table
+    // 2. Unlock stamp in passport_stamps table & auto-register new spot if needed
     try {
-        $stmtStamp = $pdo->prepare("INSERT INTO passport_stamps (user_id, spot_name, unlocked) VALUES (:uid, :spot, 1)");
+        $pdo->exec("CREATE TABLE IF NOT EXISTS passport_stamps (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            spot_name VARCHAR(191) NOT NULL,
+            unlocked TINYINT(1) DEFAULT 1,
+            unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY user_spot (user_id, spot_name)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        $stmtStamp = $pdo->prepare("INSERT INTO passport_stamps (user_id, spot_name, unlocked) VALUES (:uid, :spot, 1) ON DUPLICATE KEY UPDATE unlocked_at = CURRENT_TIMESTAMP");
         $stmtStamp->execute(['uid' => $userId, 'spot' => $spotName]);
+
+        // Auto-register spot to master spots table if new
+        $stmtCheckMaster = $pdo->prepare("SELECT id FROM spots WHERE name = :name LIMIT 1");
+        $stmtCheckMaster->execute(['name' => $spotName]);
+        if (!$stmtCheckMaster->fetch()) {
+            $stmtAddSpot = $pdo->prepare("INSERT INTO spots (name, category, description) VALUES (:name, 'Coastal / SUP', 'Spot dayung baru yang dijelajahi pengguna')");
+            $stmtAddSpot->execute(['name' => $spotName]);
+        }
     } catch (Exception $exStamp) {}
 
     // 3. Update user total distance
