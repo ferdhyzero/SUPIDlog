@@ -148,10 +148,10 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
       >
         {/* Background Stand-Up Paddleboard Action Image */}
         <img 
-          src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800&auto=format&fit=crop" 
+          src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1000&auto=format&fit=crop" 
           alt="Stand Up Paddle Boarding"
           onError={(e) => {
-            e.target.src = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&auto=format&fit=crop';
+            e.target.src = 'https://images.unsplash.com/photo-1517649763962-0c623266010b?w=1000&auto=format&fit=crop';
           }}
           style={{
             position: 'absolute',
@@ -160,12 +160,13 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            opacity: 0.38,
+            objectPosition: 'center 35%',
+            opacity: 0.65,
             zIndex: 0,
             pointerEvents: 'none'
           }}
         />
-        {/* Ocean Gradient Overlay */}
+        {/* Transparent Dark Ocean Overlay */}
         <div 
           style={{
             position: 'absolute',
@@ -173,7 +174,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(180deg, rgba(2, 132, 199, 0.45) 0%, rgba(3, 105, 161, 0.85) 100%)',
+            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.30) 0%, rgba(15, 23, 42, 0.60) 100%)',
             zIndex: 1,
             pointerEvents: 'none'
           }}
