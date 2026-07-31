@@ -69,6 +69,23 @@ html, body {
   box-sizing: border-box;
 }
 
+/* 100% Full Mobile Screen Responsive Edge-to-Edge Fill on Mobile Phones */
+@media (max-width: 768px) {
+  #root {
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  .header-glass,
+  .bottom-nav,
+  .stamp-modal-backdrop,
+  .modal-sheet,
+  .modal-backdrop,
+  .active-sports-overlay {
+    max-width: 100% !important;
+  }
+}
+
 /* Typography Helpers - Ultra Clean & Proportioned */
 h1 { font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
 h2 { font-size: 1.15rem; font-weight: 700; line-height: 1.25; }
