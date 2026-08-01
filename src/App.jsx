@@ -252,45 +252,65 @@ export default function App() {
             {currentUser ? (
               <button
                 onClick={handleLogout}
+                title="Klik untuk Keluar Akun"
                 style={{
-                  background: 'rgba(7, 13, 27, 0.45)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.4)',
+                  background: 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1.5px solid rgba(255,255,255,0.35)',
                   color: 'white',
-                  padding: '4px 10px',
-                  borderRadius: '16px',
+                  padding: '5px 10px 5px 6px',
+                  borderRadius: '20px',
                   fontSize: '0.75rem',
                   fontWeight: 800,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.7)'
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  transition: 'all 0.18s ease'
                 }}
-                title="Klik untuk Keluar Akun"
               >
-                <span>👤 {currentUser.name}</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>🚪</span>
+                {/* User avatar circle */}
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #0284c7, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser.name.split(' ')[0]}</span>
+                {/* Logout icon */}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
               </button>
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
                 style={{
-                  background: 'rgba(7, 13, 27, 0.45)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.4)',
+                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  border: '1.5px solid rgba(255,255,255,0.25)',
                   color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '16px',
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
+                  padding: '6px 14px 6px 10px',
+                  borderRadius: '20px',
+                  fontSize: '0.78rem',
+                  fontWeight: 900,
                   cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.7)'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  boxShadow: '0 3px 10px rgba(2,132,199,0.45)',
+                  letterSpacing: '0.01em',
+                  transition: 'all 0.18s ease'
                 }}
               >
-                🔑 Login
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Login
               </button>
             )}
           </div>

@@ -513,15 +513,8 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
                 </button>
               </div>
 
-              {isGuest && (
-                <div style={{ background: 'rgba(255,255,255,0.16)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.4)', padding: '8px 12px', borderRadius: '12px', marginBottom: '12px', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Silakan login untuk menyimpan hasil sesi paddle.
-                  </span>
-                  <button onClick={onRequireLogin} style={{ background: '#ffffff', color: '#0284c7', border: 'none', padding: '5px 12px', borderRadius: '8px', fontWeight: 900, cursor: 'pointer', fontSize: '0.72rem' }}>Login</button>
-                </div>
-              )}
+
+
 
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 700 }}>
                 {[
