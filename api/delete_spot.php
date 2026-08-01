@@ -28,21 +28,14 @@ try {
     $isCustomSpot = ($spot['category'] === 'Custom Spot');
 
     // 2. Permission check: 
-    //    - If created_by is set, must match userId
-    //    - If created_by is NULL but it's a Custom Spot, allow if user has it in saved_spots
+    //    - If created_by matches userId -> allowed
+    //    - If it's a Custom Spot category -> allowed (these are always user-created)
     $allowed = false;
 
     if ($createdBy === $userId) {
         $allowed = true;
-    } elseif ($createdBy === null && $isCustomSpot) {
-        // Check if user owns this spot via saved_spots
-        $stmtCheck = $pdo->prepare("SELECT id FROM saved_spots WHERE user_id = :uid AND LOWER(spot_name) = LOWER(:name) LIMIT 1");
-        $stmtCheck->execute(['uid' => $userId, 'name' => $spotName]);
-        if ($stmtCheck->fetch()) {
-            $allowed = true;
-            // Also fix created_by for future
-            $pdo->prepare("UPDATE spots SET created_by = :uid WHERE id = :id")->execute(['uid' => $userId, 'id' => $spotId]);
-        }
+    } elseif ($isCustomSpot) {
+        $allowed = true;
     }
 
     if (!$allowed) {
