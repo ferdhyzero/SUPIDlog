@@ -136,7 +136,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
   };
 
   return (
-    <div style={{ width: '100%', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', padding: '12px 12px 24px 12px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
       {/* Profile Header with Real Stand-Up Paddleboard (SUP) Action Photo API */}
       <div 

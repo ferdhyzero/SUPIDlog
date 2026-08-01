@@ -51,7 +51,7 @@ export default function StatisticsScreen({ userId = 2 }) {
   }, [userId]);
 
   return (
-    <div style={{ width: '100%', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', padding: '12px 12px 24px 12px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
       
       {/* Header */}
       <div>

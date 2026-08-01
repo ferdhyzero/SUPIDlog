@@ -607,7 +607,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const paginatedSpots = filteredSpots.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div style={{ width: '100%', padding: '12px 10px 90px 10px', display: 'flex', flexDirection: 'column', gap: '10px', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', padding: '12px 12px 90px 12px', display: 'flex', flexDirection: 'column', gap: '10px', boxSizing: 'border-box' }}>
       
       {/* Header Bar */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

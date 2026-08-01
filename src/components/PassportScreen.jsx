@@ -43,7 +43,7 @@ export default function PassportScreen({ userId = null, onRequireLogin, onTestSt
   });
 
   return (
-    <div style={{ width: '100%', padding: '12px 14px 20px 14px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', padding: '12px 12px 24px 12px', display: 'flex', flexDirection: 'column', gap: '14px', boxSizing: 'border-box' }}>
       
       {/* Passport Hero Banner with User 2nd Stand-Up Paddleboard Action Photo */}
       <div 
