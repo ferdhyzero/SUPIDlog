@@ -390,8 +390,16 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
       }}>
         <div style={{ display: 'flex', gap: '4px', background: '#F1F5F9', borderRadius: '12px', padding: '3px' }}>
           {[
-            { key: 'feed', label: '🌊 Activity Feed' },
-            { key: 'dashboard', label: '📊 My Dashboard' }
+            {
+              key: 'feed',
+              icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>,
+              label: 'Activity Feed'
+            },
+            {
+              key: 'dashboard',
+              icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+              label: 'My Dashboard'
+            }
           ].map(tab => (
             <button
               key={tab.key}
@@ -405,9 +413,11 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
                 fontSize: '0.82rem',
                 cursor: 'pointer',
                 boxShadow: activeTab === tab.key ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
               }}
             >
+              {tab.icon}
               {tab.label}
             </button>
           ))}
@@ -455,8 +465,10 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
                   onComment={openCommentModal}
                 />
               ))}
-              <div style={{ textAlign: 'center', padding: '10px 0 4px', fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700 }}>
-                — {feedActivities.length} aktivitas terakhir —
+              <div style={{ textAlign: 'center', padding: '10px 0 4px', fontSize: '0.72rem', color: '#CBD5E1', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <div style={{ height: '1px', width: '40px', background: '#E2E8F0' }} />
+                {feedActivities.length} aktivitas terakhir
+                <div style={{ height: '1px', width: '40px', background: '#E2E8F0' }} />
               </div>
             </div>
           )}
@@ -656,14 +668,22 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
         <div onClick={() => setCommentActivity(null)} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '480px', background: 'white', borderRadius: '20px 20px 0 0', padding: '20px', maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -8px 30px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#0F172A' }}>💬 Komentar</h3>
-              <button onClick={() => setCommentActivity(null)} style={{ background: '#F1F5F9', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 800, color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+              <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Komentar
+              </h3>
+              <button onClick={() => setCommentActivity(null)} style={{ background: '#F1F5F9', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
               {comments.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#94A3B8', fontSize: '0.82rem', fontWeight: 600 }}>
-                  Jadilah yang pertama berkomentar! 🏄
+                <div style={{ textAlign: 'center', padding: '24px 20px', color: '#94A3B8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>Jadilah yang pertama berkomentar</span>
                 </div>
               ) : (
                 comments.map((c, i) => (
