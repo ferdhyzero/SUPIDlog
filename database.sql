@@ -207,6 +207,8 @@ CREATE TABLE `saved_spots` (
   `user_id` int NOT NULL,
   `spot_name` varchar(100) NOT NULL,
   `location_address` varchar(255) DEFAULT '',
+  `lat` decimal(10,7) DEFAULT NULL,
+  `lng` decimal(10,7) DEFAULT NULL,
   `planned_date` date NOT NULL,
   `notes` text,
   `is_completed` tinyint(1) DEFAULT 0,
