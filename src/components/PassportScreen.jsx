@@ -71,7 +71,7 @@ export default function PassportScreen({ userId = null, onRequireLogin, onTestSt
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 60%',
+            objectPosition: 'center 75%',
             opacity: 0.95,
             filter: 'brightness(1.05) contrast(1.05)',
             zIndex: 0,
