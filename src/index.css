@@ -138,14 +138,15 @@ p, span { line-height: 1.4; }
 
 /* Clean Stand-Up Paddleboard Ocean Header (Sticky Lock Top Bar Theme) */
 .header-glass {
-  width: 100%;
-  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   background: #0284c7;
   color: white;
   padding: 12px 14px;
   position: sticky !important;
   top: 0 !important;
-  z-index: 9999 !important;
+  z-index: 45 !important; /* Proper z-index for page header so splash & modals cover it 100% */
   box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;

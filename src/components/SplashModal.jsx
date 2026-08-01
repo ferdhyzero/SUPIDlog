@@ -3,14 +3,16 @@ import React from 'react';
 export default function SplashModal({ onClose }) {
   return (
     <div 
+      className="stamp-modal-backdrop"
       onClick={onClose}
       style={{
         position: 'fixed',
         inset: 0,
-        maxWidth: '480px',
+        width: '100%',
+        maxWidth: 'var(--app-max-width)',
         margin: '0 auto',
-        zIndex: 200,
-        background: 'linear-gradient(180deg, rgba(3,4,94,0.95) 0%, rgba(0,119,182,0.98) 100%)',
+        zIndex: 99999,
+        background: 'linear-gradient(180deg, rgba(3,4,94,0.98) 0%, rgba(0,119,182,0.99) 100%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

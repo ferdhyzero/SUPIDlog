@@ -172,8 +172,8 @@ export default function App() {
         <SplashModal onClose={() => setShowSplash(false)} />
       )}
 
-      {/* Main Glass Header (100% Sticky Lock at Top of Screen) */}
-      <header className="header-glass" style={{ position: 'sticky', top: 0, zIndex: 9999, overflow: 'hidden' }}>
+      {/* Main Glass Header (Sticky Ocean SUP Bar) */}
+      <header className="header-glass">
         {/* Background Real Stand-Up Paddleboard Action Photo */}
         <img 
           src="/header-sup-bg.webp" 
