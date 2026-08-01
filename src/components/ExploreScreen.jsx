@@ -715,15 +715,37 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               background: 'white',
               borderRadius: '14px',
               border: '1.5px solid #0284c7',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
               zIndex: 1000,
               maxHeight: '260px',
               overflowY: 'auto'
             }}
           >
-            <div style={{ padding: '6px 12px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ padding: '8px 12px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>REKOMENDASI LOKASI ({suggestionsList.length})</span>
-              <span>{isSearchingSuggestions ? 'Mencari...' : 'Pilih Lokasi'}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSuggestionsDropdown(false);
+                  setSuggestionsList([]);
+                }}
+                style={{
+                  background: '#EF4444',
+                  color: 'white',
+                  border: 'none',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}
+              >
+                <span>Tutup</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
 
             {suggestionsList.map((item, idx) => (
@@ -753,33 +775,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           </div>
         )}
       </div>
-
-      {/* Pin Action Banner for Custom Search Result */}
-      {searchQuery.trim().length >= 3 && (
-        <div 
-          onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
-          style={{
-            background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
-            color: 'white',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            display: 'flex',
-            justify: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-md)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <div>
-              <strong style={{ fontSize: '0.85rem', display: 'block' }}>Sematkan "{searchQuery}"</strong>
-              <span style={{ fontSize: '0.72rem', opacity: 0.9 }}>Simpan ke Rencana Kunjungan</span>
-            </div>
-          </div>
-          <span style={{ background: 'rgba(255,255,255,0.25)', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800 }}>SEMATKAN</span>
-        </div>
-      )}
 
       {/* Filter Horizontal Scroll Chips */}
       <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }}>
