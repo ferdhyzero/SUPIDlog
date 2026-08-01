@@ -290,23 +290,63 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     }).addTo(map);
   }, [leafletReady, mapType]);
 
-  // Reverse Geocoding Map Click Handler
+  // Smart Reverse Geocoding Map Click Handler (POI Name Priority -> Road/Village Fallback)
   const handleMapPointInteraction = async (lat, lng, actionType) => {
-    let placeName = `Titik (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+    let placeName = '';
+    let placeCategory = 'Pilihan Peta';
 
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      const data = await res.json();
-      if (data && data.display_name) {
-        placeName = data.display_name.split(',')[0].trim() || placeName;
+    // 1. Proximity check against local database spots (within ~500m / 0.005 degrees)
+    const nearbySpot = spots.find(s => {
+      if (!s.lat || !s.lng) return false;
+      const dLat = Math.abs(parseFloat(s.lat) - lat);
+      const dLng = Math.abs(parseFloat(s.lng) - lng);
+      return dLat < 0.005 && dLng < 0.005;
+    });
+
+    if (nearbySpot) {
+      placeName = nearbySpot.name;
+      placeCategory = nearbySpot.category || 'Spot SUP';
+    } else {
+      // 2. Fetch OpenStreetMap Reverse Geocoding with Address Details (zoom 18 for high POI resolution)
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        const data = await res.json();
+
+        if (data && data.address) {
+          const addr = data.address;
+          // Priority A: Point of Interest / Tourism / Natural feature / Resort / Camp name
+          const poiName = addr.tourism || addr.leisure || addr.amenity || addr.natural || addr.waterway || addr.beach || addr.attraction || addr.park || addr.camp_site || addr.hotel || addr.resort || addr.building;
+          
+          if (poiName) {
+            const subLoc = addr.village || addr.suburb || addr.city_district || addr.county || '';
+            placeName = subLoc ? `${poiName} (${subLoc})` : poiName;
+            placeCategory = 'POI Spot';
+          } else if (addr.road || addr.pedestrian) {
+            // Priority B: Street / Road Name
+            const roadName = addr.road || addr.pedestrian;
+            const subLoc = addr.village || addr.suburb || addr.city_district || addr.county || '';
+            placeName = subLoc ? `${roadName}, ${subLoc}` : roadName;
+            placeCategory = 'Jalan / Area';
+          } else if (addr.village || addr.suburb || addr.city || addr.county) {
+            // Priority C: Village / District / City Name
+            placeName = addr.village || addr.suburb || addr.city || addr.county;
+            placeCategory = 'Kawasan / Daerah';
+          } else if (data.display_name) {
+            placeName = data.display_name.split(',')[0].trim();
+          }
+        }
+      } catch (e) {}
+
+      if (!placeName) {
+        placeName = `Lokasi Peta (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
       }
-    } catch (e) {}
+    }
 
     const clickedLoc = {
       name: placeName,
       lat: lat,
       lng: lng,
-      category: 'Pilihan Peta'
+      category: placeCategory
     };
 
     // 1x Click: Set search bar text, active location, & trigger blue banner
