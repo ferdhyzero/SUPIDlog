@@ -9,6 +9,8 @@ $spotName = trim($data['spot_name'] ?? 'Pantai Losari');
 $locationAddress = trim($data['location_address'] ?? '');
 $plannedDate = trim($data['planned_date'] ?? date('Y-m-d', strtotime('+7 days')));
 $notes = trim($data['notes'] ?? 'Rencana Paddle Trip Custom');
+$lat = isset($data['lat']) ? (float)$data['lat'] : null;
+$lng = isset($data['lng']) ? (float)$data['lng'] : null;
 
 try {
     // 1. Ensure table structure exists
@@ -17,37 +19,62 @@ try {
         user_id INT NOT NULL,
         spot_name VARCHAR(150) NOT NULL,
         location_address VARCHAR(255) DEFAULT '',
+        lat DECIMAL(10, 7) DEFAULT NULL,
+        lng DECIMAL(10, 7) DEFAULT NULL,
         planned_date DATE NOT NULL,
         notes VARCHAR(255) DEFAULT '',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         UNIQUE KEY user_spot_plan (user_id, spot_name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-    // 2. Ensure location_address column exists if table was created previously without it
+    // 2. Ensure lat and lng columns exist if table was created previously without them
     try {
         $pdo->exec("ALTER TABLE saved_spots ADD COLUMN location_address VARCHAR(255) DEFAULT ''");
-    } catch (Exception $exColumn) {
-        // Column already exists, safe to continue
-    }
+    } catch (Exception $ex) {}
 
-    // 3. Insert or Update Planned Spot using VALUES() MySQL syntax to prevent PDO parameter count mismatch
-    $stmt = $pdo->prepare("INSERT INTO saved_spots (user_id, spot_name, location_address, planned_date, notes) 
-                           VALUES (:uid, :spot, :addr, :pdate, :notes) 
-                           ON DUPLICATE KEY UPDATE planned_date = VALUES(planned_date), location_address = VALUES(location_address), notes = VALUES(notes)");
+    try {
+        $pdo->exec("ALTER TABLE saved_spots ADD COLUMN lat DECIMAL(10, 7) DEFAULT NULL");
+    } catch (Exception $ex) {}
+
+    try {
+        $pdo->exec("ALTER TABLE saved_spots ADD COLUMN lng DECIMAL(10, 7) DEFAULT NULL");
+    } catch (Exception $ex) {}
+
+    // 3. Insert or Update Planned Spot with Lat/Lng
+    $stmt = $pdo->prepare("INSERT INTO saved_spots (user_id, spot_name, location_address, lat, lng, planned_date, notes) 
+                           VALUES (:uid, :spot, :addr, :lat, :lng, :pdate, :notes) 
+                           ON DUPLICATE KEY UPDATE 
+                             planned_date = VALUES(planned_date), 
+                             location_address = VALUES(location_address), 
+                             notes = VALUES(notes),
+                             lat = COALESCE(VALUES(lat), lat),
+                             lng = COALESCE(VALUES(lng), lng)");
     $stmt->execute([
         'uid' => $userId,
         'spot' => $spotName,
         'addr' => $locationAddress,
+        'lat' => $lat,
+        'lng' => $lng,
         'pdate' => $plannedDate,
         'notes' => $notes
     ]);
 
-    // 4. Ensure spot exists in master spots table
+    // 4. Ensure spot exists in master spots table with exact coordinates
     $stmtCheck = $pdo->prepare("SELECT id FROM spots WHERE LOWER(name) = LOWER(:spot) LIMIT 1");
     $stmtCheck->execute(['spot' => $spotName]);
-    if (!$stmtCheck->fetch()) {
-        $stmtInsertSpot = $pdo->prepare("INSERT INTO spots (name, category, stars, season, difficulty, water, visited_count) VALUES (:spot, 'Custom Spot', 5, 'All Year', 'Easy', 'Clear', 1)");
-        $stmtInsertSpot->execute(['spot' => $spotName]);
+    $existingSpot = $stmtCheck->fetch();
+
+    if (!$existingSpot) {
+        $stmtInsertSpot = $pdo->prepare("INSERT INTO spots (name, category, lat, lng, stars, season, difficulty, water, visited_count) VALUES (:spot, 'Custom Spot', :lat, :lng, 5, 'All Year', 'Easy', 'Clear', 1)");
+        $stmtInsertSpot->execute([
+            'spot' => $spotName,
+            'lat' => $lat || -5.147812,
+            'lng' => $lng || 119.415421
+        ]);
+    } else if ($lat && $lng) {
+        // Update lat/lng in spots if missing
+        $stmtUpdSpot = $pdo->prepare("UPDATE spots SET lat = :lat, lng = :lng WHERE id = :id AND (lat IS NULL OR lat = 0)");
+        $stmtUpdSpot->execute(['lat' => $lat, 'lng' => $lng, 'id' => $existingSpot['id']]);
     }
 
     echo json_encode([

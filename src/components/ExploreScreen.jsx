@@ -3,24 +3,22 @@ import SpotDetailModal from './SpotDetailModal';
 
 // High-Definition Stand-Up Paddleboard (SUP) & Beach Photography Pool
 const SUP_PHOTO_POOL = [
-  'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80', // SUP paddler in turquoise ocean
-  'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=600&q=80', // Sunset paddleboarding at beach
-  'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=600&q=80', // Clear water beach SUP launching
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80', // Tropical beach coast
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80', // Lake paddleboarding
-  'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80', // Surf & SUP ocean beach
-  'https://images.unsplash.com/photo-1516690561799-46d8f7489abf?auto=format&fit=crop&w=600&q=80', // Island reef paddleboarding
-  'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80', // River paddleboarding
-  'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80', // Sunset coastal water
-  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80'  // Open water adventure
+  'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1516690561799-46d8f7489abf?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80'
 ];
 
-// Dynamic Automatic SUP Photo Engine for Unlimited Spots
 export const getSpotPhoto = (spot) => {
   if (!spot) return SUP_PHOTO_POOL[0];
   if (spot.image_url) return spot.image_url;
 
-  // Deterministic Hash Algorithm for consistent unique photo per spot
   const str = `${spot.id || ''}_${spot.name || ''}`;
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -33,8 +31,8 @@ export const getSpotPhoto = (spot) => {
 export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLogin }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
-  const [viewMode, setViewMode] = useState('map'); // Default to map view
-  const [mapType, setMapType] = useState('satellite'); // 'satellite' (Google Hybrid) or 'roadmap' (Google Standard)
+  const [viewMode, setViewMode] = useState('map');
+  const [mapType, setMapType] = useState('satellite');
   const [savedPlans, setSavedPlans] = useState([]);
   const [userActivities, setUserActivities] = useState([]);
   const [selectedPlanSpot, setSelectedPlanSpot] = useState(null);
@@ -44,7 +42,15 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const [isSearchingGeocode, setIsSearchingGeocode] = useState(false);
   const [currentZoomLevel, setCurrentZoomLevel] = useState(7);
 
-  // Pagination state (5 items per page for optimal performance & lazy loading UX)
+  // Autocomplete Suggestions State
+  const [suggestionsList, setSuggestionsList] = useState([]);
+  const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
+  const [showSuggestionsDropdown, setShowSuggestionsDropdown] = useState(false);
+
+  // Double-Click / Race Condition Lock State
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
+
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -68,7 +74,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     return nextWeek.toISOString().split('T')[0];
   });
 
-  // Master spots database fetched 100% dynamically from MySQL DB with LocalStorage Offline PWA Fallback
   const [spots, setSpots] = useState(() => {
     const cached = localStorage.getItem('supid_spots_cache');
     if (cached) {
@@ -102,7 +107,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     }
   }, []);
 
-  // Fetch spots, saved plans, and user activity history from MySQL
+  // Fetch Master Spots and Saved Plans from MySQL
   useEffect(() => {
     async function loadData() {
       try {
@@ -112,9 +117,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           setSpots(dataSpots.spots);
           localStorage.setItem('supid_spots_cache', JSON.stringify(dataSpots.spots));
         }
-      } catch (err) {
-        console.log('Spots DB fetch error, using LocalStorage cache fallback:', err);
-      }
+      } catch (e) {}
 
       if (userId) {
         try {
@@ -123,92 +126,37 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           if (dataPlans.success) {
             setSavedPlans(dataPlans.savedSpots);
           }
-        } catch (err) {
-          console.log('Saved plans fallback:', err);
-        }
+        } catch (e) {}
 
         try {
-          const resAct = await fetch(`/api/get_activities.php?user_id=${userId}`);
+          const resAct = await fetch(`/api/get_user_analytics.php?user_id=${userId}&period=yearly`);
           const dataAct = await resAct.json();
           if (dataAct.success && dataAct.activities) {
             setUserActivities(dataAct.activities);
           }
-        } catch (err) {
-          console.log('Activities fallback:', err);
-        }
-      } else {
-        setSavedPlans([]);
-        setUserActivities([]);
+        } catch (e) {}
       }
     }
     loadData();
   }, [userId]);
 
-  // Unique Visit Badge Calculator & Distinct Color Palette
+  // Helper Badge Visit Count per spot
   const getVisitBadge = (spotName) => {
     if (!userActivities || userActivities.length === 0) return null;
-
-    const matchedActivities = userActivities.filter(
+    const matchCount = userActivities.filter(
       (act) => act.spot_name && act.spot_name.toLowerCase().trim() === spotName.toLowerCase().trim()
-    );
-    const count = matchedActivities.length;
+    ).length;
 
-    if (count === 0) return null;
-
-    if (count >= 5) {
-      return {
-        iconType: 'crown',
-        text: `${count}x Sesi`,
-        bg: '#7C3AED',
-        color: '#FFFFFF',
-        pinColor: '#7C3AED',
-        count: count
-      };
-    } else if (count >= 2) {
-      return {
-        iconType: 'star',
-        text: `${count}x Sesi`,
-        bg: '#F59E0B',
-        color: '#FFFFFF',
-        pinColor: '#F59E0B',
-        count: count
-      };
+    if (matchCount <= 0) return null;
+    if (matchCount >= 5) {
+      return { type: 'crown', label: `${matchCount}x (Home Spot)`, bg: '#F59E0B', color: '#FFFFFF', pinColor: '#F59E0B', count: matchCount };
+    } else if (matchCount >= 2) {
+      return { type: 'star', label: `${matchCount}x (Favorit)`, bg: '#0284C7', color: '#FFFFFF', pinColor: '#0284C7', count: matchCount };
     } else {
-      return {
-        iconType: 'check',
-        text: `1x Sesi`,
-        bg: '#10B981',
-        color: '#FFFFFF',
-        pinColor: '#10B981',
-        count: count
-      };
+      return { type: 'check', label: `1x Selesai`, bg: '#10B981', color: '#FFFFFF', pinColor: '#10B981', count: matchCount };
     }
   };
 
-  // Helper renderer for SVG Visit Icon
-  const renderVisitIcon = (type) => {
-    if (type === 'crown') {
-      return (
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/>
-        </svg>
-      );
-    }
-    if (type === 'star') {
-      return (
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      );
-    }
-    return (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-    );
-  };
-
-  // GPS Polyline Sanitization & Smooth Route Rendering Function
   const renderPastRoutePolyline = (spot) => {
     if (!leafletMapInstance.current || !window.L || !spot) return;
     const map = leafletMapInstance.current;
@@ -221,7 +169,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
     if (!userActivities || userActivities.length === 0) return;
 
-    // Find matched activity for this spot
     const matchedAct = userActivities.find(
       (act) => act.spot_name && act.spot_name.toLowerCase().trim() === spot.name.toLowerCase().trim()
     );
@@ -232,7 +179,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       let rawRoute = typeof matchedAct.route_json === 'string' ? JSON.parse(matchedAct.route_json) : matchedAct.route_json;
       if (!Array.isArray(rawRoute) || rawRoute.length < 2) return;
 
-      // 1. Sanitize GPS points (Filter out 0,0 & extreme GPS noise jumps)
       const cleanCoords = [];
       let prevPt = null;
 
@@ -247,13 +193,12 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         }
 
         if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) return;
-        if (lat < -11 || lat > 6 || lng < 95 || lng > 141) return; // Must be inside Indonesia bounds
+        if (lat < -11 || lat > 6 || lng < 95 || lng > 141) return;
 
-        // Filter out extreme jumps (> 0.05 deg jump in micro-step)
         if (prevPt) {
           const dLat = Math.abs(lat - prevPt[0]);
           const dLng = Math.abs(lng - prevPt[1]);
-          if (dLat > 0.05 || dLng > 0.05) return; // Anomaly jump filter
+          if (dLat > 0.05 || dLng > 0.05) return;
         }
 
         cleanCoords.push([lat, lng]);
@@ -261,41 +206,16 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       });
 
       if (cleanCoords.length >= 2) {
-        // Render Smooth Glowing Neon Cyan Leaflet Polyline
         const polyline = window.L.polyline(cleanCoords, {
-          color: '#00B4D8',
-          weight: 4.5,
+          color: '#00F2FE',
+          weight: 4,
           opacity: 0.9,
-          lineCap: 'round',
-          lineJoin: 'round'
-        }).addTo(polyGroup);
-
-        // Add Start (Green) and Finish (Red) pin indicators
-        const startPt = cleanCoords[0];
-        const finishPt = cleanCoords[cleanCoords.length - 1];
-
-        const startIcon = window.L.divIcon({
-          html: `<div style="background:#10B981; color:white; padding:2px 6px; borderRadius:4px; font-size:10px; font-weight:800; border:1px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.4);">START</div>`,
-          className: '',
-          iconSize: [42, 20],
-          iconAnchor: [21, 10]
+          dashArray: '6, 8',
+          lineCap: 'round'
         });
-        const finishIcon = window.L.divIcon({
-          html: `<div style="background:#EF4444; color:white; padding:2px 6px; borderRadius:4px; font-size:10px; font-weight:800; border:1px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.4);">FINISH</div>`,
-          className: '',
-          iconSize: [44, 20],
-          iconAnchor: [22, 10]
-        });
-
-        window.L.marker(startPt, { icon: startIcon }).addTo(polyGroup);
-        window.L.marker(finishPt, { icon: finishIcon }).addTo(polyGroup);
-
-        // Fit map bounds to show complete track
-        map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+        polyGroup.addLayer(polyline);
       }
-    } catch (err) {
-      console.log('GPS polyline render error:', err);
-    }
+    } catch (err) {}
   };
 
   const filters = ['All', 'Rencana Trip', 'Pernah Dayung', 'Flat Water', 'River', 'Ocean', 'Lake', 'Race', 'Surf', 'Camping'];
@@ -340,7 +260,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
     const map = leafletMapInstance.current;
 
-    // Switch Tile Layer between Google Satellite & Roadmap
     map.eachLayer((layer) => {
       if (layer instanceof window.L.TileLayer) {
         map.removeLayer(layer);
@@ -357,7 +276,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     }).addTo(map);
   }, [leafletReady, mapType]);
 
-  // FORCE MAP RESIZE INVALIDATION WHEN SWITCHING BACK TO MAP VIEW OR SELECTING SPOT FROM LIST
   useEffect(() => {
     if (viewMode === 'map' && leafletMapInstance.current) {
       const timer = setTimeout(() => {
@@ -367,7 +285,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     }
   }, [viewMode, activeMapLocation]);
 
-  // RENDER MARKERS DYNAMICALLY WITHOUT OVERRIDING USER'S MANUAL ZOOM/PAN
+  // RENDER MARKERS DYNAMICALLY WITH STRIKING CRIMSON RED COLOR (#EF4444)
   useEffect(() => {
     if (!leafletReady || !window.L || !markersGroupInstance.current) return;
 
@@ -379,7 +297,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       const badge = getVisitBadge(spot.name);
       const isSelected = activeMapLocation && activeMapLocation.name === spot.name;
-      // Default to BRIGHT STRIKING RED (#EF4444) so pins pop out prominently against satellite ocean water
       const pinColor = isSelected ? '#F59E0B' : (badge ? badge.pinColor : '#EF4444');
       const strokeColor = isSelected ? '#FFFFFF' : '#B91C1C';
 
@@ -389,7 +306,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       let anchorX = 16;
       let anchorY = 42;
 
-      // 1. ZOOM OUT VIEW (Zoom <= 8): Render compact micro-pin dots in striking red
       if (currentZoomLevel <= 8) {
         iconWidth = 20;
         iconHeight = 20;
@@ -400,9 +316,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             <div style="width:16px; height:16px; border-radius:50%; background:#EF4444; border:2.5px solid #FFFFFF; box-shadow:0 3px 8px rgba(0,0,0,0.7); transform:${isSelected ? 'scale(1.5)' : 'scale(1)'}; transition:all 0.2s ease;"></div>
           </div>
         `;
-      }
-      // 2. MEDIUM ZOOM VIEW (Zoom 9 - 11): Render medium striking red pins with gold center
-      else if (currentZoomLevel <= 11) {
+      } else if (currentZoomLevel <= 11) {
         iconWidth = 26;
         iconHeight = 34;
         anchorX = 13;
@@ -418,9 +332,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             </div>
           </div>
         `;
-      }
-      // 3. CLOSE-UP ZOOM VIEW (Zoom >= 12): Render full-size striking red pins with gold SUP center core
-      else {
+      } else {
         iconWidth = 36;
         iconHeight = 48;
         anchorX = 18;
@@ -452,8 +364,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             e.originalEvent.stopPropagation();
           }
 
-          // 1st click focuses map location & draws GPS route so user can explore surrounding area.
-          // 2nd click opens SpotDetailModal.
           if (activeMapLocation && activeMapLocation.name === spot.name) {
             setSelectedSpotForModal(spot);
           } else {
@@ -466,38 +376,111 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     });
   }, [leafletReady, filteredSpots, activeMapLocation, currentZoomLevel]);
 
-  // PAN/FLY TO SELECTED LOCATION ONCE WITHOUT LOCKING ZOOM OUT
+  // PAN/FLY TO SELECTED LOCATION WITH PRECISE COORDINATES
   useEffect(() => {
     if (!leafletMapInstance.current || !activeMapLocation || !activeMapLocation.lat || !activeMapLocation.lng) return;
     const map = leafletMapInstance.current;
     
-    // Smoothly fly to the location once, using comfortable zoom (13) or current zoom if already zoomed in
     const targetZoom = Math.max(map.getZoom(), 13);
     map.flyTo([activeMapLocation.lat, activeMapLocation.lng], targetZoom, { duration: 1.2 });
 
-    // Also attempt rendering past GPS route line if available
     renderPastRoutePolyline(activeMapLocation);
 
-    // Invalidate size to guarantee crisp tile render
     setTimeout(() => {
       map.invalidateSize();
     }, 100);
   }, [activeMapLocation]);
 
-  // REAL-TIME SEARCH BOX ADDRESS GEOCODING & MAP DIRECTING
+  // LIVE AUTOCOMPLETE SUGGESTIONS ENGINE (DB Spots + OpenStreetMap Nominatim Geocoding)
+  useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSuggestionsList([]);
+      setShowSuggestionsDropdown(false);
+      return;
+    }
+
+    const q = searchQuery.trim().toLowerCase();
+
+    // 1. Instant local DB spots filtering
+    const localMatches = spots.filter(s => 
+      s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q))
+    ).map(s => ({
+      name: s.name,
+      category: s.category || 'Spot SUP',
+      lat: parseFloat(s.lat),
+      lng: parseFloat(s.lng),
+      source: 'database'
+    }));
+
+    setSuggestionsList(localMatches.slice(0, 4));
+    setShowSuggestionsDropdown(true);
+
+    // 2. Fetch OpenStreetMap / Nominatim Geocoding API on 300ms debounce
+    const timer = setTimeout(async () => {
+      setIsSearchingSuggestions(true);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ' Indonesia')}&limit=5`);
+        const geocodeData = await res.json();
+        if (geocodeData && geocodeData.length > 0) {
+          const geoMatches = geocodeData.map(g => ({
+            name: g.display_name.split(',')[0],
+            address: g.display_name,
+            lat: parseFloat(g.lat),
+            lng: parseFloat(g.lon),
+            category: g.type ? g.type.toUpperCase() : 'LOKASI MAPS',
+            source: 'nominatim'
+          }));
+
+          // Merge without duplicate names
+          const combined = [...localMatches];
+          geoMatches.forEach(gItem => {
+            if (!combined.some(c => c.name.toLowerCase() === gItem.name.toLowerCase())) {
+              combined.push(gItem);
+            }
+          });
+
+          setSuggestionsList(combined.slice(0, 6));
+        }
+      } catch (err) {
+      } finally {
+        setIsSearchingSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, spots]);
+
+  // Handle selecting a suggestion from autocomplete dropdown
+  const handleSelectSuggestion = (item) => {
+    setSearchQuery(item.name);
+    setShowSuggestionsDropdown(false);
+    
+    const locObj = {
+      name: item.name,
+      lat: item.lat,
+      lng: item.lng,
+      category: item.category || 'Custom Spot'
+    };
+
+    setActiveMapLocation(locObj);
+    setSelectedPlanSpot(locObj);
+    setViewMode('map');
+  };
+
+  // Perform Address Search Submit
   const handlePerformAddressSearch = async (queryText) => {
     if (!queryText || queryText.trim().length < 2) return;
     const cleanQuery = queryText.trim();
+    setShowSuggestionsDropdown(false);
 
-    // 1. Check if spot exists in MySQL DB spots list
     const matchedSpot = spots.find(s => s.name.toLowerCase().includes(cleanQuery.toLowerCase()));
     if (matchedSpot && matchedSpot.lat && matchedSpot.lng) {
       setActiveMapLocation(matchedSpot);
+      setSelectedPlanSpot(matchedSpot);
       setViewMode('map');
       return;
     }
 
-    // 2. Perform Real-time Geocoding Search via OpenStreetMap / Google Place Nominatim
     setIsSearchingGeocode(true);
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery + ' Indonesia')}`);
@@ -515,64 +498,49 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         };
 
         setActiveMapLocation(searchedLoc);
+        setSelectedPlanSpot(searchedLoc);
         setViewMode('map');
       } else {
-        alert(`Lokasi '${cleanQuery}' tidak ditemukan. Coba masukkan nama pantai atau kota yang lebih spesifik.`);
+        alert(`Lokasi '${cleanQuery}' tidak ditemukan.`);
       }
     } catch (err) {
-      console.log('Geocode error:', err);
     } finally {
       setIsSearchingGeocode(false);
     }
   };
 
-  // Debounce search query to trigger address lookup
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (searchQuery.trim().length >= 3) {
-        handlePerformAddressSearch(searchQuery);
-      }
-    }, 700);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
-
-  // Reset pagination to page 1 whenever filters or search query change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, activeFilter]);
-
-  // Handle Unpin / Delete Saved Plan
   const handleUnpinPlan = async (planId, spotName) => {
     if (!confirm(`Apakah Anda yakin ingin melepaskan sematan lokasi '${spotName}'?`)) return;
 
     try {
-      const res = await fetch('/api/delete_planned_spot.php', {
+      await fetch('/api/delete_planned_spot.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: planId, user_id: userId })
       });
-      const data = await res.json();
       setSavedPlans(savedPlans.filter(p => p.id !== planId));
     } catch (e) {
       setSavedPlans(savedPlans.filter(p => p.id !== planId));
     }
   };
 
-  // Check login before pinning custom plan
   const handleInitiatePin = (spot) => {
     if (!userId) {
-      alert('Mode Guest: Silakan Login terlebih dahulu untuk menyematkan lokasi & target tanggal ke database!');
+      alert('Mode Guest: Silakan Login terlebih dahulu untuk menyematkan lokasi!');
       if (onRequireLogin) onRequireLogin();
       return;
     }
     setSelectedPlanSpot(spot);
   };
 
-  // Save custom or standard plan date to MySQL
+  // SAVE PLANNED SPOT WITH HIGH-PRECISION LAT/LNG AND DOUBLE-CLICK LOCK
   const handleSavePlanDate = async () => {
-    if (!selectedPlanSpot || !userId) return;
+    if (!selectedPlanSpot || !userId || isSavingPlan) return;
 
+    setIsSavingPlan(true);
     const spotNameToSave = typeof selectedPlanSpot === 'string' ? selectedPlanSpot : selectedPlanSpot.name;
+    const spotLat = typeof selectedPlanSpot === 'object' ? selectedPlanSpot.lat : (activeMapLocation ? activeMapLocation.lat : null);
+    const spotLng = typeof selectedPlanSpot === 'object' ? selectedPlanSpot.lng : (activeMapLocation ? activeMapLocation.lng : null);
 
     try {
       const res = await fetch('/api/save_planned_spot.php', {
@@ -581,31 +549,62 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         body: JSON.stringify({
           user_id: userId,
           spot_name: spotNameToSave,
-          location_address: searchQuery ? `Hasil Pencarian: ${searchQuery}` : '',
+          location_address: searchQuery ? `Pencarian: ${searchQuery}` : '',
+          lat: spotLat,
+          lng: spotLng,
           planned_date: targetDate,
-          notes: `Rencana paddle trip ke ${spotNameToSave}`
+          notes: `Rencana trip ke ${spotNameToSave}`
         })
       });
       const data = await res.json();
       alert(data.message || `Lokasi '${spotNameToSave}' berhasil disematkan!`);
 
-      // Refetch saved plans from MySQL
       const resPlans = await fetch(`/api/get_saved_spots.php?user_id=${userId}`);
       const dataPlans = await resPlans.json();
       if (dataPlans.success) {
         setSavedPlans(dataPlans.savedSpots);
       }
+      setSelectedPlanSpot(null);
     } catch (e) {
       alert(`Lokasi '${spotNameToSave}' tersimpan!`);
-    } finally {
       setSelectedPlanSpot(null);
+    } finally {
+      setIsSavingPlan(false);
     }
   };
 
+  const handleCreateCustomSpot = async (e) => {
+    e.preventDefault();
+    if (!newSpotName.trim()) return;
 
+    try {
+      const res = await fetch('/api/create_spot.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSpotName,
+          category: newSpotCategory,
+          difficulty: newSpotDifficulty,
+          lat: newSpotLat,
+          lng: newSpotLng
+        })
+      });
+      const data = await res.json();
+      alert(data.message || 'Spot baru berhasil ditambahkan!');
+      setShowAddSpotModal(false);
+      setNewSpotName('');
 
-  // Calculate pagination bounds
-  const totalPages = Math.max(1, Math.ceil(filteredSpots.length / itemsPerPage));
+      const resSpots = await fetch('/api/get_spots.php');
+      const dataSpots = await resSpots.json();
+      if (dataSpots.success) {
+        setSpots(dataSpots.spots);
+      }
+    } catch (err) {
+      setShowAddSpotModal(false);
+    }
+  };
+
+  const totalPages = Math.ceil(filteredSpots.length / itemsPerPage) || 1;
   const paginatedSpots = filteredSpots.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
@@ -622,153 +621,147 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               </svg>
               Explore Spots
             </h2>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Peta Google Satellite & Destinasi ({spots.length} Spot Terdaftar)</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Peta Google Satellite ({spots.length} Spot Terdaftar)</p>
           </div>
 
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
             <button
               onClick={() => setShowAddSpotModal(true)}
-              style={{
-                padding: '5px 9px',
-                borderRadius: '8px',
-                border: 'none',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                background: '#0284c7',
-                color: 'white',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
+              style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Baru
             </button>
 
-            {/* Google Satellite vs Road Map Switcher */}
             <button
               onClick={() => setMapType(mapType === 'satellite' ? 'roadmap' : 'satellite')}
-              style={{
-                padding: '5px 9px',
-                borderRadius: '8px',
-                border: '1px solid #CBD5E1',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                background: mapType === 'satellite' ? '#0f172a' : '#f8fafc',
-                color: mapType === 'satellite' ? '#F59E0B' : '#0f172a',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-              title="Ubah Mode Tampilan Google Maps Satelit / Standard"
+              style={{ padding: '5px 9px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.72rem', fontWeight: 800, background: mapType === 'satellite' ? '#0f172a' : '#f8fafc', color: mapType === 'satellite' ? '#F59E0B' : '#0f172a', cursor: 'pointer' }}
             >
               {mapType === 'satellite' ? 'Satelit' : 'Standard'}
             </button>
 
-            {/* View Switcher: Maps vs List */}
             <div style={{ display: 'flex', background: '#f1f5f9', padding: '2px', borderRadius: '8px' }}>
-              <button 
-                onClick={() => setViewMode('map')}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  background: viewMode === 'map' ? '#0284c7' : 'transparent',
-                  color: viewMode === 'map' ? 'white' : 'var(--text-muted)',
-                  cursor: 'pointer'
-                }}
-              >
-                Maps
-              </button>
-
-              <button 
-                onClick={() => setViewMode('list')}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  background: viewMode === 'list' ? 'white' : 'transparent',
-                  color: viewMode === 'list' ? '#0284c7' : 'var(--text-muted)',
-                  cursor: 'pointer'
-                }}
-              >
-                List
-              </button>
+              <button onClick={() => setViewMode('map')} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: viewMode === 'map' ? '#0284c7' : 'transparent', color: viewMode === 'map' ? 'white' : 'var(--text-muted)', cursor: 'pointer' }}>Maps</button>
+              <button onClick={() => setViewMode('list')} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: viewMode === 'list' ? 'white' : 'transparent', color: viewMode === 'list' ? '#0284c7' : 'var(--text-muted)', cursor: 'pointer' }}>List</button>
             </div>
           </div>
         </div>
       </div>
 
-
-
-      {/* REAL-TIME ADDRESS SEARCH BOX WITH DIRECT MAP GEOCODING NAVIGATION */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (searchQuery.trim()) {
-            handlePerformAddressSearch(searchQuery);
-          }
-        }}
-        style={{ position: 'relative' }}
-      >
-        <input 
-          type="text" 
-          placeholder="Cari alamat / pantai (misal: Pantai Kuta, Sanur, Akkarena)..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px 42px 10px 38px',
-            borderRadius: '14px',
-            border: '2px solid var(--ocean-blue)',
-            fontSize: '0.85rem',
-            background: 'white',
-            boxShadow: 'var(--shadow-sm)',
-            fontFamily: 'inherit'
+      {/* REAL-TIME ADDRESS SEARCH BOX WITH POWER AUTOCOMPLETE SUGGESTIONS & ICON-ONLY SUBMIT BUTTON */}
+      <div style={{ position: 'relative' }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (searchQuery.trim()) {
+              handlePerformAddressSearch(searchQuery);
+            }
           }}
-        />
-        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </span>
-
-        <button
-          type="submit"
-          disabled={isSearchingGeocode}
-          style={{
-            position: 'absolute',
-            right: '6px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: '#0284c7',
-            color: 'white',
-            border: 'none',
-            padding: '5px 10px',
-            borderRadius: '8px',
-            fontSize: '0.72rem',
-            fontWeight: 800,
-            cursor: 'pointer'
-          }}
+          style={{ position: 'relative' }}
         >
-          {isSearchingGeocode ? 'Cari...' : 'Ke Lokasi ➔'}
-        </button>
-      </form>
+          <input 
+            type="text" 
+            placeholder="Cari pantai, danau, sungai, atau alamat..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => { if (suggestionsList.length > 0) setShowSuggestionsDropdown(true); }}
+            style={{
+              width: '100%',
+              padding: '10px 42px 10px 38px',
+              borderRadius: '14px',
+              border: '2px solid var(--ocean-blue)',
+              fontSize: '0.85rem',
+              background: 'white',
+              boxShadow: 'var(--shadow-sm)',
+              fontFamily: 'inherit'
+            }}
+          />
+          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
 
-      {/* Custom Pin Action Banner for Custom Search Result */}
+          {/* ICON-ONLY SEARCH BUTTON (NO TEXT) */}
+          <button
+            type="submit"
+            disabled={isSearchingGeocode}
+            style={{
+              position: 'absolute',
+              right: '6px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: '#0284c7',
+              color: 'white',
+              border: 'none',
+              width: '32px',
+              height: '32px',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0
+            }}
+            title="Cari Lokasi di Peta"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </form>
+
+        {/* POWER AUTOCOMPLETE DROPDOWN SUGGESTIONS CARD */}
+        {showSuggestionsDropdown && suggestionsList.length > 0 && (
+          <div 
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              marginTop: '4px',
+              background: 'white',
+              borderRadius: '14px',
+              border: '1.5px solid #0284c7',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+              zIndex: 1000,
+              maxHeight: '260px',
+              overflowY: 'auto'
+            }}
+          >
+            <div style={{ padding: '6px 12px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between' }}>
+              <span>REKOMENDASI LOKASI ({suggestionsList.length})</span>
+              <span>{isSearchingSuggestions ? 'Mencari...' : 'Pilih Lokasi'}</span>
+            </div>
+
+            {suggestionsList.map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => handleSelectSuggestion(item)}
+                style={{
+                  padding: '10px 12px',
+                  borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'white'
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <strong style={{ fontSize: '0.82rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</strong>
+                  <span style={{ fontSize: '0.68rem', color: '#64748B', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category} • {item.lat.toFixed(3)}, {item.lng.toFixed(3)}</span>
+                </div>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7' }}>Pilih ➔</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Pin Action Banner for Custom Search Result */}
       {searchQuery.trim().length >= 3 && (
         <div 
-          onClick={() => handleInitiatePin({ name: searchQuery.trim() })}
+          onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
           style={{
             background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
             color: 'white',
@@ -782,21 +775,13 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <div>
               <strong style={{ fontSize: '0.85rem', display: 'block' }}>Sematkan "{searchQuery}"</strong>
-              <span style={{ fontSize: '0.72rem', opacity: 0.9 }}>Simpan lokasi ke Rencana Kunjungan</span>
+              <span style={{ fontSize: '0.72rem', opacity: 0.9 }}>Simpan ke Rencana Kunjungan</span>
             </div>
           </div>
-          <span style={{ background: 'rgba(255,255,255,0.25)', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            SEMATKAN
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </span>
+          <span style={{ background: 'rgba(255,255,255,0.25)', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800 }}>SEMATKAN</span>
         </div>
       )}
 
@@ -821,7 +806,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       <div style={{ display: viewMode === 'map' ? 'block' : 'none', height: '320px', borderRadius: '16px', overflow: 'hidden', border: '2px solid var(--ocean-blue)', boxShadow: 'var(--shadow-md)', position: 'relative' }}>
         <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 1 }} />
 
-        {/* Floating GPS Target "Lokasi Saya" Button */}
+        {/* TOP-LEFT SLEEK GLASSMORPHISM LOKASI SAYA GPS TARGET BUTTON (ICON-ONLY NO TEXT) */}
         <button
           type="button"
           onClick={() => {
@@ -834,7 +819,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                   }
                 },
                 (err) => {
-                  alert('Gagal mendeteksi lokasi GPS HP/Browser Anda.');
+                  alert('Gagal mendeteksi lokasi GPS.');
                 }
               );
             }
@@ -860,22 +845,13 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           }}
           title="Lokasi Saya (GPS Target)"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="12" r="3"/>
-            <line x1="12" y1="2" x2="12" y2="4"/>
-            <line x1="12" y1="20" x2="12" y2="22"/>
-            <line x1="2" y1="12" x2="4" y2="12"/>
-            <line x1="20" y1="12" x2="22" y2="12"/>
-          </svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
         </button>
 
+        {/* MAP FLOATING BOTTOM INFO BAR WITH ICON-ONLY DETAIL & RESET BUTTONS */}
         <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', background: 'rgba(15, 23, 42, 0.92)', backdropFilter: 'blur(8px)', color: 'white', padding: '8px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 5 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {activeMapLocation 
                 ? `FOKUS: "${activeMapLocation.name}" (${activeMapLocation.lat ? activeMapLocation.lat.toFixed(4) : ''}, ${activeMapLocation.lng ? activeMapLocation.lng.toFixed(4) : ''})`
@@ -885,14 +861,21 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
           {activeMapLocation && (
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+              {/* ICON-ONLY DETAIL BUTTON (EYE SVG) */}
               <button 
                 onClick={() => setSelectedSpotForModal(activeMapLocation)} 
-                style={{ background: '#0284c7', border: 'none', color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 800, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}
+                style={{ background: '#0284c7', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                title="Lihat Detail Spot"
               >
-                Lihat Detail ➔
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
-              <button onClick={() => { setActiveMapLocation(null); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', cursor: 'pointer', fontWeight: 800 }}>
-                Reset ↺
+              {/* ICON-ONLY RESET BUTTON (REFRESH SVG) */}
+              <button 
+                onClick={() => { setActiveMapLocation(null); }} 
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                title="Reset Fokus Peta"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
               </button>
             </div>
           )}
@@ -901,487 +884,166 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* Spot Cards List with 5 Items Pagination */}
       <div style={{ display: viewMode === 'list' ? 'flex' : 'none', flexDirection: 'column', gap: '10px' }}>
-        
-        {/* Rencana Kunjungan Saya Inside List View */}
         {userId && savedPlans && savedPlans.length > 0 && (
           <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', padding: '10px 12px', borderRadius: '14px', marginBottom: '4px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
               <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#92400E', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Rencana Trip Saya ({savedPlans.length})
               </span>
             </div>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {savedPlans.map((plan) => {
-                const visitBadge = getVisitBadge(plan.spot_name);
-                return (
-                  <div key={plan.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '8px 12px', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                    <div 
-                      onClick={() => {
-                        const found = spots.find(s => s.name.toLowerCase().trim() === plan.spot_name.toLowerCase().trim());
-                        if (found) {
-                          setActiveMapLocation(found);
-                          setSelectedSpotForModal(found);
-                          setViewMode('map');
-                        }
-                      }}
-                      style={{ cursor: 'pointer', flex: 1, minWidth: 0, paddingRight: '8px' }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <strong style={{ fontSize: '0.85rem', color: '#78350F', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {plan.spot_name}
-                        </strong>
-                        {visitBadge && (
-                          <span style={{ background: visitBadge.bg, color: visitBadge.color, padding: '1px 6px', borderRadius: '9999px', fontSize: '0.62rem', fontWeight: 800, flexShrink: 0 }}>
-                            {visitBadge.text}
-                          </span>
-                        )}
-                      </div>
-                      <span style={{ fontSize: '0.72rem', color: '#B45309', display: 'block' }}>Target: {plan.formatted_date || plan.planned_date}</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                      <span style={{ background: plan.days_left <= 3 ? '#FEF2F2' : '#FFFBEB', color: plan.days_left <= 3 ? '#EF4444' : '#D97706', padding: '3px 8px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 800 }}>
-                        {plan.days_left <= 0 ? 'Hari Ini!' : `${plan.days_left} H`}
-                      </span>
-
-                      {/* Unpin Button */}
-                      <button
-                        onClick={() => handleUnpinPlan(plan.id, plan.spot_name)}
-                        style={{
-                          background: '#fee2e2',
-                          color: '#dc2626',
-                          border: 'none',
-                          padding: '4px 6px',
-                          borderRadius: '6px',
-                          fontSize: '0.7rem',
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
-                        title="Lepas sematan"
-                      >
-                        Unpin
-                      </button>
-                    </div>
+              {savedPlans.map((plan) => (
+                <div 
+                  key={plan.id} 
+                  onClick={() => {
+                    if (plan.lat && plan.lng) {
+                      setActiveMapLocation({ name: plan.spot_name, lat: parseFloat(plan.lat), lng: parseFloat(plan.lng) });
+                      setViewMode('map');
+                    } else {
+                      const matched = spots.find(s => s.name.toLowerCase().trim() === plan.spot_name.toLowerCase().trim());
+                      if (matched) {
+                        setActiveMapLocation(matched);
+                        setViewMode('map');
+                      }
+                    }
+                  }}
+                  style={{ background: 'white', padding: '8px 10px', borderRadius: '10px', border: '1px solid #FCD34D', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                >
+                  <div>
+                    <strong style={{ fontSize: '0.82rem', color: '#78350F', display: 'block' }}>{plan.spot_name}</strong>
+                    <span style={{ fontSize: '0.7rem', color: '#B45309' }}>Tanggal: {plan.formatted_date || plan.planned_date}</span>
                   </div>
-                );
-              })}
+                  <button onClick={(e) => { e.stopPropagation(); handleUnpinPlan(plan.id, plan.spot_name); }} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '3px 7px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Lepas</button>
+                </div>
+              ))}
             </div>
           </div>
         )}
+
         {paginatedSpots.map((spot) => {
-          const visitBadge = getVisitBadge(spot.name);
+          const badge = getVisitBadge(spot.name);
+
           return (
             <div 
-              key={spot.id || spot.name} 
-              className="card-clean"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '0',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                background: 'white',
-                border: '1px solid #E2E8F0',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+              key={spot.id} 
+              className="card-clean" 
+              onClick={() => {
+                setActiveMapLocation(spot);
+                setViewMode('map');
               }}
+              style={{ display: 'flex', gap: '12px', padding: '10px', borderRadius: '14px', border: '1px solid #CBD5E1', cursor: 'pointer' }}
             >
-              {/* Full Card Top Landscape Photo Cover Banner */}
-              <div 
-                onClick={() => {
-                  setActiveMapLocation(spot);
-                  setSelectedSpotForModal(spot);
-                  setViewMode('map');
-                  if (onSelectSpot) onSelectSpot(spot);
-                }}
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '140px',
-                  cursor: 'pointer',
-                  background: '#0F172A'
-                }}
-              >
-                <img 
-                  src={getSpotPhoto(spot)} 
-                  alt={spot.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  onError={(e) => {
-                    e.target.src = SUP_PHOTO_POOL[0];
-                  }}
-                />
-
-                {/* Dark Gradient Overlay for Crisp Text Readability */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.2) 60%)', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  
-                  {/* Top Badges */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(6px)', color: 'white', padding: '3px 9px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: 800, border: '1px solid rgba(255,255,255,0.3)' }}>
-                      {spot.category || 'Ocean'}
-                    </span>
-
-                    {visitBadge && (
-                      <span style={{ background: visitBadge.bg, color: visitBadge.color, padding: '3px 8px', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>
-                        {renderVisitIcon(visitBadge.iconType)}
-                        {visitBadge.text}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Bottom Title & GPS inside Banner */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <div>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF', margin: 0, textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
-                        {spot.name}
-                      </h4>
-                      <div style={{ color: '#F59E0B', fontSize: '0.75rem', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {'★'.repeat(spot.stars || 5)}{'☆'.repeat(5 - (spot.stars || 5))}
-                        <span style={{ color: '#E2E8F0', fontSize: '0.68rem', fontWeight: 600 }}>
-                          ({spot.lat ? spot.lat.toFixed(3) : ''}, {spot.lng ? spot.lng.toFixed(3) : ''})
-                        </span>
-                      </div>
-                    </div>
-
-                    <span style={{ background: '#0284c7', color: 'white', padding: '4px 10px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>
-                      Peta & Detail ➔
-                    </span>
-                  </div>
-
-                </div>
+              <div style={{ width: '84px', height: '84px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                <img src={getSpotPhoto(spot)} alt={spot.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {badge && (
+                  <span style={{ position: 'absolute', top: '4px', left: '4px', background: badge.bg, color: badge.color, padding: '2px 6px', borderRadius: '6px', fontSize: '0.62rem', fontWeight: 900 }}>
+                    {badge.label}
+                  </span>
+                )}
               </div>
 
-              {/* Card Bottom Action Area */}
-              <div style={{ padding: '10px 12px' }}>
-                <button 
-                  onClick={() => handleInitiatePin(spot)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    borderRadius: '10px',
-                    background: 'rgba(0,180,216,0.08)',
-                    color: 'var(--ocean-blue)',
-                    border: '1px dashed var(--ocean-blue)',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '5px'
-                  }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  Sematkan Tanggal Rencana
-                </button>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{spot.name}</strong>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', background: 'rgba(2, 132, 199, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                      ★ {spot.stars || '5.0'}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{spot.category} • {spot.difficulty || 'Easy'}</span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>{spot.water || 'Clear Water'}</span>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button onClick={(e) => { e.stopPropagation(); handleInitiatePin(spot); }} style={{ background: '#F59E0B', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Sematkan</button>
+                    <button onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} style={{ background: '#0284c7', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Detail</button>
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
 
-        {/* Empty Search State UX */}
-        {filteredSpots.length === 0 && (
-          <div style={{ background: 'white', border: '1px dashed #CBD5E1', borderRadius: '16px', padding: '32px 16px', textAlign: 'center', margin: '12px 0' }}>
-            <div style={{ color: 'var(--ocean-blue)', marginBottom: '10px', display: 'flex', justifyContent: 'center' }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                <line x1="11" y1="8" x2="11" y2="14"/>
-                <line x1="8" y1="11" x2="14" y2="11"/>
-              </svg>
-            </div>
-            <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0F172A', marginBottom: '4px' }}>Spot Tidak Ditemukan</h4>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-              Tidak ada lokasi dayung yang cocok dengan kata kunci "{searchQuery}" atau filter "{activeFilter}".
-            </p>
-            <button 
-              onClick={() => { setSearchQuery(''); setActiveFilter('All'); }}
-              style={{ background: 'var(--ocean-blue)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer' }}
-            >
-              Reset Semua Saringan
-            </button>
-          </div>
-        )}
-
-        {/* PAGINATION CONTROL BAR (5 Data Limit per Page) */}
-        {filteredSpots.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F8FAFC', border: '1px solid #CBD5E1', padding: '8px 12px', borderRadius: '12px', marginTop: '4px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-              Hal <strong>{currentPage}</strong> dari <strong>{totalPages}</strong> ({filteredSpots.length} Spot)
-            </span>
-
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid #CBD5E1',
-                  background: currentPage === 1 ? '#E2E8F0' : 'white',
-                  color: currentPage === 1 ? '#94A3B8' : '#0284c7',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px'
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-                </svg>
-                Sebelumnya
-              </button>
-
-              {/* Number Buttons */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-                <button
-                  key={pg}
-                  onClick={() => setCurrentPage(pg)}
-                  style={{
-                    width: '26px',
-                    height: '26px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    background: currentPage === pg ? '#0284c7' : '#E2E8F0',
-                    color: currentPage === pg ? 'white' : '#475569',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {pg}
-                </button>
-              ))}
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid #CBD5E1',
-                  background: currentPage === totalPages ? '#E2E8F0' : 'white',
-                  color: currentPage === totalPages ? '#94A3B8' : '#0284c7',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px'
-                }}
-              >
-                Berikutnya
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </button>
-            </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', fontSize: '0.75rem', fontWeight: 800, opacity: currentPage === 1 ? 0.5 : 1 }}>Prev</button>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)' }}>Hal {currentPage} dari {totalPages}</span>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', fontSize: '0.75rem', fontWeight: 800, opacity: currentPage === totalPages ? 0.5 : 1 }}>Next</button>
           </div>
         )}
       </div>
 
-      {/* SPOT DETAIL POP-UP MODAL ON PIN CLICK */}
-      {selectedSpotForModal && (
-        <SpotDetailModal
-          spot={selectedSpotForModal}
-          onClose={() => setSelectedSpotForModal(null)}
-        />
-      )}
-
-      {/* MODAL SET TARGET VISIT DATE */}
+      {/* MODAL SEMATKAN RENCANA VISIT */}
       {selectedPlanSpot && (
-        <div className="modal-sheet">
-          <div className="modal-sheet-content" style={{ padding: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ padding: '16px', borderRadius: '16px' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '10px' }}>Sematkan Target Rencana Trip</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+              Lokasi: <strong>{typeof selectedPlanSpot === 'string' ? selectedPlanSpot : selectedPlanSpot.name}</strong>
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--ocean-blue)', textTransform: 'uppercase' }}>
-                  SEMATKAN LOKASI
-                </span>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginTop: '2px' }}>
-                  {typeof selectedPlanSpot === 'string' ? selectedPlanSpot : selectedPlanSpot.name}
-                </h3>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Target Tanggal Trip</label>
+                <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }} />
               </div>
-              <button onClick={() => setSelectedPlanSpot(null)} style={{ border: 'none', background: '#E2E8F0', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <button type="button" onClick={() => setSelectedPlanSpot(null)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#E2E8F0', color: '#475569', fontWeight: 800, border: 'none' }}>Batal</button>
+                <button type="button" disabled={isSavingPlan} onClick={handleSavePlanDate} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#0284c7', color: 'white', fontWeight: 800, border: 'none' }}>
+                  {isSavingPlan ? 'Simpan...' : 'Simpan Plan'}
+                </button>
+              </div>
             </div>
-
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '6px', color: 'var(--text-main)' }}>
-                Target Tanggal Paddle:
-              </label>
-              <input 
-                type="date"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.9rem', fontWeight: 700 }}
-              />
-            </div>
-
-            <button className="btn-cta-jumbo" onClick={handleSavePlanDate} style={{ padding: '12px', fontSize: '0.9rem' }}>
-              SEMATKAN LOKASI & TANGGAL
-            </button>
           </div>
         </div>
       )}
 
-      {/* MODAL TAMBAH REKOMENDASI SPOT BARU DENGAN LOKASI GPS */}
+      {/* Spot Detail Modal */}
+      {selectedSpotForModal && (
+        <SpotDetailModal
+          spot={selectedSpotForModal}
+          userActivities={userActivities}
+          onClose={() => setSelectedSpotForModal(null)}
+          onInitiatePin={(spot) => {
+            setSelectedSpotForModal(null);
+            handleInitiatePin(spot);
+          }}
+        />
+      )}
+
+      {/* Add Spot Modal */}
       {showAddSpotModal && (
-        <div className="modal-sheet">
-          <div className="modal-sheet-content" style={{ padding: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <div>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--ocean-blue)', textTransform: 'uppercase' }}>
-                  DESTINASI PADDLE
-                </span>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginTop: '2px' }}>
-                  Tambah Spot Baru
-                </h3>
-              </div>
-              <button onClick={() => setShowAddSpotModal(false)} style={{ border: 'none', background: '#E2E8F0', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', fontWeight: 700 }}>✕</button>
-            </div>
-
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!newSpotName.trim()) return;
-
-                try {
-                  const res = await fetch('/api/create_spot.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      name: newSpotName,
-                      category: newSpotCategory,
-                      difficulty: newSpotDifficulty,
-                      lat: newSpotLat,
-                      lng: newSpotLng
-                    })
-                  });
-                  const data = await res.json();
-                  if (data.success) {
-                    // Refetch dynamic spots list from MySQL DB
-                    const resSpots = await fetch('/api/get_spots.php');
-                    const dataSpots = await resSpots.json();
-                    if (dataSpots.success && dataSpots.spots) {
-                      setSpots(dataSpots.spots);
-                    }
-                    alert(data.message || 'Spot baru berhasil ditambahkan!');
-                    setShowAddSpotModal(false);
-                    setNewSpotName('');
-                  } else {
-                    alert(data.message || 'Spot berhasil ditambahkan!');
-                    setShowAddSpotModal(false);
-                  }
-                } catch (err) {
-                  alert(`Spot '${newSpotName}' berhasil direkomendasikan!`);
-                  setShowAddSpotModal(false);
-                }
-              }}
-              style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
-            >
-              <div>
-                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Spot / Pantai / Danau</label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Pantai Akkarena"
-                  value={newSpotName}
-                  onChange={(e) => setNewSpotName(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Kategori Perairan</label>
-                <select
-                  value={newSpotCategory}
-                  onChange={(e) => setNewSpotCategory(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                >
-                  <option value="Ocean">Ocean / Pantai</option>
-                  <option value="Flat Water">Flat Water / Air Tenang</option>
-                  <option value="Lake">Lake / Danau</option>
-                  <option value="River">River / Sungai</option>
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ padding: '16px', borderRadius: '16px' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '10px' }}>Tambah Spot SUP Baru</h3>
+            <form onSubmit={handleCreateCustomSpot} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <input type="text" placeholder="Nama Spot (misal: Pantai Bira)" value={newSpotName} onChange={(e) => setNewSpotName(e.target.value)} required style={{ padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
+              
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <select value={newSpotCategory} onChange={(e) => setNewSpotCategory(e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }}>
+                  <option value="Ocean">Ocean</option>
+                  <option value="Lake">Lake</option>
+                  <option value="River">River</option>
+                  <option value="Flat Water">Flat Water</option>
+                </select>
+                <select value={newSpotDifficulty} onChange={(e) => setNewSpotDifficulty(e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }}>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
                 </select>
               </div>
 
-              {/* Automatic GPS Location Detection Button */}
-              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Koordinat GPS:</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!('geolocation' in navigator)) {
-                        alert('Fitur GPS tidak didukung di browser ini.');
-                        return;
-                      }
-                      setDetectingGps(true);
-                      navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                          const lat = parseFloat(pos.coords.latitude.toFixed(6));
-                          const lng = parseFloat(pos.coords.longitude.toFixed(6));
-                          setNewSpotLat(lat);
-                          setNewSpotLng(lng);
-                          setDetectingGps(false);
-                          alert(`GPS Lokasi Terkini Terdeteksi: (${lat}, ${lng})`);
-                        },
-                        (err) => {
-                          setDetectingGps(false);
-                          alert('Gagal membaca GPS terkini. Menggunakan posisi koordinat default.');
-                        },
-                        { enableHighAccuracy: true, timeout: 8000 }
-                      );
-                    }}
-                    style={{
-                      background: '#0284c7',
-                      color: 'white',
-                      border: 'none',
-                      padding: '4px 8px',
-                      borderRadius: '6px',
-                      fontSize: '0.7rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {detectingGps ? 'Mendeteksi...' : 'Ambil GPS Terkini'}
-                  </button>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem' }}>
-                  <div>
-                    <label style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.68rem' }}>Lat</label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={newSpotLat}
-                      onChange={(e) => setNewSpotLat(parseFloat(e.target.value))}
-                      style={{ width: '100%', padding: '4px 6px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.68rem' }}>Lng</label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={newSpotLng}
-                      onChange={(e) => setNewSpotLng(parseFloat(e.target.value))}
-                      style={{ width: '100%', padding: '4px 6px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }}
-                    />
-                  </div>
-                </div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <input type="number" step="any" placeholder="Latitude (-5.14)" value={newSpotLat} onChange={(e) => setNewSpotLat(parseFloat(e.target.value))} required style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
+                <input type="number" step="any" placeholder="Longitude (119.41)" value={newSpotLng} onChange={(e) => setNewSpotLng(parseFloat(e.target.value))} required style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
               </div>
 
-              <button className="btn-cta-jumbo" type="submit" style={{ marginTop: '4px', padding: '10px', fontSize: '0.85rem' }}>
-                SIMPAN SPOT BARU
-              </button>
+              <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                <button type="button" onClick={() => setShowAddSpotModal(false)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#E2E8F0', color: '#475569', fontWeight: 800, border: 'none' }}>Batal</button>
+                <button type="submit" style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#0284c7', color: 'white', fontWeight: 800, border: 'none' }}>Simpan Spot</button>
+              </div>
             </form>
           </div>
         </div>
