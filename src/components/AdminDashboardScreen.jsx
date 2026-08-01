@@ -213,6 +213,21 @@ export default function AdminDashboardScreen({ currentUser }) {
                   </select>
 
                   <div style={{ display: 'flex', gap: '4px' }}>
+                    <button 
+                      onClick={() => handleChangeRole(userItem.id, isTargetAdmin ? 'user' : 'super_admin')}
+                      style={{ 
+                        background: isTargetAdmin ? '#E2E8F0' : '#FEF3C7', 
+                        color: isTargetAdmin ? '#475569' : '#B45309', 
+                        border: isTargetAdmin ? '1px solid #CBD5E1' : '1px solid #FCD34D', 
+                        padding: '4px 8px', 
+                        borderRadius: '6px', 
+                        fontSize: '0.72rem', 
+                        fontWeight: 800,
+                        cursor: 'pointer' 
+                      }}
+                    >
+                      {isTargetAdmin ? 'Ubah ke User' : 'Jadikan Admin'}
+                    </button>
                     {isPendingReg && (
                       <button onClick={() => handleApproveUser(userItem.id, userItem.name)} style={{ background: '#10B981', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>Setujui</button>
                     )}
