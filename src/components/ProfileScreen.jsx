@@ -146,7 +146,10 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
           position: 'relative',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #070D1B 0%, #0369a1 100%)', 
-          padding: '20px 16px' 
+          borderRadius: '18px',
+          padding: '18px 16px',
+          boxShadow: '0 6px 20px rgba(2, 132, 199, 0.25)',
+          border: '1px solid rgba(255, 255, 255, 0.25)'
         }}
       >
         {/* Background Stand-Up Paddleboard Action Image (Full Brightness & Vivid Contrast) */}

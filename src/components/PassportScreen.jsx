@@ -52,12 +52,12 @@ export default function PassportScreen({ userId = null, onRequireLogin, onTestSt
           boxSizing: 'border-box',
           background: 'linear-gradient(135deg, #070D1B 0%, #0369a1 100%)',
           color: 'white',
-          borderRadius: '20px',
-          padding: '20px 16px',
-          boxShadow: '0 8px 25px rgba(2, 132, 199, 0.35)',
+          borderRadius: '18px',
+          padding: '18px 16px',
+          boxShadow: '0 6px 20px rgba(2, 132, 199, 0.25)',
           position: 'relative',
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          border: '1px solid rgba(255, 255, 255, 0.25)'
         }}
       >
         {/* Background Stand-Up Paddleboard Action Image (2nd User Photo Asset) */}
