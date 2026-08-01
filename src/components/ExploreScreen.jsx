@@ -816,7 +816,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       </div>
 
       {/* MAP CONTAINER ALWAYS MOUNTED IN DOM TO PREVENT BLANK CANVAS ON VIEW SWITCH */}
-      <div style={{ display: viewMode === 'map' ? 'block' : 'none', height: '500px', borderRadius: '16px', overflow: 'hidden', border: '2px solid var(--ocean-blue)', boxShadow: 'var(--shadow-md)', position: 'relative' }}>
+      <div style={{ display: viewMode === 'map' ? 'block' : 'none', height: '320px', borderRadius: '16px', overflow: 'hidden', border: '2px solid var(--ocean-blue)', boxShadow: 'var(--shadow-md)', position: 'relative' }}>
         <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 1 }} />
 
         {/* Floating GPS Target "Lokasi Saya" Button */}

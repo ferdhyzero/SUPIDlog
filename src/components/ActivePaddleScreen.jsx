@@ -506,15 +506,13 @@ export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto 
       {viewMode === 'map' && isOnline && (
         <div 
           style={{
-            height: '580px',
-            maxHeight: '42vh',
-            minHeight: '520px',
+            height: '260px',
             background: '#0F172A',
-            borderRadius: '24px',
+            borderRadius: '20px',
             border: '2px solid rgba(0, 180, 216, 0.5)',
             position: 'relative',
             overflow: 'hidden',
-            margin: '4px 0 12px',
+            margin: '4px 0 8px',
             boxShadow: '0 8px 30px rgba(0,0,0,0.5)'
           }}
         >
@@ -661,15 +659,13 @@ export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto 
       {viewMode === 'vector_canvas' && (
         <div 
           style={{
-            height: '580px',
-            maxHeight: '42vh',
-            minHeight: '520px',
+            height: '260px',
             background: '#0B1329',
-            borderRadius: '24px',
+            borderRadius: '20px',
             border: '2px solid rgba(0, 180, 216, 0.6)',
             position: 'relative',
             overflow: 'hidden',
-            margin: '4px 0 12px',
+            margin: '4px 0 8px',
             boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
             display: 'flex',
             alignItems: 'center',
