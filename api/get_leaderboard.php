@@ -27,6 +27,11 @@ try {
         $favRow = $stmtFav->fetch();
         $favoriteSpot = $favRow ? $favRow['spot_name'] : '-';
 
+        // Dynamic Activity Sessions Count
+        $stmtSess = $pdo->prepare("SELECT COUNT(*) as sess_cnt FROM activities WHERE user_id = :uid");
+        $stmtSess->execute(['uid' => $uid]);
+        $sessionsCnt = (int)($stmtSess->fetch()['sess_cnt'] ?? 0);
+
         // Max speed
         $stmtMaxSpeed = $pdo->prepare("SELECT avg_speed FROM activities WHERE user_id = :uid ORDER BY id DESC LIMIT 1");
         $stmtMaxSpeed->execute(['uid' => $uid]);
@@ -41,6 +46,8 @@ try {
             'role' => $u['role'],
             'alltime_distance_km' => $alltimeDist,
             'monthly_distance_km' => $monthDist,
+            'total_distance_km' => $alltimeDist,
+            'total_sessions' => $sessionsCnt,
             'favorite_spot' => $favoriteSpot,
             'max_speed' => $maxSpeedStr
         ];

@@ -193,19 +193,25 @@ export default function StatisticsScreen({ userId = 2 }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {leaderboard.map((item) => {
             const isMe = item.id === userId;
+            const distVal = timeFilter === 'this_month' 
+              ? (item.monthly_distance_km ?? 0.0) 
+              : (item.alltime_distance_km ?? item.total_distance_km ?? 0.0);
+            const formattedDist = parseFloat(distVal).toFixed(1);
+            const sessVal = item.total_sessions ?? (distVal > 0 ? 1 : 0);
+
             return (
               <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '10px', background: isMe ? 'rgba(2, 132, 199, 0.08)' : '#F8FAFC', border: isMe ? '1px solid #0284c7' : '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#0284c7', width: '24px' }}>#{item.rank}</span>
                   <div>
                     <strong style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 800 }}>{item.name}</strong>
-                    <span style={{ fontSize: '0.68rem', color: '#0284c7', display: 'block' }}>{item.level}</span>
+                    <span style={{ fontSize: '0.68rem', color: '#0284c7', display: 'block' }}>{item.level || 'Explorer'}</span>
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <strong style={{ fontSize: '0.95rem', color: '#0284c7', fontWeight: 900 }}>{item.total_distance_km} km</strong>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>{item.total_sessions} sesi</span>
+                  <strong style={{ fontSize: '0.95rem', color: '#0284c7', fontWeight: 900 }}>{formattedDist} km</strong>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>{sessVal} Sesi</span>
                 </div>
               </div>
             );
