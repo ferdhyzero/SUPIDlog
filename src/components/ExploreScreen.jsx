@@ -841,24 +841,26 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           }}
           style={{
             position: 'absolute',
-            bottom: '14px',
-            right: '14px',
+            top: '12px',
+            left: '12px',
             zIndex: 999,
-            background: 'white',
-            color: '#0F172A',
-            border: '1.5px solid #0284c7',
+            width: '36px',
+            height: '36px',
             borderRadius: '10px',
-            padding: '7px 12px',
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            background: 'rgba(15, 23, 42, 0.68)',
+            backdropFilter: 'blur(8px)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.35)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '5px'
+            justifyContent: 'center',
+            padding: 0
           }}
+          title="Lokasi Saya (GPS Target)"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <circle cx="12" cy="12" r="3"/>
             <line x1="12" y1="2" x2="12" y2="4"/>
@@ -866,7 +868,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             <line x1="2" y1="12" x2="4" y2="12"/>
             <line x1="20" y1="12" x2="22" y2="12"/>
           </svg>
-          Lokasi Saya
         </button>
 
         <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', background: 'rgba(15, 23, 42, 0.92)', backdropFilter: 'blur(8px)', color: 'white', padding: '8px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 5 }}>
