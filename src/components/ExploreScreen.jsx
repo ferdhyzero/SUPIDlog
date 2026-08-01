@@ -460,8 +460,8 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       category: item.category || 'Custom Spot'
     };
 
+    // ONLY navigate map, do not force modal open directly
     setActiveMapLocation(locObj);
-    setSelectedPlanSpot(locObj);
     setViewMode('map');
   };
 
@@ -474,7 +474,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     const matchedSpot = spots.find(s => s.name.toLowerCase().includes(cleanQuery.toLowerCase()));
     if (matchedSpot && matchedSpot.lat && matchedSpot.lng) {
       setActiveMapLocation(matchedSpot);
-      setSelectedPlanSpot(matchedSpot);
       setViewMode('map');
       return;
     }
@@ -496,7 +495,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         };
 
         setActiveMapLocation(searchedLoc);
-        setSelectedPlanSpot(searchedLoc);
         setViewMode('map');
       } else {
         alert(`Lokasi '${cleanQuery}' tidak ditemukan.`);
@@ -775,6 +773,36 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           </div>
         )}
       </div>
+
+      {/* Pin Action Banner for Custom Search Result */}
+      {searchQuery.trim().length >= 3 && (
+        <div 
+          onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
+          style={{
+            background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
+            color: 'white',
+            borderRadius: '14px',
+            padding: '10px 14px',
+            display: 'flex',
+            justify: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(0, 180, 216, 0.35)',
+            marginTop: '2px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <strong style={{ fontSize: '0.88rem', display: 'block', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>Sematkan "{searchQuery}"</strong>
+              <span style={{ fontSize: '0.72rem', opacity: 0.95 }}>Simpan ke Rencana Kunjungan</span>
+            </div>
+          </div>
+          <span style={{ background: 'rgba(255,255,255,0.28)', padding: '5px 12px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>SEMATKAN</span>
+        </div>
+      )}
 
       {/* Filter Horizontal Scroll Chips */}
       <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }}>
