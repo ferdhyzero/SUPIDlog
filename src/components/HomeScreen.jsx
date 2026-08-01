@@ -146,10 +146,10 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
           padding: '16px 14px'
         }}
       >
-        {/* Background Stand-Up Paddleboard Action Image (Bundled Local High-Res Asset) */}
+        {/* Background Stand-Up Paddleboard Action Image (Compressed High-Res WebP) */}
         <img 
-          src="/sup-hero-bg.jpg" 
-          alt="Stand Up Paddle Boarding"
+          src="/sup-hero-bg.webp" 
+          alt="Stand Up Paddle Boarding Indonesia"
           style={{
             position: 'absolute',
             top: 0,
@@ -157,13 +157,13 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 40%',
-            opacity: 0.65,
+            objectPosition: 'center 60%',
+            opacity: 0.75,
             zIndex: 0,
             pointerEvents: 'none'
           }}
         />
-        {/* Translucent Dark Ocean Overlay for Maximum Visibility & Text Legibility */}
+        {/* Translucent Soft Ocean Overlay for High Text Legibility */}
         <div 
           style={{
             position: 'absolute',
@@ -171,7 +171,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.25) 0%, rgba(3, 105, 161, 0.55) 100%)',
+            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.20) 0%, rgba(3, 105, 161, 0.50) 100%)',
             zIndex: 1,
             pointerEvents: 'none'
           }}
