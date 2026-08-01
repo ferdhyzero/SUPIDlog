@@ -803,6 +803,44 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     }
   };
 
+  // DELETE SPOT (only for spots created by current user)
+  const handleDeleteSpot = async (spot) => {
+    if (!userId) {
+      alert('Silakan login terlebih dahulu.');
+      return;
+    }
+    if (!confirm(`Apakah Anda yakin ingin menghapus spot "${spot.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+
+    try {
+      const res = await fetch('/api/delete_spot.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ spot_id: spot.id, user_id: userId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        // Refresh spots list
+        const resSpots = await fetch('/api/get_spots.php');
+        const dataSpots = await resSpots.json();
+        if (dataSpots.success) {
+          setSpots(dataSpots.spots);
+          localStorage.setItem('supid_spots_cache', JSON.stringify(dataSpots.spots));
+        }
+        // Refresh saved plans
+        if (userId) {
+          const resPlans = await fetch(`/api/get_saved_spots.php?user_id=${userId}`);
+          const dataPlans = await resPlans.json();
+          if (dataPlans.success) setSavedPlans(dataPlans.savedSpots);
+        }
+      } else {
+        alert(data.message || 'Gagal menghapus spot.');
+      }
+    } catch (e) {
+      alert('Terjadi error saat menghapus spot.');
+    }
+  };
+
   const totalPages = Math.ceil(filteredSpots.length / itemsPerPage) || 1;
   const paginatedSpots = filteredSpots.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -1202,6 +1240,39 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                     </span>
                   )}
                 </div>
+
+                {/* Top Right Delete Button (Only for user-created spots) */}
+                {userId && spot.created_by && parseInt(spot.created_by) === parseInt(userId) && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteSpot(spot); }}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      width: '30px',
+                      height: '30px',
+                      borderRadius: '8px',
+                      background: 'rgba(239, 68, 68, 0.85)',
+                      backdropFilter: 'blur(6px)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: 'white',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0,
+                      boxShadow: '0 2px 8px rgba(239,68,68,0.4)'
+                    }}
+                    title="Hapus Spot Ini"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      <line x1="10" y1="11" x2="10" y2="17"/>
+                      <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                  </button>
+                )}
 
                 {/* Bottom Content over image */}
                 <div style={{ position: 'absolute', bottom: '10px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>

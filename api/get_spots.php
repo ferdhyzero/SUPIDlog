@@ -24,6 +24,9 @@ try {
     try {
         $pdo->exec("ALTER TABLE spots ADD COLUMN lng DECIMAL(10, 6) DEFAULT 119.415421");
     } catch (Exception $e2) {}
+    try {
+        $pdo->exec("ALTER TABLE spots ADD COLUMN created_by INT DEFAULT NULL");
+    } catch (Exception $e3) {}
 
     // 3. Auto-fix distinct real-world GPS coordinates for existing spots with duplicate defaults
     $pdo->exec("UPDATE spots SET lat = -5.614800, lng = 120.457800 WHERE (name LIKE '%bira%' OR name LIKE '%Bira%') AND lat = -5.147800");
@@ -44,7 +47,7 @@ try {
     }
 
     // 5. Fetch all dynamic spots from MySQL DB with 100% distinct coordinates
-    $stmt = $pdo->query("SELECT id, name, category, stars, season, difficulty, water, visited_count as visitedCount, CAST(lat AS DOUBLE) as lat, CAST(lng AS DOUBLE) as lng FROM spots ORDER BY id DESC");
+    $stmt = $pdo->query("SELECT id, name, category, stars, season, difficulty, water, visited_count as visitedCount, CAST(lat AS DOUBLE) as lat, CAST(lng AS DOUBLE) as lng, created_by FROM spots ORDER BY id DESC");
     $spots = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([
