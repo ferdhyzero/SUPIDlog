@@ -379,7 +379,9 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       const badge = getVisitBadge(spot.name);
       const isSelected = activeMapLocation && activeMapLocation.name === spot.name;
-      const pinColor = isSelected ? '#EF4444' : (badge ? badge.pinColor : '#0284c7');
+      // Default to BRIGHT STRIKING RED (#EF4444) so pins pop out prominently against satellite ocean water
+      const pinColor = isSelected ? '#F59E0B' : (badge ? badge.pinColor : '#EF4444');
+      const strokeColor = isSelected ? '#FFFFFF' : '#B91C1C';
 
       let pinSvg = '';
       let iconWidth = 32;
@@ -387,49 +389,49 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       let anchorX = 16;
       let anchorY = 42;
 
-      // 1. ZOOM OUT VIEW (Zoom <= 8): Render compact micro-pin dots with zero text clutter
+      // 1. ZOOM OUT VIEW (Zoom <= 8): Render compact micro-pin dots in striking red
       if (currentZoomLevel <= 8) {
-        iconWidth = 18;
-        iconHeight = 18;
-        anchorX = 9;
-        anchorY = 9;
+        iconWidth = 20;
+        iconHeight = 20;
+        anchorX = 10;
+        anchorY = 10;
         pinSvg = `
-          <div style="position:relative; width:18px; height:18px; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="${spot.name}">
-            <div style="width:14px; height:14px; border-radius:50%; background:${pinColor}; border:2px solid #FFFFFF; box-shadow:0 2px 6px rgba(0,0,0,0.6); transform:${isSelected ? 'scale(1.4)' : 'scale(1)'}; transition:all 0.2s ease;"></div>
+          <div style="position:relative; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="${spot.name}">
+            <div style="width:16px; height:16px; border-radius:50%; background:#EF4444; border:2.5px solid #FFFFFF; box-shadow:0 3px 8px rgba(0,0,0,0.7); transform:${isSelected ? 'scale(1.5)' : 'scale(1)'}; transition:all 0.2s ease;"></div>
           </div>
         `;
       }
-      // 2. MEDIUM ZOOM VIEW (Zoom 9 - 11): Render medium pin icons with compact titles
+      // 2. MEDIUM ZOOM VIEW (Zoom 9 - 11): Render medium striking red pins with gold center
       else if (currentZoomLevel <= 11) {
-        iconWidth = 24;
-        iconHeight = 32;
-        anchorX = 12;
-        anchorY = 32;
+        iconWidth = 26;
+        iconHeight = 34;
+        anchorX = 13;
+        anchorY = 34;
         pinSvg = `
-          <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer; filter:drop-shadow(0px 3px 6px rgba(0,0,0,0.5)); transform:${isSelected ? 'scale(1.15)' : 'scale(1)'};">
-            <svg width="24" height="32" viewBox="0 0 24 34" fill="none">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 22 12 22s12-13 12-22c0-6.63-5.37-12-12-12z" fill="${pinColor}" stroke="#FFFFFF" stroke-width="2"/>
-              <circle cx="12" cy="12" r="4.5" fill="#FFFFFF"/>
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer; filter:drop-shadow(0px 4px 8px rgba(0,0,0,0.6)); transform:${isSelected ? 'scale(1.2)' : 'scale(1)'};">
+            <svg width="26" height="34" viewBox="0 0 24 34" fill="none">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 22 12 22s12-13 12-22c0-6.63-5.37-12-12-12z" fill="${pinColor}" stroke="${strokeColor}" stroke-width="2.2"/>
+              <circle cx="12" cy="12" r="5" fill="#FBBF24" stroke="#FFFFFF" stroke-width="1.5"/>
             </svg>
-            <div style="background:rgba(15,23,42,0.9); color:white; padding:1px 5px; borderRadius:4px; font-size:9px; font-weight:800; white-space:nowrap; margin-top:-5px; border:1px solid rgba(255,255,255,0.3);">
+            <div style="background:#0F172A; color:#FFFFFF; padding:2px 6px; borderRadius:4px; font-size:9px; font-weight:900; white-space:nowrap; margin-top:-5px; border:1px solid #EF4444; box-shadow:0 2px 6px rgba(0,0,0,0.5);">
               ${spot.name}
             </div>
           </div>
         `;
       }
-      // 3. CLOSE-UP ZOOM VIEW (Zoom >= 12): Render full-size detailed pin icons & badges
+      // 3. CLOSE-UP ZOOM VIEW (Zoom >= 12): Render full-size striking red pins with gold SUP center core
       else {
-        iconWidth = 34;
-        iconHeight = 46;
-        anchorX = 17;
-        anchorY = 46;
+        iconWidth = 36;
+        iconHeight = 48;
+        anchorX = 18;
+        anchorY = 48;
         pinSvg = `
-          <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer; filter:drop-shadow(0px 4px 8px rgba(0,0,0,0.5)); transform:${isSelected ? 'scale(1.2)' : 'scale(1)'}; transition:all 0.2s ease;">
-            <svg width="34" height="46" viewBox="0 0 24 34" fill="none">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 22 12 22s12-13 12-22c0-6.63-5.37-12-12-12z" fill="${pinColor}" stroke="#FFFFFF" stroke-width="2"/>
-              <circle cx="12" cy="12" r="4.5" fill="#FFFFFF"/>
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer; filter:drop-shadow(0px 5px 10px rgba(0,0,0,0.7)); transform:${isSelected ? 'scale(1.25)' : 'scale(1)'}; transition:all 0.2s ease;">
+            <svg width="36" height="48" viewBox="0 0 24 34" fill="none">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 22 12 22s12-13 12-22c0-6.63-5.37-12-12-12z" fill="${pinColor}" stroke="${strokeColor}" stroke-width="2.5"/>
+              <circle cx="12" cy="12" r="5.5" fill="#FBBF24" stroke="#FFFFFF" stroke-width="1.5"/>
             </svg>
-            <div style="background:rgba(15,23,42,0.92); color:white; padding:2px 7px; borderRadius:6px; font-size:10px; font-weight:800; white-space:nowrap; margin-top:-7px; border:1px solid rgba(255,255,255,0.4); text-shadow:0 1px 2px rgba(0,0,0,0.8);">
+            <div style="background:#0F172A; color:#FFFFFF; padding:2px 8px; borderRadius:6px; font-size:10px; font-weight:900; white-space:nowrap; margin-top:-7px; border:1.5px solid #EF4444; text-shadow:0 1px 3px rgba(0,0,0,0.9); box-shadow:0 3px 8px rgba(0,0,0,0.6);">
               ${spot.name}
             </div>
           </div>
@@ -839,12 +841,12 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           }}
           style={{
             position: 'absolute',
-            top: '12px',
-            right: '12px',
-            zIndex: 10,
+            bottom: '14px',
+            right: '14px',
+            zIndex: 999,
             background: 'white',
             color: '#0F172A',
-            border: '1px solid #CBD5E1',
+            border: '1.5px solid #0284c7',
             borderRadius: '10px',
             padding: '7px 12px',
             fontSize: '0.75rem',
