@@ -213,25 +213,27 @@ export default function AdminDashboardScreen({ currentUser }) {
                   </select>
 
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button 
-                      onClick={() => handleChangeRole(userItem.id, isTargetAdmin ? 'user' : 'super_admin')}
-                      style={{ 
-                        background: isTargetAdmin ? '#E2E8F0' : '#FEF3C7', 
-                        color: isTargetAdmin ? '#475569' : '#B45309', 
-                        border: isTargetAdmin ? '1px solid #CBD5E1' : '1px solid #FCD34D', 
-                        padding: '4px 8px', 
-                        borderRadius: '6px', 
-                        fontSize: '0.72rem', 
-                        fontWeight: 800,
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      {isTargetAdmin ? 'Ubah ke User' : 'Jadikan Admin'}
-                    </button>
+                    {userItem.email !== 'ahmadferdy66@gmail.com' && userItem.id !== 1 && (
+                      <button 
+                        onClick={() => handleChangeRole(userItem.id, isTargetAdmin ? 'user' : 'super_admin')}
+                        style={{ 
+                          background: isTargetAdmin ? '#E2E8F0' : '#FEF3C7', 
+                          color: isTargetAdmin ? '#475569' : '#B45309', 
+                          border: isTargetAdmin ? '1px solid #CBD5E1' : '1px solid #FCD34D', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '0.72rem', 
+                          fontWeight: 800,
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        {isTargetAdmin ? 'Ubah ke User' : 'Jadikan Admin'}
+                      </button>
+                    )}
                     {isPendingReg && (
                       <button onClick={() => handleApproveUser(userItem.id, userItem.name)} style={{ background: '#10B981', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>Setujui</button>
                     )}
-                    {userItem.id !== 1 && (
+                    {userItem.id !== 1 && userItem.email !== 'ahmadferdy66@gmail.com' && (
                       <button onClick={() => handleDeleteUser(userItem.id, userItem.name)} style={{ background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>Hapus</button>
                     )}
                   </div>
