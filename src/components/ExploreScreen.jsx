@@ -1242,7 +1242,10 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                 </div>
 
                 {/* Top Right Delete Button (Only for user-created spots) */}
-                {userId && spot.created_by && parseInt(spot.created_by) === parseInt(userId) && (
+                {userId && (
+                  (spot.created_by && parseInt(spot.created_by) === parseInt(userId)) ||
+                  (spot.category === 'Custom Spot' && savedPlans && savedPlans.some(p => p.spot_name.toLowerCase() === spot.name.toLowerCase()))
+                ) && (
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDeleteSpot(spot); }}
                     style={{

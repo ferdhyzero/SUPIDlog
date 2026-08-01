@@ -13,8 +13,8 @@ if (!$spotId || !$userId) {
 }
 
 try {
-    // 1. Verify the spot exists and was created by this user
-    $stmt = $pdo->prepare("SELECT id, name, created_by FROM spots WHERE id = :id LIMIT 1");
+    // 1. Verify the spot exists
+    $stmt = $pdo->prepare("SELECT id, name, category, created_by FROM spots WHERE id = :id LIMIT 1");
     $stmt->execute(['id' => $spotId]);
     $spot = $stmt->fetch();
 
@@ -23,20 +23,40 @@ try {
         exit;
     }
 
-    if ((int)$spot['created_by'] !== $userId) {
+    $spotName = $spot['name'];
+    $createdBy = $spot['created_by'] ? (int)$spot['created_by'] : null;
+    $isCustomSpot = ($spot['category'] === 'Custom Spot');
+
+    // 2. Permission check: 
+    //    - If created_by is set, must match userId
+    //    - If created_by is NULL but it's a Custom Spot, allow if user has it in saved_spots
+    $allowed = false;
+
+    if ($createdBy === $userId) {
+        $allowed = true;
+    } elseif ($createdBy === null && $isCustomSpot) {
+        // Check if user owns this spot via saved_spots
+        $stmtCheck = $pdo->prepare("SELECT id FROM saved_spots WHERE user_id = :uid AND LOWER(spot_name) = LOWER(:name) LIMIT 1");
+        $stmtCheck->execute(['uid' => $userId, 'name' => $spotName]);
+        if ($stmtCheck->fetch()) {
+            $allowed = true;
+            // Also fix created_by for future
+            $pdo->prepare("UPDATE spots SET created_by = :uid WHERE id = :id")->execute(['uid' => $userId, 'id' => $spotId]);
+        }
+    }
+
+    if (!$allowed) {
         echo json_encode(['success' => false, 'message' => 'Anda tidak memiliki izin untuk menghapus spot ini. Hanya pembuat spot yang dapat menghapusnya.']);
         exit;
     }
 
-    $spotName = $spot['name'];
+    // 3. Delete from saved_spots (this user's pins for this spot)
+    $stmtDelSaved = $pdo->prepare("DELETE FROM saved_spots WHERE spot_name = :name AND user_id = :uid");
+    $stmtDelSaved->execute(['name' => $spotName, 'uid' => $userId]);
 
-    // 2. Delete from saved_spots (all users' pins for this spot)
-    $stmtDelSaved = $pdo->prepare("DELETE FROM saved_spots WHERE spot_name = :name");
-    $stmtDelSaved->execute(['name' => $spotName]);
-
-    // 3. Delete from master spots table
-    $stmtDelSpot = $pdo->prepare("DELETE FROM spots WHERE id = :id AND created_by = :uid");
-    $stmtDelSpot->execute(['id' => $spotId, 'uid' => $userId]);
+    // 4. Delete from master spots table
+    $stmtDelSpot = $pdo->prepare("DELETE FROM spots WHERE id = :id");
+    $stmtDelSpot->execute(['id' => $spotId]);
 
     echo json_encode([
         'success' => true,

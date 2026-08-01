@@ -28,6 +28,14 @@ try {
         $pdo->exec("ALTER TABLE spots ADD COLUMN created_by INT DEFAULT NULL");
     } catch (Exception $e3) {}
 
+    // 3a. Backfill created_by for existing Custom Spots using saved_spots ownership
+    try {
+        $pdo->exec("UPDATE spots s 
+            JOIN saved_spots ss ON LOWER(s.name) = LOWER(ss.spot_name) 
+            SET s.created_by = ss.user_id 
+            WHERE s.created_by IS NULL AND s.category = 'Custom Spot'");
+    } catch (Exception $e4) {}
+
     // 3. Auto-fix distinct real-world GPS coordinates for existing spots with duplicate defaults
     $pdo->exec("UPDATE spots SET lat = -5.614800, lng = 120.457800 WHERE (name LIKE '%bira%' OR name LIKE '%Bira%') AND lat = -5.147800");
     $pdo->exec("UPDATE spots SET lat = -5.148200, lng = 119.412800 WHERE (name LIKE '%indah bosowa%') AND lat = -5.147800");
