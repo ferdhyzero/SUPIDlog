@@ -191,9 +191,10 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
               <button 
                 onClick={handleInstallClick}
                 style={{ 
-                  background: '#ffffff',
-                  color: '#0284c7',
-                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.22)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                  backdropFilter: 'blur(8px)',
                   padding: '6px 12px',
                   borderRadius: '16px',
                   fontWeight: 800,
@@ -202,7 +203,8 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.6)'
                 }}
               >
                 <img 
@@ -215,10 +217,10 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             </div>
           </div>
 
-          {/* Guest Warning Banner with Glassmorphism Blur */}
+          {/* Guest Warning Banner with Ultra-Translucent Glassmorphism */}
           {isGuest && (
-            <div style={{ background: 'rgba(7, 13, 27, 0.45)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 12px', borderRadius: '12px', marginBottom: '12px', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.16)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.4)', padding: '8px 12px', borderRadius: '12px', marginBottom: '12px', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -239,7 +241,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
                 }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -252,21 +254,21 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             </div>
           )}
 
-          {/* Live GPS Weather Forecast Chips with Glassmorphism Blur */}
+          {/* Live GPS Weather Forecast Chips with Ultra-Translucent Glassmorphism */}
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 700 }}>
-            <div style={{ background: 'rgba(7, 13, 27, 0.45)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.35)', color: 'white', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.18)', backdropFilter: 'blur(6px)', padding: '5px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.4)', color: 'white', display: 'flex', alignItems: 'center', gap: '5px', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
               </svg>
               {weather.temp}
             </div>
-            <div style={{ background: 'rgba(7, 13, 27, 0.45)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.35)', color: 'white', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.18)', backdropFilter: 'blur(6px)', padding: '5px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.4)', color: 'white', display: 'flex', alignItems: 'center', gap: '5px', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
               </svg>
               {weather.wind}
             </div>
-            <div style={{ background: 'rgba(7, 13, 27, 0.45)', backdropFilter: 'blur(10px)', padding: '5px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.35)', color: 'white', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.18)', backdropFilter: 'blur(6px)', padding: '5px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.4)', color: 'white', display: 'flex', alignItems: 'center', gap: '5px', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
               </svg>
