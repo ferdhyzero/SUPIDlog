@@ -54,9 +54,9 @@ html, body {
   font-size: 14px;
 }
 
-/* Mobile App Shell Container - Identical Width to Bottom Nav */
+/* Mobile App Shell Container - Exact 1:1 Width Alignment to Bottom Nav */
 #root {
-  width: 100%;
+  width: 100% !important;
   max-width: var(--app-max-width);
   min-height: 100vh;
   background-color: var(--bg-soft);
@@ -64,14 +64,29 @@ html, body {
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  overflow: visible; /* No inner scrollbar mismatch */
+  overflow-x: hidden !important; /* CRITICAL: Prevents wide child elements from stretching #root */
   padding-bottom: calc(var(--nav-height) + 16px);
+  box-sizing: border-box !important;
+}
+
+main {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important; /* CRITICAL: Ensures content fits page width fluidly */
+  box-sizing: border-box !important;
+  flex: 1;
+}
+
+/* Force all child elements inside main to fluidly constrain within parent container */
+main * {
+  max-width: 100%;
   box-sizing: border-box;
 }
 
 /* 100% Full Mobile Screen Responsive Edge-to-Edge Fill on Mobile Phones */
 @media (max-width: 768px) {
-  #root {
+  #root,
+  main {
     max-width: 100% !important;
     box-shadow: none !important;
   }
