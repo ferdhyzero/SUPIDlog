@@ -665,7 +665,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             onFocus={() => { if (suggestionsList.length > 0) setShowSuggestionsDropdown(true); }}
             style={{
               width: '100%',
-              padding: '10px 42px 10px 38px',
+              padding: '10px 16px 10px 40px',
               borderRadius: '14px',
               border: '2px solid var(--ocean-blue)',
               fontSize: '0.85rem',
@@ -674,34 +674,32 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               fontFamily: 'inherit'
             }}
           />
-          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </span>
 
-          {/* ICON-ONLY SEARCH BUTTON (NO TEXT) */}
+          {/* LEFT CLICKABLE SEARCH SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={isSearchingGeocode}
             style={{
               position: 'absolute',
-              right: '6px',
+              left: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              background: '#0284c7',
-              color: 'white',
+              background: 'transparent',
               border: 'none',
-              width: '32px',
-              height: '32px',
-              borderRadius: '10px',
+              padding: '6px',
+              borderRadius: '8px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: 0
+              color: '#0284c7'
             }}
-            title="Cari Lokasi di Peta"
+            title="Cari Lokasi"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
           </button>
         </form>
 
