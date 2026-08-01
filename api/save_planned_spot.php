@@ -68,8 +68,8 @@ try {
         $stmtInsertSpot = $pdo->prepare("INSERT INTO spots (name, category, lat, lng, stars, season, difficulty, water, visited_count) VALUES (:spot, 'Custom Spot', :lat, :lng, 5, 'All Year', 'Easy', 'Clear', 1)");
         $stmtInsertSpot->execute([
             'spot' => $spotName,
-            'lat' => $lat || -5.147812,
-            'lng' => $lng || 119.415421
+            'lat' => $lat ?? -5.147812,
+            'lng' => $lng ?? 119.415421
         ]);
     } else if ($lat && $lng) {
         // Update lat/lng in spots if missing
