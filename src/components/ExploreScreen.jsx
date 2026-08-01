@@ -925,52 +925,120 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           return (
             <div 
               key={spot.id} 
-              className="card-clean" 
-              onClick={() => {
-                setActiveMapLocation(spot);
-                setViewMode('map');
+              style={{ 
+                background: 'white', 
+                borderRadius: '18px', 
+                border: '1px solid #E2E8F0', 
+                overflow: 'hidden', 
+                boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+                display: 'flex',
+                flexDirection: 'column'
               }}
-              style={{ display: 'flex', gap: '12px', padding: '10px', borderRadius: '14px', border: '1px solid #CBD5E1', cursor: 'pointer' }}
             >
-              <div style={{ width: '84px', height: '84px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                <img src={getSpotPhoto(spot)} alt={spot.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                {badge && (
-                  <span style={{ position: 'absolute', top: '4px', left: '4px', background: badge.bg, color: badge.color, padding: '2px 6px', borderRadius: '6px', fontSize: '0.62rem', fontWeight: 900 }}>
-                    {badge.label}
+              {/* Top Hero Image Banner */}
+              <div 
+                onClick={() => {
+                  setActiveMapLocation(spot);
+                  setViewMode('map');
+                }}
+                style={{
+                  position: 'relative',
+                  height: '140px',
+                  width: '100%',
+                  overflow: 'hidden',
+                  cursor: 'pointer'
+                }}
+              >
+                <img 
+                  src={getSpotPhoto(spot)} 
+                  alt={spot.name} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+
+                {/* Dark Gradient Overlay */}
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.88) 100%)'
+                  }} 
+                />
+
+                {/* Top Left Pill */}
+                <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
+                  <span style={{ background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800 }}>
+                    {spot.category || 'Custom Spot'}
                   </span>
-                )}
+                  {badge && (
+                    <span style={{ background: badge.bg, color: badge.color, padding: '3px 8px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 900 }}>
+                      {badge.label}
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom Content over image */}
+                <div style={{ position: 'absolute', bottom: '10px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.8)', margin: 0 }}>
+                      {spot.name}
+                    </h3>
+                    <div style={{ fontSize: '0.72rem', color: '#FCD34D', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>★★★★★</span>
+                      <span style={{ color: 'rgba(255,255,255,0.85)' }}>
+                        ({spot.lat ? (+spot.lat).toFixed(3) : '-5.147'}, {spot.lng ? (+spot.lng).toFixed(3) : '119.415'})
+                      </span>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} 
+                    style={{
+                      background: '#0284c7',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 14px',
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>Peta & Detail</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                </div>
               </div>
 
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{spot.name}</strong>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', background: 'rgba(2, 132, 199, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                      ★ {spot.stars || '5.0'}
-                    </span>
-                  </div>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{spot.category} • {spot.difficulty || 'Easy'}</span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>{spot.water || 'Clear Water'}</span>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleInitiatePin(spot); }} 
-                      style={{ background: '#F59E0B', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                    >
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                      <span>Sematkan</span>
-                    </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} 
-                      style={{ background: '#0284c7', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                    >
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      <span>Detail</span>
-                    </button>
-                  </div>
-                </div>
+              {/* Bottom Action Dashed Button */}
+              <div style={{ padding: '8px 10px' }}>
+                <button
+                  onClick={() => handleInitiatePin(spot)}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    borderRadius: '12px',
+                    border: '1.5px dashed #38BDF8',
+                    background: '#F0F9FF',
+                    color: '#0284c7',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>Sematkan Tanggal Rencana</span>
+                </button>
               </div>
             </div>
           );
