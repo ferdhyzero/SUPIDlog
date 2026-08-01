@@ -83,16 +83,44 @@ main * {
   box-sizing: border-box;
 }
 
-/* 100% Full Mobile Screen Responsive Edge-to-Edge Fill on Mobile Phones */
+/* 100% Full Mobile Screen Responsive Edge-to-Edge Fill (Zero White Side Gaps on Mobile Phones) */
 @media (max-width: 768px) {
+  html, body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
   #root,
   main {
+    width: 100% !important;
     max-width: 100% !important;
+    margin: 0 !important;
     box-shadow: none !important;
   }
 
-  .header-glass,
-  .bottom-nav,
+  .header-glass {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .bottom-nav-wrapper {
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  .bottom-nav {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+  }
+
   .stamp-modal-backdrop,
   .modal-sheet,
   .modal-backdrop,
