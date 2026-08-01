@@ -149,7 +149,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
           padding: '20px 16px' 
         }}
       >
-        {/* Background Stand-Up Paddleboard Action Image (Compressed High-Res WebP) */}
+        {/* Background Stand-Up Paddleboard Action Image (Full Brightness & Vivid Contrast) */}
         <img 
           src="/sup-hero-bg.webp" 
           alt="Stand Up Paddle Boarding Indonesia"
@@ -161,12 +161,13 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             height: '100%',
             objectFit: 'cover',
             objectPosition: 'center 60%',
-            opacity: 0.75,
+            opacity: 0.95,
+            filter: 'brightness(1.05) contrast(1.05)',
             zIndex: 0,
             pointerEvents: 'none'
           }}
         />
-        {/* Translucent Soft Ocean Overlay for High Text Legibility */}
+        {/* Soft Ultra-Light Ocean Gradient Overlay */}
         <div 
           style={{
             position: 'absolute',
@@ -174,7 +175,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
             left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.20) 0%, rgba(3, 105, 161, 0.50) 100%)',
+            background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.10) 0%, rgba(3, 105, 161, 0.25) 100%)',
             zIndex: 1,
             pointerEvents: 'none'
           }}
@@ -233,7 +234,7 @@ export default function ProfileScreen({ currentUser, onOpenLogin, onLogout, onNa
           {isGuest ? 'Guest SUPer' : profileStats.name}
         </h2>
         
-        <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px' }}>
+        <div style={{ display: 'inline-block', background: 'rgba(7, 13, 27, 0.45)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', padding: '5px 14px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, marginTop: '4px', color: 'white' }}>
           {isSuperAdmin ? '🛡️ Super Admin System' : (isGuest ? '🔒 Mode Tamu (Belum Terdaftar)' : `Level: ${profileStats.level} 🧭 • Rank #${profileStats.community_rank}`)}
         </div>
 
