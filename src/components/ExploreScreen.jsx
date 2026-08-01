@@ -389,7 +389,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
     }, 100);
   }, [activeMapLocation]);
 
-  // LIVE AUTOCOMPLETE SUGGESTIONS ENGINE (DB Spots + OpenStreetMap Nominatim Geocoding)
+  // HIGH-PRECISION MULTI-ENGINE AUTOCOMPLETE SEARCH (DB Fuzzy Matcher + Nominatim + Photon Geocoder)
   useEffect(() => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       setSuggestionsList([]);
@@ -397,53 +397,106 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       return;
     }
 
-    const q = searchQuery.trim().toLowerCase();
+    const rawQuery = searchQuery.trim();
+    const qLower = rawQuery.toLowerCase();
+    const queryTokens = qLower.split(/\s+/).filter(t => t.length > 0);
 
-    // 1. Instant local DB spots filtering
-    const localMatches = spots.filter(s => 
-      s.name.toLowerCase().includes(q) || (s.category && s.category.toLowerCase().includes(q))
-    ).map(s => ({
+    // 1. Instant Tokenized Fuzzy Matching on Local DB Spots
+    const localMatches = spots.filter(s => {
+      const sName = (s.name || '').toLowerCase();
+      const sCat = (s.category || '').toLowerCase();
+      const sWater = (s.water || '').toLowerCase();
+      const sTag = (s.tag || '').toLowerCase();
+      const combined = `${sName} ${sCat} ${sWater} ${sTag}`;
+      return queryTokens.every(token => combined.includes(token));
+    }).map(s => ({
       name: s.name,
+      address: s.name + (s.category ? ` (${s.category})` : ''),
       category: s.category || 'Spot SUP',
       lat: parseFloat(s.lat),
       lng: parseFloat(s.lng),
       source: 'database'
     }));
 
-    setSuggestionsList(localMatches.slice(0, 4));
+    setSuggestionsList(localMatches.slice(0, 5));
     setShowSuggestionsDropdown(true);
 
-    // 2. Fetch OpenStreetMap / Nominatim Geocoding API on 300ms debounce
+    // 2. Multi-Engine Geocoding API with 250ms Debounce
     const timer = setTimeout(async () => {
       setIsSearchingSuggestions(true);
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ' Indonesia')}&limit=5`);
-        const geocodeData = await res.json();
-        if (geocodeData && geocodeData.length > 0) {
-          const geoMatches = geocodeData.map(g => ({
-            name: g.display_name.split(',')[0],
-            address: g.display_name,
-            lat: parseFloat(g.lat),
-            lng: parseFloat(g.lon),
-            category: g.type ? g.type.toUpperCase() : 'LOKASI MAPS',
-            source: 'nominatim'
-          }));
+        const geoResults = [];
 
-          // Merge without duplicate names
-          const combined = [...localMatches];
-          geoMatches.forEach(gItem => {
-            if (!combined.some(c => c.name.toLowerCase() === gItem.name.toLowerCase())) {
-              combined.push(gItem);
-            }
+        // Engine 1: OpenStreetMap Nominatim with Address Details
+        const searchUrl = rawQuery.toLowerCase().includes('indonesia')
+          ? `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(rawQuery)}&limit=8`
+          : `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=id&q=${encodeURIComponent(rawQuery)}&limit=8`;
+
+        const resNom = await fetch(searchUrl);
+        const dataNom = await resNom.json();
+
+        if (dataNom && dataNom.length > 0) {
+          dataNom.forEach(g => {
+            const parts = g.display_name.split(',').map(p => p.trim());
+            const primaryName = parts[0];
+            const secondaryName = parts.length > 1 ? parts.slice(1, 3).join(', ') : '';
+            const fullTitle = secondaryName ? `${primaryName} (${secondaryName})` : primaryName;
+
+            geoResults.push({
+              name: primaryName,
+              address: fullTitle,
+              lat: parseFloat(g.lat),
+              lng: parseFloat(g.lon),
+              category: g.type ? g.type.toUpperCase() : 'MAPS',
+              source: 'nominatim'
+            });
           });
-
-          setSuggestionsList(combined.slice(0, 6));
         }
+
+        // Engine 2: Photon Komoot Geocoder Fallback for beaches, bays, rivers, lakes, landmarks
+        if (geoResults.length < 3) {
+          try {
+            const resPhoton = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(rawQuery)}&limit=6`);
+            const dataPhoton = await resPhoton.json();
+            if (dataPhoton && dataPhoton.features) {
+              dataPhoton.features.forEach(f => {
+                const props = f.properties || {};
+                const coords = f.geometry ? f.geometry.coordinates : null;
+                if (coords && coords.length >= 2) {
+                  const pName = props.name || props.street || rawQuery;
+                  const pCity = props.city || props.state || props.country || '';
+                  const fullTitle = pCity ? `${pName} (${pCity})` : pName;
+
+                  if (!geoResults.some(g => g.name.toLowerCase() === pName.toLowerCase())) {
+                    geoResults.push({
+                      name: pName,
+                      address: fullTitle,
+                      lat: parseFloat(coords[1]),
+                      lng: parseFloat(coords[0]),
+                      category: props.osm_value ? props.osm_value.toUpperCase() : 'GEO',
+                      source: 'photon'
+                    });
+                  }
+                }
+              });
+            }
+          } catch (e) {}
+        }
+
+        // Combine DB matches and Geocode Results (removing duplicates)
+        const combinedList = [...localMatches];
+        geoResults.forEach(gItem => {
+          if (!combinedList.some(c => c.name.toLowerCase() === gItem.name.toLowerCase())) {
+            combinedList.push(gItem);
+          }
+        });
+
+        setSuggestionsList(combinedList.slice(0, 8));
       } catch (err) {
       } finally {
         setIsSearchingSuggestions(false);
       }
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [searchQuery, spots]);
@@ -469,19 +522,33 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const handlePerformAddressSearch = async (queryText) => {
     if (!queryText || queryText.trim().length < 2) return;
     const cleanQuery = queryText.trim();
+    const queryTokens = cleanQuery.toLowerCase().split(/\s+/).filter(t => t.length > 0);
     setShowSuggestionsDropdown(false);
 
-    const matchedSpot = spots.find(s => s.name.toLowerCase().includes(cleanQuery.toLowerCase()));
+    // 1. Check local DB spots with tokenized matching
+    const matchedSpot = spots.find(s => {
+      const sName = (s.name || '').toLowerCase();
+      const sCat = (s.category || '').toLowerCase();
+      const combined = `${sName} ${sCat}`;
+      return queryTokens.every(token => combined.includes(token));
+    });
+
     if (matchedSpot && matchedSpot.lat && matchedSpot.lng) {
       setActiveMapLocation(matchedSpot);
       setViewMode('map');
       return;
     }
 
+    // 2. Perform Multi-Engine Geocoding
     setIsSearchingGeocode(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery + ' Indonesia')}`);
+      const searchUrl = cleanQuery.toLowerCase().includes('indonesia')
+        ? `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(cleanQuery)}`
+        : `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=id&q=${encodeURIComponent(cleanQuery)}`;
+
+      const res = await fetch(searchUrl);
       const data = await res.json();
+
       if (data && data.length > 0) {
         const topMatch = data[0];
         const lat = parseFloat(topMatch.lat);
@@ -497,7 +564,26 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         setActiveMapLocation(searchedLoc);
         setViewMode('map');
       } else {
-        alert(`Lokasi '${cleanQuery}' tidak ditemukan.`);
+        // Fallback to Photon Komoot API
+        const resPhoton = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&limit=1`);
+        const dataPhoton = await resPhoton.json();
+
+        if (dataPhoton && dataPhoton.features && dataPhoton.features.length > 0) {
+          const f = dataPhoton.features[0];
+          const coords = f.geometry.coordinates;
+          const pName = f.properties.name || cleanQuery;
+
+          const searchedLoc = {
+            name: pName,
+            lat: parseFloat(coords[1]),
+            lng: parseFloat(coords[0])
+          };
+
+          setActiveMapLocation(searchedLoc);
+          setViewMode('map');
+        } else {
+          alert(`Lokasi '${cleanQuery}' tidak ditemukan. Coba ketik nama pantai, danau, sungai, atau kota secara spesifik.`);
+        }
       }
     } catch (err) {
     } finally {
@@ -764,8 +850,8 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <strong style={{ fontSize: '0.82rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</strong>
-                  <span style={{ fontSize: '0.68rem', color: '#64748B', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category} • {item.lat.toFixed(3)}, {item.lng.toFixed(3)}</span>
+                  <strong style={{ fontSize: '0.84rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
+                  <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 700, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category} • {item.lat.toFixed(4)}, {item.lng.toFixed(4)}</span>
                 </div>
                 <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7' }}>Pilih ➔</span>
               </div>
