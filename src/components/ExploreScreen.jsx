@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SpotDetailModal from './SpotDetailModal';
 
-// High-Definition Stand-Up Paddleboard (SUP) & Beach Photography Pool
+// High-Definition Stand-Up Paddleboard (SUP) & Tropical Ocean Photography Pool
 const SUP_PHOTO_POOL = [
-  'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1516690561799-46d8f7489abf?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80'
+  'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80', // Stand Up Paddleboarder in clear turquoise sea
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80', // White sand tropical beach
+  'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=600&q=80', // Sunset ocean paddleboarding
+  'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=600&q=80', // Crystal clear lagoon & SUP
+  'https://images.unsplash.com/photo-1516690561799-46d8f7489abf?auto=format&fit=crop&w=600&q=80', // Tropical island ocean coast
+  'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80', // Bali ocean beach reef
+  'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80', // Ocean shoreline sunset
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80'  // Lake & mountain paddle trip
 ];
 
 export const getSpotPhoto = (spot) => {
@@ -957,8 +955,20 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>{spot.water || 'Clear Water'}</span>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button onClick={(e) => { e.stopPropagation(); handleInitiatePin(spot); }} style={{ background: '#F59E0B', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Sematkan</button>
-                    <button onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} style={{ background: '#0284c7', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Detail</button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleInitiatePin(spot); }} 
+                      style={{ background: '#F59E0B', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <span>Sematkan</span>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} 
+                      style={{ background: '#0284c7', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      <span>Detail</span>
+                    </button>
                   </div>
                 </div>
               </div>
