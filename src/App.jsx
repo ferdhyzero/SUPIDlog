@@ -172,9 +172,41 @@ export default function App() {
         <SplashModal onClose={() => setShowSplash(false)} />
       )}
 
-      {/* Main Glass Header (Standardized Ocean SUP Theme for All Users) */}
-      <header className="header-glass">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Main Glass Header with Real Cropped Stand-Up Paddleboard Action Background Photo */}
+      <header className="header-glass" style={{ position: 'sticky', top: 0, zIndex: 40, overflow: 'hidden' }}>
+        {/* Background Real Stand-Up Paddleboard Action Photo */}
+        <img 
+          src="/header-sup-bg.webp" 
+          alt="Stand Up Paddleboard Header Background"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center 45%',
+            opacity: 0.90,
+            filter: 'brightness(1.05) contrast(1.05)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        {/* Translucent Soft Ocean Gradient Overlay for High Contrast & Text Legibility */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(90deg, rgba(7, 13, 27, 0.45) 0%, rgba(3, 105, 161, 0.30) 50%, rgba(7, 13, 27, 0.45) 100%)',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}
+        />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 2 }}>
 
           {/* Header Brand with Official PADDLE ID Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -186,12 +218,13 @@ export default function App() {
                 height: '32px',
                 borderRadius: '8px',
                 border: '1.5px solid #ffffff',
-                objectFit: 'cover'
+                objectFit: 'cover',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
               }}
             />
             <div>
-              <h1 style={{ fontSize: '0.98rem', fontWeight: 800, lineHeight: 1.1 }}>Stand Up PaddleLog</h1>
-              <span style={{ fontSize: '0.65rem', opacity: 0.85, fontWeight: 600, letterSpacing: '0.04em' }}>SUP.ID INDONESIA</span>
+              <h1 style={{ fontSize: '0.98rem', fontWeight: 900, lineHeight: 1.1, textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>Stand Up PaddleLog</h1>
+              <span style={{ fontSize: '0.65rem', opacity: 0.95, fontWeight: 700, letterSpacing: '0.04em', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>SUP.ID INDONESIA</span>
             </div>
           </div>
 
@@ -203,11 +236,13 @@ export default function App() {
                   background: '#f59e0b',
                   color: 'white',
                   border: 'none',
-                  padding: '4px 8px',
+                  padding: '4px 9px',
                   borderRadius: '16px',
                   fontSize: '0.72rem',
-                  fontWeight: 800,
-                  cursor: 'pointer'
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                 }}
               >
                 Admin
@@ -218,35 +253,41 @@ export default function App() {
               <button
                 onClick={handleLogout}
                 style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  border: '1px solid rgba(255,255,255,0.3)',
+                  background: 'rgba(7, 13, 27, 0.45)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.4)',
                   color: 'white',
                   padding: '4px 10px',
                   borderRadius: '16px',
                   fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontWeight: 800,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.7)'
                 }}
                 title="Klik untuk Keluar Akun"
               >
                 <span>👤 {currentUser.name}</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>🚪</span>
+                <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>🚪</span>
               </button>
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
                 style={{
-                  background: 'rgba(255,255,255,0.2)',
+                  background: 'rgba(7, 13, 27, 0.45)',
+                  backdropFilter: 'blur(8px)',
                   border: '1px solid rgba(255,255,255,0.4)',
                   color: 'white',
                   padding: '4px 12px',
                   borderRadius: '16px',
                   fontSize: '0.75rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.7)'
                 }}
               >
                 🔑 Login
