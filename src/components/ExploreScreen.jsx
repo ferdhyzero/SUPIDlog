@@ -247,8 +247,24 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       window.L.control.zoom({ position: 'topright' }).addTo(map);
 
-      map.on('zoomend', () => {
-        setCurrentZoomLevel(map.getZoom());
+      // Map click handler (1x click = reverse geocode to search bar + blue banner, 2x dblclick = open detail modal)
+      let mapClickTimer = null;
+
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+
+        if (mapClickTimer) {
+          clearTimeout(mapClickTimer);
+          mapClickTimer = null;
+          // DOUBLE CLICK (2x): Open detail modal directly
+          handleMapPointInteraction(lat, lng, 'dblclick');
+        } else {
+          mapClickTimer = setTimeout(() => {
+            mapClickTimer = null;
+            // SINGLE CLICK (1x): Reverse geocode & update search input + blue banner
+            handleMapPointInteraction(lat, lng, 'click');
+          }, 280);
+        }
       });
 
       leafletMapInstance.current = map;
@@ -273,6 +289,36 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     }).addTo(map);
   }, [leafletReady, mapType]);
+
+  // Reverse Geocoding Map Click Handler
+  const handleMapPointInteraction = async (lat, lng, actionType) => {
+    let placeName = `Titik (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      if (data && data.display_name) {
+        placeName = data.display_name.split(',')[0].trim() || placeName;
+      }
+    } catch (e) {}
+
+    const clickedLoc = {
+      name: placeName,
+      lat: lat,
+      lng: lng,
+      category: 'Pilihan Peta'
+    };
+
+    // 1x Click: Set search bar text, active location, & trigger blue banner
+    setSearchQuery(placeName);
+    setActiveMapLocation(clickedLoc);
+    setShowSuggestionsDropdown(false);
+
+    // 2x Double Click: Open Spot Detail Modal directly
+    if (actionType === 'dblclick') {
+      setSelectedSpotForModal(clickedLoc);
+    }
+  };
 
   useEffect(() => {
     if (viewMode === 'map' && leafletMapInstance.current) {
@@ -372,6 +418,37 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           if (onSelectSpot) onSelectSpot(spot);
         });
     });
+
+    // Render custom activeMapLocation pin if it's a custom clicked location
+    if (activeMapLocation && activeMapLocation.lat && activeMapLocation.lng) {
+      const isCustomLoc = !filteredSpots.some(s => s.name === activeMapLocation.name);
+      if (isCustomLoc) {
+        const customTargetSvg = `
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer; filter:drop-shadow(0px 5px 12px rgba(0,0,0,0.8)); transform:scale(1.25); z-index:999;">
+            <svg width="36" height="48" viewBox="0 0 24 34" fill="none">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 22 12 22s12-13 12-22c0-6.63-5.37-12-12-12z" fill="#00F2FE" stroke="#FFFFFF" stroke-width="2.5"/>
+              <circle cx="12" cy="12" r="5.5" fill="#F59E0B" stroke="#FFFFFF" stroke-width="1.5"/>
+            </svg>
+            <div style="background:#0F172A; color:#00F2FE; padding:3px 8px; borderRadius:6px; font-size:10px; font-weight:900; white-space:nowrap; margin-top:-7px; border:1.5px solid #00F2FE; box-shadow:0 3px 8px rgba(0,0,0,0.7);">
+              📍 ${activeMapLocation.name}
+            </div>
+          </div>
+        `;
+
+        const customIcon = window.L.divIcon({
+          html: customTargetSvg,
+          className: '',
+          iconSize: [36, 48],
+          iconAnchor: [18, 48]
+        });
+
+        window.L.marker([activeMapLocation.lat, activeMapLocation.lng], { icon: customIcon })
+          .addTo(markersGroup)
+          .on('click', () => {
+            setSelectedSpotForModal(activeMapLocation);
+          });
+      }
+    }
   }, [leafletReady, filteredSpots, activeMapLocation, currentZoomLevel]);
 
   // PAN/FLY TO SELECTED LOCATION WITH PRECISE COORDINATES
