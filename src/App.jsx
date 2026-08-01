@@ -172,8 +172,8 @@ export default function App() {
         <SplashModal onClose={() => setShowSplash(false)} />
       )}
 
-      {/* Main Glass Header */}
-      <header className="header-glass" style={{ background: isSuperAdmin ? '#0f172a' : undefined }}>
+      {/* Main Glass Header (Standardized Ocean SUP Theme for All Users) */}
+      <header className="header-glass">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
           {/* Header Brand with Official PADDLE ID Logo */}

@@ -108,17 +108,19 @@ h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
 h4 { font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
 p, span { line-height: 1.4; }
 
-/* Clean Ocean Blue Header - Edge-to-Edge inside App Frame */
+/* Clean Stand-Up Paddleboard Ocean Header (Unified Theme for All Users) */
 .header-glass {
   width: 100%;
   box-sizing: border-box;
-  background: var(--ocean-blue);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: white;
   padding: 12px 14px;
   position: sticky;
   top: 0;
   z-index: 40;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 /* Hero Background Card */
