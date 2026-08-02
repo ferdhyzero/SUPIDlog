@@ -10,7 +10,11 @@ function FitBounds({ coords }) {
   useEffect(() => {
     if (coords.length >= 2) {
       const bounds = coords.map(c => [c[0], c[1]]);
-      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+      // Delay to ensure container is rendered in modal
+      setTimeout(() => {
+        map.invalidateSize();
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+      }, 200);
     }
   }, [coords, map]);
   return null;
@@ -123,7 +127,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
         </div>
 
         {/* ── Leaflet Map Section ── */}
-        <div style={{ height: '280px', background: '#dce9f0' }}>
+        <div style={{ height: '280px', background: '#dce9f0', position: 'relative', zIndex: 1 }}>
           {hasRoute ? (
             <MapContainer
               center={[centerLat, centerLng]}
@@ -131,7 +135,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
               scrollWheelZoom={false}
               dragging={true}
               zoomControl={false}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '280px', width: '100%', zIndex: 1 }}
             >
               <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

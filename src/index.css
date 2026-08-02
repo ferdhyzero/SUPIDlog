@@ -453,3 +453,16 @@ p, span { line-height: 1.4; }
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Leaflet fixes inside modal */
+.activity-detail-sheet .leaflet-container {
+  z-index: 1 !important;
+  background: #dce9f0;
+}
+.activity-detail-sheet .leaflet-pane {
+  z-index: 1;
+}
+.activity-detail-sheet .leaflet-top,
+.activity-detail-sheet .leaflet-bottom {
+  z-index: 2;
+}
