@@ -1060,18 +1060,16 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       </button>
 
       {/* ── POP-UP BOTTOM SHEET FOR SPOTS LIST ── */}
-      {(showListBottomSheet || viewMode === 'list') && (
+      {showListBottomSheet && (
         <div 
-          onClick={() => { setShowListBottomSheet(false); setViewMode('map'); }}
-          style={{ position: 'fixed', inset: 0, zIndex: 2500, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+          className="activity-detail-overlay"
+          onClick={() => setShowListBottomSheet(false)}
         >
           <div 
+            className="activity-detail-sheet"
             onClick={e => e.stopPropagation()} 
             style={{ 
-              maxHeight: '82vh', background: '#F8FAFC', 
-              borderTopLeftRadius: '24px', borderTopRightRadius: '24px', 
-              overflowY: 'auto', padding: '14px 14px 90px 14px',
-              boxShadow: '0 -10px 30px rgba(0,0,0,0.3)',
+              padding: '16px 16px 90px 16px',
               display: 'flex', flexDirection: 'column', gap: '12px'
             }}
           >
@@ -1085,7 +1083,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                 <span style={{ fontSize: '0.72rem', color: '#64748B' }}>Pilih spot untuk melihat lokasi di peta</span>
               </div>
               <button 
-                onClick={() => { setShowListBottomSheet(false); setViewMode('map'); }} 
+                onClick={() => setShowListBottomSheet(false)} 
                 style={{ background: '#E2E8F0', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontWeight: 800, color: '#475569' }}
               >
                 ✕
