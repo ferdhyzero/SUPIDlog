@@ -191,77 +191,71 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
         </div>
 
         {/* ── Leaflet Map Container + Floating Controls ── */}
-        <div style={{ height: '290px', background: '#0F172A', position: 'relative', zIndex: 1, overflow: 'hidden', perspective: '1000px' }}>
+        <div style={{ height: '380px', background: mapType === 'satellite' ? '#111827' : '#e5e1d6', position: 'relative', zIndex: 1, overflow: 'hidden', perspective: '1000px' }}>
           {hasRoute ? (
             <>
               {/* Map Controls Top Right */}
               <div style={{
-                position: 'absolute', top: '10px', right: '10px', zIndex: 500,
-                display: 'flex', gap: '4px', background: 'rgba(15, 23, 42, 0.8)',
-                backdropFilter: 'blur(8px)', padding: '3px', borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.2)'
+                position: 'absolute', top: '12px', right: '12px', zIndex: 500,
+                display: 'flex', flexDirection: 'column', gap: '8px'
               }}>
-                {Object.keys(MAP_TILES).map(key => (
-                  <button
-                    key={key}
-                    onClick={() => setMapType(key)}
-                    style={{
-                      border: 'none',
-                      background: mapType === key ? '#0284c7' : 'transparent',
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '7px',
-                      fontSize: '0.68rem',
-                      fontWeight: mapType === key ? 900 : 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {MAP_TILES[key].label}
-                  </button>
-                ))}
-                {/* 3D Perspective Mode Button */}
+                {/* Map Layer Toggle Button (Street / Satellite) */}
+                <button
+                  onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
+                  style={{
+                    border: 'none', background: 'white', color: '#0F172A',
+                    width: '38px', height: '38px', borderRadius: '10px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}
+                  title="Ganti Peta"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/>
+                  </svg>
+                </button>
+                {/* 3D Perspective Toggle Button */}
                 <button
                   onClick={() => setIs3D(!is3D)}
                   style={{
-                    border: 'none',
-                    background: is3D ? 'linear-gradient(135deg, #0284c7, #06B6D4)' : 'transparent',
-                    color: 'white',
-                    padding: '4px 9px',
-                    borderRadius: '7px',
-                    fontSize: '0.68rem',
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px'
+                    border: 'none', background: is3D ? '#0284c7' : 'white',
+                    color: is3D ? 'white' : '#0F172A',
+                    width: '38px', height: '38px', borderRadius: '10px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                   }}
+                  title="3D Perspektif"
                 >
-                  <span>3D</span>
+                  <span style={{ fontWeight: 900, fontSize: '0.9rem' }}>3D</span>
                 </button>
               </div>
 
-              {/* Replay Animation Button Bottom Right */}
+              {/* Replay Animation Button Bottom Center */}
               <button
                 onClick={handlePlayAnimation}
+                disabled={isPlaying}
                 style={{
-                  position: 'absolute', bottom: '12px', right: '12px', zIndex: 500,
-                  background: isPlaying ? '#DC2626' : 'linear-gradient(135deg, #0284c7, #0369a1)',
-                  color: 'white', border: '1.5px solid rgba(255,255,255,0.4)',
-                  padding: '7px 14px', borderRadius: '20px',
-                  fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                  position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 500,
+                  background: isPlaying ? 'rgba(2, 132, 199, 0.7)' : '#0284c7',
+                  color: 'white', border: 'none', padding: '10px 20px', borderRadius: '30px',
+                  fontWeight: 900, fontSize: '0.85rem', cursor: isPlaying ? 'default' : 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  boxShadow: '0 6px 16px rgba(0,0,0,0.25)',
+                  transition: 'all 0.2s ease',
+                  opacity: isPlaying ? 0.8 : 1
                 }}
               >
                 {isPlaying ? (
                   <>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                    Stop
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    Memutar...
                   </>
                 ) : (
                   <>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Putar Animasi Rute
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Putar Rute
                   </>
                 )}
               </button>
@@ -269,7 +263,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
               <div style={{
                 height: '100%',
                 width: '100%',
-                transform: is3D ? 'rotateX(48deg) scale(1.25)' : 'none',
+                transform: is3D ? 'translateY(10%) rotateX(50deg) scale(1.4)' : 'none',
                 transformOrigin: 'center center',
                 transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
               }}>
@@ -280,9 +274,9 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                   dragging={true}
                   zoomControl={false}
                   attributionControl={false}
-                  style={{ height: '290px', width: '100%', zIndex: 1 }}
+                  style={{ height: '380px', width: '100%', zIndex: 1 }}
                 >
-                <TileLayer url={MAP_TILES[mapType].url} attribution={MAP_TILES[mapType].attribution} />
+                <TileLayer url={MAP_TILES[mapType]?.url || MAP_TILES.street.url} attribution={MAP_TILES[mapType]?.attribution || ''} />
                 <FitBounds coords={routeCoords} />
 
                 {/* Outer Glow Stroke for SUP.ID Ocean Blue Contrast */}
