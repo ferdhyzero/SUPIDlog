@@ -851,43 +851,12 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       {/* ── FULL-HEIGHT LEAFLET MAP CONTAINER ── */}
       <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 1 }} />
 
-      {/* ── FLOATING TOP CONTROLS OVERLAY (GLASSMORPHISM) ── */}
+      {/* ── FLOATING TOP CONTROLS OVERLAY (SEARCH & FILTERS) ── */}
       <div style={{
         position: 'absolute', top: '10px', left: '10px', right: '10px', zIndex: 1000,
-        background: 'rgba(15, 23, 42, 0.88)', backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,255,255,0.2)', padding: '10px 12px', borderRadius: '16px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: '8px'
+        display: 'flex', flexDirection: 'column', gap: '8px'
       }}>
-        {/* Top Header Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'white' }}>Explore Spots</span>
-            <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 700 }}>({spots.length})</span>
-          </div>
-
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            <button
-              onClick={() => setShowAddSpotModal(true)}
-              style={{ padding: '5px 10px', borderRadius: '8px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Baru
-            </button>
-
-            <button
-              onClick={() => setMapType(mapType === 'satellite' ? 'roadmap' : 'satellite')}
-              style={{ padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', fontSize: '0.72rem', fontWeight: 800, background: mapType === 'satellite' ? '#F59E0B' : 'rgba(255,255,255,0.2)', color: mapType === 'satellite' ? '#0F172A' : 'white', cursor: 'pointer' }}
-            >
-              {mapType === 'satellite' ? 'Satelit' : 'Biasa'}
-            </button>
-          </div>
-        </div>
-
-        {/* Search Bar Form */}
+        {/* Search Input Bar */}
         <div style={{ position: 'relative' }}>
           <form
             onSubmit={(e) => {
@@ -900,20 +869,23 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           >
             <input 
               type="text" 
-              placeholder="Cari pantai, danau, sungai, atau alamat..."
+              placeholder="Cari Spot pantai, danau, sungai..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => { if (suggestionsList.length > 0) setShowSuggestionsDropdown(true); }}
               style={{
                 width: '100%',
-                padding: '8px 14px 8px 36px',
-                borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                fontSize: '0.8rem',
-                background: 'rgba(255,255,255,0.15)',
-                color: 'white',
+                padding: '10px 16px 10px 40px',
+                borderRadius: '30px',
+                border: 'none',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                background: 'white',
+                color: '#0F172A',
+                boxShadow: '0 4px 18px rgba(0,0,0,0.18)',
                 outline: 'none',
-                fontFamily: 'inherit'
+                fontFamily: 'inherit',
+                boxSizing: 'border-box'
               }}
             />
 
@@ -921,13 +893,13 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               type="submit"
               disabled={isSearchingGeocode}
               style={{
-                position: 'absolute', left: '6px', top: '50%', transform: 'translateY(-50%)',
+                position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
                 background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38BDF8'
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284c7'
               }}
-              title="Cari Lokasi"
+              title="Cari Spot"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
@@ -938,17 +910,17 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           {showSuggestionsDropdown && suggestionsList.length > 0 && (
             <div 
               style={{
-                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-                background: 'white', borderRadius: '12px', border: '1.5px solid #0284c7',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: 2000, maxHeight: '220px', overflowY: 'auto'
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
+                background: 'white', borderRadius: '16px', border: '1px solid #E2E8F0',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.25)', zIndex: 2000, maxHeight: '220px', overflowY: 'auto'
               }}
             >
-              <div style={{ padding: '6px 10px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.7rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>REKOMENDASI LOKASI ({suggestionsList.length})</span>
+              <div style={{ padding: '8px 12px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.7rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>REKOMENDASI SPOT ({suggestionsList.length})</span>
                 <button
                   type="button"
                   onClick={() => { setShowSuggestionsDropdown(false); setSuggestionsList([]); }}
-                  style={{ background: '#EF4444', color: 'white', border: 'none', padding: '2px 6px', borderRadius: '4px', fontSize: '0.62rem', fontWeight: 800, cursor: 'pointer' }}
+                  style={{ background: '#EF4444', color: 'white', border: 'none', padding: '2px 8px', borderRadius: '6px', fontSize: '0.62rem', fontWeight: 800, cursor: 'pointer' }}
                 >
                   Tutup
                 </button>
@@ -959,15 +931,15 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                   key={idx}
                   onClick={() => handleSelectSuggestion(item)}
                   style={{
-                    padding: '8px 10px', borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
+                    padding: '9px 12px', borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', background: 'white'
                   }}
                 >
-                  <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <div style={{ width: '26px', height: '26px', borderRadius: '8px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <strong style={{ fontSize: '0.78rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
+                    <strong style={{ fontSize: '0.8rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
                     <span style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category}</span>
                   </div>
                 </div>
@@ -976,34 +948,17 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           )}
         </div>
 
-        {/* Pin Action Banner */}
-        {searchQuery.trim().length >= 3 && (
-          <div 
-            onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
-            style={{
-              background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
-              color: 'white', borderRadius: '10px', padding: '6px 10px',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <strong style={{ fontSize: '0.75rem' }}>Sematkan "{searchQuery}"</strong>
-            </div>
-            <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 900 }}>SEMATKAN</span>
-          </div>
-        )}
-
-        {/* Category Chips Scroll */}
-        <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {/* Filter Horizontal Chips */}
+        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', scrollbarWidth: 'none', padding: '2px 0' }}>
           {filters.map((f) => (
             <button 
               key={f}
               onClick={() => { setActiveFilter(f); setActiveMapLocation(null); }}
               style={{
-                padding: '3px 9px', borderRadius: '14px', border: 'none', fontSize: '0.68rem', fontWeight: 800,
-                background: activeFilter === f ? '#0284c7' : 'rgba(255,255,255,0.15)',
-                color: activeFilter === f ? 'white' : '#CBD5E1', cursor: 'pointer', whiteSpace: 'nowrap'
+                padding: '5px 12px', borderRadius: '20px', border: 'none', fontSize: '0.72rem', fontWeight: 800,
+                background: activeFilter === f ? '#0284c7' : 'white',
+                color: activeFilter === f ? 'white' : '#0F172A',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.12)', cursor: 'pointer', whiteSpace: 'nowrap'
               }}
             >
               {f}
@@ -1012,52 +967,172 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         </div>
       </div>
 
-      {/* ── FLOATING BOTTOM CONTROLS ON MAP ── */}
-      {/* GPS Target Location Button (Bottom Left) */}
+      {/* ── RIGHT ACTION BUTTON STACK (LAYER & MY LOCATION) ── */}
+      <div style={{
+        position: 'absolute', top: '115px', right: '12px', zIndex: 1000,
+        display: 'flex', flexDirection: 'column', gap: '10px'
+      }}>
+        {/* Layer Map Switcher Button (Outline Layers Icon) */}
+        <button
+          type="button"
+          onClick={() => setMapType(mapType === 'satellite' ? 'roadmap' : 'satellite')}
+          style={{
+            width: '42px', height: '42px', borderRadius: '50%',
+            background: 'white', color: '#0F172A', border: 'none',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.2)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          title={mapType === 'satellite' ? 'Tampilan Peta Biasa' : 'Tampilan Peta Satelit'}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 12 12 17 22 12"/>
+            <polyline points="2 17 12 22 22 17"/>
+          </svg>
+        </button>
+
+        {/* My Location GPS Target Button */}
+        <button
+          type="button"
+          onClick={() => {
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  const { latitude, longitude } = pos.coords;
+                  if (leafletMapInstance.current) {
+                    leafletMapInstance.current.setView([latitude, longitude], 14, { animate: true });
+                  }
+                },
+                () => alert('Gagal mendeteksi lokasi GPS.')
+              );
+            }
+          }}
+          style={{
+            width: '42px', height: '42px', borderRadius: '50%',
+            background: 'white', color: '#0F172A', border: 'none',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.2)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          title="Lokasi Saya (GPS Target)"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="2" x2="12" y2="4"/>
+            <line x1="12" y1="20" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="4" y2="12"/>
+            <line x1="20" y1="12" x2="22" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* ── FLOATING BUTTON "+ BUAT SPOT" (RIGHT BOTTOM ABOVE CAROUSEL) ── */}
       <button
         type="button"
-        onClick={() => {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (pos) => {
-                const { latitude, longitude } = pos.coords;
-                if (leafletMapInstance.current) {
-                  leafletMapInstance.current.setView([latitude, longitude], 14, { animate: true });
-                }
-              },
-              () => alert('Gagal mendeteksi lokasi GPS.')
-            );
-          }
-        }}
+        onClick={() => setShowAddSpotModal(true)}
         style={{
-          position: 'absolute', bottom: '16px', left: '16px', zIndex: 1000,
-          width: '42px', height: '42px', borderRadius: '12px',
-          background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)',
-          color: 'white', border: '1px solid rgba(255, 255, 255, 0.35)',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.35)', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
+          position: 'absolute', bottom: '215px', right: '12px', zIndex: 1000,
+          background: 'white', color: '#0F172A', border: 'none',
+          padding: '9px 16px', borderRadius: '30px', fontWeight: 900, fontSize: '0.82rem',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '6px',
+          cursor: 'pointer'
         }}
-        title="Lokasi Saya (GPS Target)"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        + Buat Spot
       </button>
 
-      {/* Floating Bottom List Spot Button (Bottom Right) */}
-      <button
-        type="button"
+      {/* ── HORIZONTAL SPOT CARDS CAROUSEL (BOTTOM OVER MAP) ── */}
+      <div style={{
+        position: 'absolute', bottom: '48px', left: 0, right: 0, zIndex: 1000,
+        padding: '0 12px', overflowX: 'auto', display: 'flex', gap: '12px',
+        scrollbarWidth: 'none', scrollSnapType: 'x mandatory'
+      }}>
+        {filteredSpots.map((spot) => {
+          const badge = getVisitBadge(spot.name);
+          const isSelected = activeMapLocation && activeMapLocation.name === spot.name;
+
+          return (
+            <div
+              key={spot.id}
+              onClick={() => {
+                setActiveMapLocation(spot);
+                if (leafletMapInstance.current && spot.lat && spot.lng) {
+                  leafletMapInstance.current.flyTo([spot.lat, spot.lng], 14, { duration: 1.2 });
+                }
+              }}
+              style={{
+                width: '260px', flexShrink: 0, scrollSnapAlign: 'center',
+                background: 'white', borderRadius: '16px', border: isSelected ? '2px solid #0284c7' : '1px solid #E2E8F0',
+                overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.18)', cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {/* Hero Photo Header */}
+              <div style={{ position: 'relative', height: '110px', width: '100%', overflow: 'hidden' }}>
+                <img src={getSpotPhoto(spot)} alt={spot.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.8) 100%)' }} />
+
+                <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '4px' }}>
+                  <span style={{ background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)', color: 'white', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 800 }}>
+                    {spot.category || 'Spot SUP'}
+                  </span>
+                  {badge && (
+                    <span style={{ background: badge.bg, color: badge.color, padding: '2px 8px', borderRadius: '9999px', fontSize: '0.65rem', fontWeight: 900 }}>
+                      {badge.label}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ position: 'absolute', bottom: '8px', left: '10px', right: '10px' }}>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 900, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {spot.name}
+                  </h4>
+                </div>
+              </div>
+
+              {/* Card Footer Content */}
+              <div style={{ padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
+                <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>
+                  📍 {spot.lat ? (+spot.lat).toFixed(3) : '-5.147'}, {spot.lng ? (+spot.lng).toFixed(3) : '119.415'}
+                </span>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedSpotForModal(spot);
+                  }}
+                  style={{
+                    background: '#0284c7', color: 'white', border: 'none',
+                    padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem',
+                    fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px'
+                  }}
+                >
+                  Detail ➔
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── BOTTOM DRAWER BAR HANDLE (CLICK/PULL TO SEE ALL SPOTS) ── */}
+      <div 
         onClick={() => setShowListBottomSheet(true)}
         style={{
-          position: 'absolute', bottom: '16px', right: '16px', zIndex: 1000,
-          background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: 'white',
-          border: '1.5px solid rgba(255,255,255,0.4)', padding: '10px 18px', borderRadius: '30px',
-          fontWeight: 900, fontSize: '0.82rem', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '6px',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.35)', transition: 'all 0.2s ease'
+          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1000,
+          height: '42px', background: 'white', borderTopLeftRadius: '18px', borderTopRightRadius: '18px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          boxShadow: '0 -4px 14px rgba(0,0,0,0.12)', cursor: 'pointer'
         }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        List Spot ({filteredSpots.length})
-      </button>
+        <div style={{ width: '32px', height: '4px', background: '#CBD5E1', borderRadius: '2px', position: 'absolute', top: '6px' }} />
+        <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#0F172A', marginTop: '6px' }}>
+          📋 {filteredSpots.length} Spot Dayung <span style={{ color: '#0284c7', fontSize: '0.75rem' }}>▲ Lihat Semua</span>
+        </span>
+      </div>
 
       {/* ── POP-UP BOTTOM SHEET FOR SPOTS LIST ── */}
       {showListBottomSheet && (
