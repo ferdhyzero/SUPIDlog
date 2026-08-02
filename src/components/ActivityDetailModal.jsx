@@ -12,9 +12,9 @@ function FitBounds({ coords, is3D }) {
       const bounds = coords.map(c => [c[0], c[1]]);
       setTimeout(() => {
         map.invalidateSize();
-        // Counteract scale(2) in 3D mode by adding large padding so route isn't cut off
-        const pad = is3D ? 120 : 30;
-        map.fitBounds(bounds, { padding: [pad, pad], maxZoom: is3D ? 15 : 16 });
+        // Counteract mild scale(1.28) in 3D mode so route is perfectly centered and crisp
+        const pad = is3D ? 60 : 30;
+        map.fitBounds(bounds, { padding: [pad, pad], maxZoom: 16 });
       }, 200);
     }
   }, [coords, map, is3D]);
@@ -174,18 +174,23 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
       <div className="activity-detail-sheet" onClick={e => e.stopPropagation()}>
 
         {/* ── Leaflet Map Container + Floating Controls ── */}
-        {/* ── Leaflet Map Container + Floating Controls ── */}
         <div style={{ position: 'relative', height: '55vh', zIndex: 1 }}>
           
           {/* Map 3D Perspective Wrapper */}
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', perspective: '1000px', background: mapType === 'satellite' ? '#111827' : '#e5e1d6', borderTopLeftRadius: '20px', borderTopRightRadius: '20px' }}>
+          <div style={{
+            position: 'absolute', inset: 0, overflow: 'hidden', perspective: '1200px',
+            background: mapType === 'satellite' ? '#111827' : '#e5e1d6',
+            borderTopLeftRadius: '20px', borderTopRightRadius: '20px'
+          }}>
             {hasRoute ? (
               <div style={{
                 height: '100%',
                 width: '100%',
-                transform: is3D ? 'translateY(15%) rotateX(55deg) scale(2)' : 'none',
+                transform: is3D ? 'translateY(6%) rotateX(38deg) scale(1.28)' : 'none',
                 transformOrigin: 'center center',
-                transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+                transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+                backfaceVisibility: 'hidden',
+                willChange: 'transform'
               }}>
                 <MapContainer
                   center={[centerLat, centerLng]}
