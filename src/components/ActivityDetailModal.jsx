@@ -30,16 +30,11 @@ const MAP_TILES = {
     label: 'Satelit',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri World Imagery'
-  },
-  topo: {
-    label: '3D Topo',
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenTopoMap'
   }
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// ACTIVITY DETAIL MODAL (SUP.ID Blue Theme, Map Switcher, Replay Animation)
+// ACTIVITY DETAIL MODAL (SUP.ID Blue Theme, Map Switcher, 3D Perspective, Replay)
 // ─────────────────────────────────────────────────────────────────────
 export default function ActivityDetailModal({ activity, currentUserId, onClose, onRequireLogin }) {
   const [comments, setComments] = useState([]);
@@ -49,8 +44,10 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
   const [isKudosed, setIsKudosed] = useState(false);
   const [kudosLoading, setKudosLoading] = useState(false);
 
-  // Map layer state: 'street' | 'satellite' | 'topo'
-  const [mapType, setMapType] = useState('street');
+  // Map layer state: 'street' | 'satellite'
+  const [mapType, setMapType] = useState('satellite'); // Default satellite like Strava 3D
+  // 3D Perspective Tilt state
+  const [is3D, setIs3D] = useState(true); // Default 3D perspective mode
 
   // Animation state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -194,13 +191,13 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
         </div>
 
         {/* ── Leaflet Map Container + Floating Controls ── */}
-        <div style={{ height: '290px', background: '#0F172A', position: 'relative', zIndex: 1 }}>
+        <div style={{ height: '290px', background: '#0F172A', position: 'relative', zIndex: 1, overflow: 'hidden', perspective: '1000px' }}>
           {hasRoute ? (
             <>
               {/* Map Controls Top Right */}
               <div style={{
                 position: 'absolute', top: '10px', right: '10px', zIndex: 500,
-                display: 'flex', gap: '4px', background: 'rgba(15, 23, 42, 0.75)',
+                display: 'flex', gap: '4px', background: 'rgba(15, 23, 42, 0.8)',
                 backdropFilter: 'blur(8px)', padding: '3px', borderRadius: '10px',
                 border: '1px solid rgba(255,255,255,0.2)'
               }}>
@@ -222,6 +219,25 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                     {MAP_TILES[key].label}
                   </button>
                 ))}
+                {/* 3D Perspective Mode Button */}
+                <button
+                  onClick={() => setIs3D(!is3D)}
+                  style={{
+                    border: 'none',
+                    background: is3D ? 'linear-gradient(135deg, #0284c7, #06B6D4)' : 'transparent',
+                    color: 'white',
+                    padding: '4px 9px',
+                    borderRadius: '7px',
+                    fontSize: '0.68rem',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px'
+                  }}
+                >
+                  <span>3D</span>
+                </button>
               </div>
 
               {/* Replay Animation Button Bottom Right */}
@@ -250,15 +266,22 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                 )}
               </button>
 
-              <MapContainer
-                center={[centerLat, centerLng]}
-                zoom={14}
-                scrollWheelZoom={false}
-                dragging={true}
-                zoomControl={false}
-                attributionControl={false}
-                style={{ height: '290px', width: '100%', zIndex: 1 }}
-              >
+              <div style={{
+                height: '100%',
+                width: '100%',
+                transform: is3D ? 'rotateX(48deg) scale(1.25)' : 'none',
+                transformOrigin: 'center center',
+                transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+              }}>
+                <MapContainer
+                  center={[centerLat, centerLng]}
+                  zoom={14}
+                  scrollWheelZoom={false}
+                  dragging={true}
+                  zoomControl={false}
+                  attributionControl={false}
+                  style={{ height: '290px', width: '100%', zIndex: 1 }}
+                >
                 <TileLayer url={MAP_TILES[mapType].url} attribution={MAP_TILES[mapType].attribution} />
                 <FitBounds coords={routeCoords} />
 
@@ -278,6 +301,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                 {/* End / Moving marker (cyan blue dot) */}
                 <CircleMarker center={currentMarker} radius={6.5} pathOptions={{ fillColor: '#00D2FF', fillOpacity: 1, color: 'white', weight: 3 }} />
               </MapContainer>
+              </div>
             </>
           ) : (
             <div style={{
