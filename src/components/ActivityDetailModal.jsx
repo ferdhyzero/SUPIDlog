@@ -171,9 +171,66 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
       <div className="activity-detail-sheet" onClick={e => e.stopPropagation()}>
 
         {/* ── Leaflet Map Container + Floating Controls ── */}
-        <div style={{ height: '55vh', background: mapType === 'satellite' ? '#111827' : '#e5e1d6', position: 'relative', zIndex: 1, overflow: 'hidden', perspective: '1000px' }}>
+        {/* ── Leaflet Map Container + Floating Controls ── */}
+        <div style={{ position: 'relative', height: '55vh', zIndex: 1 }}>
           
-          {/* Top Left Back Button */}
+          {/* Map 3D Perspective Wrapper */}
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', perspective: '1000px', background: mapType === 'satellite' ? '#111827' : '#e5e1d6', borderTopLeftRadius: '20px', borderTopRightRadius: '20px' }}>
+            {hasRoute ? (
+              <div style={{
+                height: '100%',
+                width: '100%',
+                transform: is3D ? 'translateY(15%) rotateX(55deg) scale(2)' : 'none',
+                transformOrigin: 'center center',
+                transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+              }}>
+                <MapContainer
+                  center={[centerLat, centerLng]}
+                  zoom={14}
+                  scrollWheelZoom={false}
+                  dragging={true}
+                  zoomControl={false}
+                  attributionControl={false}
+                  style={{ height: '55vh', width: '100%', zIndex: 1 }}
+                >
+                  <TileLayer url={MAP_TILES[mapType]?.url || MAP_TILES.street.url} attribution={MAP_TILES[mapType]?.attribution || ''} />
+                  <FitBounds coords={routeCoords} />
+
+                  {/* Outer Glow Stroke for SUP.ID Ocean Blue Contrast */}
+                  <Polyline
+                    positions={displayedRoute}
+                    pathOptions={{ color: '#0369a1', weight: 6.5, opacity: 0.7, lineCap: 'round', lineJoin: 'round' }}
+                  />
+                  {/* Main SUP.ID Ocean Blue Polyline */}
+                  <Polyline
+                    positions={displayedRoute}
+                    pathOptions={{ color: '#00D2FF', weight: 4, opacity: 1, lineCap: 'round', lineJoin: 'round' }}
+                  />
+
+                  {/* Start marker (green) */}
+                  <CircleMarker center={startPt} radius={7} pathOptions={{ fillColor: '#2DC76D', fillOpacity: 1, color: 'white', weight: 3 }} />
+                  {/* End / Moving marker (cyan blue dot) */}
+                  <CircleMarker center={currentMarker} radius={6.5} pathOptions={{ fillColor: '#00D2FF', fillOpacity: 1, color: 'white', weight: 3 }} />
+                </MapContainer>
+              </div>
+            ) : (
+              <div style={{
+                height: '100%',
+                background: 'linear-gradient(135deg, #0369a1, #0891B2, #06B6D4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ opacity: 0.7, marginBottom: '8px' }}>
+                    <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                    <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                  </svg>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.9 }}>Tidak ada rute GPS tercatat</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Top Left Back Button (Outside 3D Context) */}
           <button onClick={onClose} style={{
             position: 'absolute', top: '16px', left: '16px', zIndex: 1000,
             background: 'white', border: 'none', width: '40px', height: '40px',
@@ -185,7 +242,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
             </svg>
           </button>
 
-          {/* Map Controls Right Side */}
+          {/* Map Controls Right Side (Outside 3D Context) */}
           <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')} style={{
               background: 'white', border: 'none', width: '40px', height: '40px',
@@ -203,73 +260,20 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
             </button>
           </div>
 
-          {hasRoute ? (
-            <>
-              {/* Bottom Right Play Button */}
-              <button onClick={handlePlayAnimation} disabled={isPlaying} style={{
-                position: 'absolute', bottom: '20px', right: '16px', zIndex: 1000,
-                background: 'white', border: 'none', width: '60px', height: '60px',
-                borderRadius: '50%', cursor: isPlaying ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'all 0.2s ease', opacity: isPlaying ? 0.7 : 1
-              }}>
-                {isPlaying ? (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="black"><rect x="7" y="7" width="10" height="10"/></svg>
-                ) : (
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'translateX(2px)' }}><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                )}
-              </button>
-
-              <div style={{
-                height: '100%',
-                width: '100%',
-                transform: is3D ? 'translateY(5%) rotateX(50deg) scale(1.8)' : 'none',
-                transformOrigin: 'center center',
-                transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
-              }}>
-                <MapContainer
-                  center={[centerLat, centerLng]}
-                  zoom={14}
-                  scrollWheelZoom={false}
-                  dragging={true}
-                  zoomControl={false}
-                  attributionControl={false}
-                  style={{ height: '55vh', width: '100%', zIndex: 1 }}
-                >
-                <TileLayer url={MAP_TILES[mapType]?.url || MAP_TILES.street.url} attribution={MAP_TILES[mapType]?.attribution || ''} />
-                <FitBounds coords={routeCoords} />
-
-                {/* Outer Glow Stroke for SUP.ID Ocean Blue Contrast */}
-                <Polyline
-                  positions={displayedRoute}
-                  pathOptions={{ color: '#0369a1', weight: 6.5, opacity: 0.7, lineCap: 'round', lineJoin: 'round' }}
-                />
-                {/* Main SUP.ID Ocean Blue Polyline */}
-                <Polyline
-                  positions={displayedRoute}
-                  pathOptions={{ color: '#00D2FF', weight: 4, opacity: 1, lineCap: 'round', lineJoin: 'round' }}
-                />
-
-                {/* Start marker (green) */}
-                <CircleMarker center={startPt} radius={7} pathOptions={{ fillColor: '#2DC76D', fillOpacity: 1, color: 'white', weight: 3 }} />
-                {/* End / Moving marker (cyan blue dot) */}
-                <CircleMarker center={currentMarker} radius={6.5} pathOptions={{ fillColor: '#00D2FF', fillOpacity: 1, color: 'white', weight: 3 }} />
-              </MapContainer>
-              </div>
-            </>
-          ) : (
-            <div style={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #0369a1, #0891B2, #06B6D4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+          {hasRoute && (
+            /* Bottom Right Play Button (Outside 3D Context) */
+            <button onClick={handlePlayAnimation} disabled={isPlaying} style={{
+              position: 'absolute', bottom: '20px', right: '16px', zIndex: 1000,
+              background: 'white', border: 'none', width: '60px', height: '60px',
+              borderRadius: '50%', cursor: isPlaying ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'all 0.2s ease', opacity: isPlaying ? 0.7 : 1
             }}>
-              <div style={{ textAlign: 'center' }}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ opacity: 0.7, marginBottom: '8px' }}>
-                  <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-                  <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-                </svg>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.9 }}>Tidak ada rute GPS tercatat</div>
-              </div>
-            </div>
+              {isPlaying ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="black"><rect x="7" y="7" width="10" height="10"/></svg>
+              ) : (
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'translateX(2px)' }}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              )}
+            </button>
           )}
         </div>
 
