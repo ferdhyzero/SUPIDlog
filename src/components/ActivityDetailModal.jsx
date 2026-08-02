@@ -1,7 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // ─────────────────────────────────────────────────────────────────────
-// ACTIVITY DETAIL MODAL (Strava-style fullscreen detail)
+// Auto-fit map bounds to route
+// ─────────────────────────────────────────────────────────────────────
+function FitBounds({ coords }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords.length >= 2) {
+      const bounds = coords.map(c => [c[0], c[1]]);
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+    }
+  }, [coords, map]);
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ACTIVITY DETAIL MODAL (Strava-style fullscreen detail with Leaflet)
 // ─────────────────────────────────────────────────────────────────────
 export default function ActivityDetailModal({ activity, currentUserId, onClose, onRequireLogin }) {
   const [comments, setComments] = useState([]);
@@ -10,7 +26,6 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
   const [kudosCount, setKudosCount] = useState(activity?.kudos_count || 0);
   const [isKudosed, setIsKudosed] = useState(false);
   const [kudosLoading, setKudosLoading] = useState(false);
-  const [mapLoaded, setMapLoaded] = useState(false);
 
   const act = activity;
   if (!act) return null;
@@ -29,21 +44,10 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
   } catch (e) {}
 
   const hasRoute = routeCoords.length >= 2;
-
-  // Center + zoom for map
-  let centerLat = -5.147, centerLng = 119.432, zoom = 14;
-  if (hasRoute) {
-    const lats = routeCoords.map(p => p[0]);
-    const lngs = routeCoords.map(p => p[1]);
-    centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
-    centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
-    const spread = Math.max(Math.max(...lats) - Math.min(...lats), Math.max(...lngs) - Math.min(...lngs));
-    if (spread > 0.1) zoom = 12;
-    else if (spread > 0.05) zoom = 13;
-    else if (spread > 0.01) zoom = 14;
-    else if (spread > 0.005) zoom = 15;
-    else zoom = 16;
-  }
+  const startPt = hasRoute ? routeCoords[0] : null;
+  const endPt = hasRoute ? routeCoords[routeCoords.length - 1] : null;
+  const centerLat = hasRoute ? (Math.min(...routeCoords.map(p => p[0])) + Math.max(...routeCoords.map(p => p[0]))) / 2 : -5.147;
+  const centerLng = hasRoute ? (Math.min(...routeCoords.map(p => p[1])) + Math.max(...routeCoords.map(p => p[1]))) / 2 : 119.432;
 
   // Load comments
   useEffect(() => {
@@ -86,81 +90,6 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
     setCommentLoading(false);
   };
 
-  // SVG Route for detail (larger)
-  const renderDetailRoute = () => {
-    if (!hasRoute) return null;
-    const lats = routeCoords.map(p => p[0]);
-    const lngs = routeCoords.map(p => p[1]);
-    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-    const latRange = maxLat - minLat || 0.001;
-    const lngRange = maxLng - minLng || 0.001;
-
-    const W = 400, H = 250, PAD = 24;
-    const norm = routeCoords.map(([lat, lng]) => {
-      const x = PAD + ((lng - minLng) / lngRange) * (W - PAD * 2);
-      const y = H - PAD - ((lat - minLat) / latRange) * (H - PAD * 2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    });
-    const startPt = norm[0].split(',');
-    const endPt = norm[norm.length - 1].split(',');
-
-    // Map tile URL
-    const tileX = Math.floor((centerLng + 180) / 360 * Math.pow(2, zoom));
-    const tileY = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
-    const mapUrl = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${tileX}/${tileY}@2x.png`;
-
-    // Calculate total path length
-    let totalLen = 0;
-    for (let i = 1; i < norm.length; i++) {
-      const [x1, y1] = norm[i - 1].split(',').map(Number);
-      const [x2, y2] = norm[i].split(',').map(Number);
-      totalLen += Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    }
-
-    return (
-      <div style={{ position: 'relative', borderRadius: '0', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `url(${mapUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'brightness(0.92) saturate(0.85)',
-          zIndex: 0
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(180deg, rgba(220,233,240,0.25) 0%, rgba(220,233,240,0.1) 50%, rgba(220,233,240,0.3) 100%)',
-          zIndex: 1
-        }} />
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block', position: 'relative', zIndex: 2 }}>
-          {/* Shadow */}
-          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" />
-          {/* Faint base path */}
-          <polyline points={norm.join(' ')} fill="none" stroke="rgba(252,76,2,0.2)" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" />
-          {/* Drawing animation */}
-          <polyline
-            points={norm.join(' ')}
-            fill="none" stroke="#FC4C02" strokeWidth="4"
-            strokeLinejoin="round" strokeLinecap="round"
-            strokeDasharray={totalLen}
-            strokeDashoffset={totalLen}
-            style={{ animation: 'routeDraw 3s ease-in-out forwards' }}
-          />
-          {/* Start dot */}
-          <circle cx={startPt[0]} cy={startPt[1]} r="7" fill="#2DC76D" stroke="white" strokeWidth="3" />
-          {/* End dot — fades in */}
-          <circle cx={endPt[0]} cy={endPt[1]} r="6" fill="#FC4C02" stroke="white" strokeWidth="3"
-            style={{ opacity: 0, animation: 'markerFadeIn 0.4s ease forwards 2.8s' }} />
-          {/* Labels */}
-          <text x={Number(startPt[0]) + 10} y={Number(startPt[1]) - 4} fill="#1E3A5F" fontSize="10" fontWeight="800">START</text>
-          <text x={Number(endPt[0]) + 10} y={Number(endPt[1]) - 4} fill="#1E3A5F" fontSize="10" fontWeight="800"
-            style={{ opacity: 0, animation: 'markerFadeIn 0.4s ease forwards 2.8s' }}>FINISH</text>
-        </svg>
-      </div>
-    );
-  };
-
   // Stats data
   const stats = [
     { icon: <><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></>, label: 'Jarak', value: `${parseFloat(act.distance_km || 0).toFixed(2)} km`, color: '#0284c7' },
@@ -193,11 +122,35 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
           <div style={{ width: '34px' }} />
         </div>
 
-        {/* ── Map Section ── */}
-        <div style={{ background: '#dce9f0', minHeight: '200px' }}>
-          {renderDetailRoute() || (
+        {/* ── Leaflet Map Section ── */}
+        <div style={{ height: '280px', background: '#dce9f0' }}>
+          {hasRoute ? (
+            <MapContainer
+              center={[centerLat, centerLng]}
+              zoom={14}
+              scrollWheelZoom={false}
+              dragging={true}
+              zoomControl={false}
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+              />
+              <FitBounds coords={routeCoords} />
+              {/* Route polyline */}
+              <Polyline
+                positions={routeCoords}
+                pathOptions={{ color: '#FC4C02', weight: 4, opacity: 0.9, lineCap: 'round', lineJoin: 'round' }}
+              />
+              {/* Start marker (green) */}
+              <CircleMarker center={startPt} radius={7} pathOptions={{ fillColor: '#2DC76D', fillOpacity: 1, color: 'white', weight: 3 }} />
+              {/* End marker (orange) */}
+              <CircleMarker center={endPt} radius={6} pathOptions={{ fillColor: '#FC4C02', fillOpacity: 1, color: 'white', weight: 3 }} />
+            </MapContainer>
+          ) : (
             <div style={{
-              height: '200px',
+              height: '100%',
               background: 'linear-gradient(135deg, #0369a1, #0891B2, #06B6D4)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
             }}>

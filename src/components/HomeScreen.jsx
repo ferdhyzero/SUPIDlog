@@ -67,28 +67,21 @@ function RouteMapSVG({ routeJson }) {
     const mapUrl = getStaticMapUrl(coords);
 
     return (
-      <div className="feed-card-route" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
-        {/* Map tile background */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `url(${mapUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'brightness(0.95) saturate(0.9)',
-          zIndex: 0
-        }} />
-        {/* Soft overlay for route visibility */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(180deg, rgba(220,233,240,0.35) 0%, rgba(220,233,240,0.15) 50%, rgba(220,233,240,0.4) 100%)',
-          zIndex: 1
-        }} />
+      <div className="feed-card-route" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: 'linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 40%, #e0f0f5 100%)' }}>
 
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block', position: 'relative', zIndex: 2 }}>
-          {/* Route shadow (static, always visible) */}
-          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.12)" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
-          {/* Base route line (faint, shows full path) */}
-          <polyline points={norm.join(' ')} fill="none" stroke="rgba(252,76,2,0.2)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block', position: 'relative' }}>
+          {/* Subtle grid pattern for map feel */}
+          <defs>
+            <pattern id="mapGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width={W} height={H} fill="url(#mapGrid)" />
+
+          {/* Route shadow */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Base route (faint, shows full path shape) */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(252,76,2,0.15)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
           {/* Animated drawing line — draws from START to FINISH */}
           <polyline
             points={norm.join(' ')}
@@ -99,12 +92,12 @@ function RouteMapSVG({ routeJson }) {
             strokeLinecap="round"
             strokeDasharray={totalLen}
             strokeDashoffset={totalLen}
-            style={{ animation: `routeDraw 2.5s ease-in-out forwards` }}
+            style={{ animation: 'routeDraw 2.5s ease-in-out forwards' }}
           />
 
-          {/* Start dot (green) — always visible */}
+          {/* Start dot (green) */}
           <circle cx={startPt[0]} cy={startPt[1]} r="5.5" fill="#2DC76D" stroke="white" strokeWidth="2.5" />
-          {/* End dot (orange) — fades in at the end of animation */}
+          {/* End dot (orange) — fades in at end */}
           <circle cx={endPt[0]} cy={endPt[1]} r="4.5" fill="#FC4C02" stroke="white" strokeWidth="2.5"
             style={{ opacity: 0, animation: 'markerFadeIn 0.4s ease forwards 2.3s' }} />
         </svg>

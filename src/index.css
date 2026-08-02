@@ -416,7 +416,6 @@ p, span { line-height: 1.4; }
 
 /* ── Activity Feed: Route Drawing Animation ── */
 @keyframes routeDraw {
-  from { stroke-dashoffset: inherit; }
   to { stroke-dashoffset: 0; }
 }
 @keyframes markerFadeIn {
