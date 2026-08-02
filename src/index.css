@@ -413,3 +413,62 @@ p, span { line-height: 1.4; }
   color: white;
   border-color: var(--ocean-blue);
 }
+
+/* ── Activity Feed: Route Animation ── */
+@keyframes routeFlow {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes routeFlowFast {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes markerPulse {
+  0%, 100% { r: 5.5; opacity: 1; }
+  50% { r: 9; opacity: 0.35; }
+}
+@keyframes markerPulseEnd {
+  0%, 100% { r: 4.5; opacity: 1; }
+  50% { r: 8; opacity: 0.3; }
+}
+
+.feed-card-route:hover .route-flow-line {
+  animation-duration: 0.6s !important;
+}
+.feed-card-route:hover .pulse-start {
+  animation-duration: 0.8s !important;
+}
+.feed-card-route:hover .pulse-end {
+  animation-duration: 0.8s !important;
+}
+
+/* ── Activity Detail Modal ── */
+.activity-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.activity-detail-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  background: #f8fafc;
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

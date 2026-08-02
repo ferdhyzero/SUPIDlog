@@ -1,14 +1,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ActivityDetailModal from './ActivityDetailModal';
 
 // ─────────────────────────────────────────────────────────────────────
-// SVG ROUTE RENDERER (Strava-style polyline from GPS coordinates)
+// HELPER: Calculate map tile URL from coordinates
+// ─────────────────────────────────────────────────────────────────────
+function getStaticMapUrl(coords, width = 640, height = 300) {
+  const lats = coords.map(p => p[0]);
+  const lngs = coords.map(p => p[1]);
+  const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+  const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+
+  // Auto zoom based on coordinate spread
+  const latSpread = Math.max(...lats) - Math.min(...lats);
+  const lngSpread = Math.max(...lngs) - Math.min(...lngs);
+  const maxSpread = Math.max(latSpread, lngSpread);
+  let zoom = 15;
+  if (maxSpread > 0.1) zoom = 12;
+  else if (maxSpread > 0.05) zoom = 13;
+  else if (maxSpread > 0.01) zoom = 14;
+  else if (maxSpread > 0.005) zoom = 15;
+  else zoom = 16;
+
+  // Use CartoDB Voyager (free, no API key needed)
+  const tileX = Math.floor((centerLng + 180) / 360 * Math.pow(2, zoom));
+  const tileY = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+
+  // Return center tile URL for background
+  return `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${tileX}/${tileY}@2x.png`;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// SVG ROUTE RENDERER (Map background + animated polyline)
 // ─────────────────────────────────────────────────────────────────────
 function RouteMapSVG({ routeJson }) {
   try {
     let points = typeof routeJson === 'string' ? JSON.parse(routeJson) : routeJson;
     if (!Array.isArray(points) || points.length < 2) return null;
 
-    // Support both [lat, lng] and {lat, lng} formats
     const coords = points.map(p => Array.isArray(p) ? p : [p.lat, p.lng]).filter(p => p[0] && p[1]);
     if (coords.length < 2) return null;
 
@@ -19,39 +47,85 @@ function RouteMapSVG({ routeJson }) {
     const latRange = maxLat - minLat || 0.001;
     const lngRange = maxLng - minLng || 0.001;
 
-    const W = 320, H = 150, PAD = 14;
+    const W = 360, H = 170, PAD = 18;
     const norm = coords.map(([lat, lng]) => {
       const x = PAD + ((lng - minLng) / lngRange) * (W - PAD * 2);
       const y = H - PAD - ((lat - minLat) / latRange) * (H - PAD * 2);
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
 
+    // Calculate total path length for dash animation
+    let totalLen = 0;
+    for (let i = 1; i < coords.length; i++) {
+      const [x1, y1] = norm[i - 1].split(',').map(Number);
+      const [x2, y2] = norm[i].split(',').map(Number);
+      totalLen += Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
+
     const startPt = norm[0].split(',');
     const endPt = norm[norm.length - 1].split(',');
+    const mapUrl = getStaticMapUrl(coords);
 
     return (
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', borderRadius: '12px', display: 'block', background: '#dce9f0' }}>
-        {/* Water-like background */}
-        <rect width={W} height={H} fill="#dce9f0" />
-        {/* Route shadow */}
-        <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="4.5" strokeLinejoin="round" strokeLinecap="round" />
-        {/* Main route line */}
-        <polyline points={norm.join(' ')} fill="none" stroke="#FC4C02" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-        {/* Start dot (green) */}
-        <circle cx={startPt[0]} cy={startPt[1]} r="5.5" fill="#2DC76D" stroke="white" strokeWidth="2" />
-        {/* End dot (red) */}
-        <circle cx={endPt[0]} cy={endPt[1]} r="4.5" fill="#FC4C02" stroke="white" strokeWidth="2" />
-      </svg>
+      <div className="feed-card-route" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
+        {/* Map tile background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url(${mapUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.95) saturate(0.9)',
+          zIndex: 0
+        }} />
+        {/* Soft overlay for route visibility */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, rgba(220,233,240,0.35) 0%, rgba(220,233,240,0.15) 50%, rgba(220,233,240,0.4) 100%)',
+          zIndex: 1
+        }} />
+
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block', position: 'relative', zIndex: 2 }}>
+          {/* Route shadow */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Main route line (solid) */}
+          <polyline points={norm.join(' ')} fill="none" stroke="#FC4C02" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Animated flowing dash overlay */}
+          <polyline
+            className="route-flow-line"
+            points={norm.join(' ')}
+            fill="none"
+            stroke="rgba(255,255,255,0.7)"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            strokeDasharray="8 12"
+            style={{ animation: 'routeFlow 1.2s linear infinite' }}
+          />
+
+          {/* Start pulse ring */}
+          <circle className="pulse-start" cx={startPt[0]} cy={startPt[1]} r="5.5" fill="none" stroke="#2DC76D" strokeWidth="2" opacity="0.5"
+            style={{ animation: 'markerPulse 2s ease-in-out infinite' }} />
+          {/* Start dot (green) */}
+          <circle cx={startPt[0]} cy={startPt[1]} r="5.5" fill="#2DC76D" stroke="white" strokeWidth="2.5" />
+
+          {/* End pulse ring */}
+          <circle className="pulse-end" cx={endPt[0]} cy={endPt[1]} r="4.5" fill="none" stroke="#FC4C02" strokeWidth="2" opacity="0.5"
+            style={{ animation: 'markerPulseEnd 2s ease-in-out infinite 0.5s' }} />
+          {/* End dot (orange) */}
+          <circle cx={endPt[0]} cy={endPt[1]} r="4.5" fill="#FC4C02" stroke="white" strokeWidth="2.5" />
+        </svg>
+      </div>
     );
   } catch (e) {
     return null;
   }
 }
 
+
 // ─────────────────────────────────────────────────────────────────────
 // ACTIVITY FEED CARD (Strava-style)
 // ─────────────────────────────────────────────────────────────────────
-function ActivityFeedCard({ act, currentUserId, onKudos, onComment }) {
+function ActivityFeedCard({ act, currentUserId, onKudos, onComment, onClick }) {
   const [kudosCount, setKudosCount] = useState(act.kudos_count || 0);
   const [isKudosed, setIsKudosed] = useState(false);
   const [kudosLoading, setKudosLoading] = useState(false);
@@ -101,6 +175,8 @@ function ActivityFeedCard({ act, currentUserId, onKudos, onComment }) {
       overflow: 'hidden',
       marginBottom: '2px'
     }}>
+      {/* ── Clickable area: Header + Stats + Map ── */}
+      <div onClick={onClick} style={{ cursor: 'pointer' }}>
       {/* ── Header: Avatar + User + Time ── */}
       <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
@@ -174,6 +250,7 @@ function ActivityFeedCard({ act, currentUserId, onKudos, onComment }) {
           </div>
         </div>
       )}
+      </div>{/* end clickable area */}
 
       {/* ── Action Bar: Kudos, Comment, Share ── */}
       <div style={{ padding: '10px 16px 14px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -245,6 +322,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
   // ── Feed state ──
   const [feedActivities, setFeedActivities] = useState([]);
   const [feedLoading, setFeedLoading] = useState(true);
+  const [selectedActivity, setSelectedActivity] = useState(null);
 
   // ── Dashboard state ──
   const [dashboardData, setDashboardData] = useState({
@@ -463,6 +541,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
                   currentUserId={userId}
                   onKudos={() => {}}
                   onComment={openCommentModal}
+                  onClick={() => setSelectedActivity(act)}
                 />
               ))}
               <div style={{ textAlign: 'center', padding: '10px 0 4px', fontSize: '0.72rem', color: '#CBD5E1', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
@@ -713,6 +792,16 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
             )}
           </div>
         </div>
+      )}
+
+      {/* ══ ACTIVITY DETAIL MODAL ══ */}
+      {selectedActivity && (
+        <ActivityDetailModal
+          activity={selectedActivity}
+          currentUserId={userId}
+          onClose={() => setSelectedActivity(null)}
+          onRequireLogin={onRequireLogin}
+        />
       )}
 
     </div>
