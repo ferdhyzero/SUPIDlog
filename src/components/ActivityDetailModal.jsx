@@ -5,17 +5,19 @@ import 'leaflet/dist/leaflet.css';
 // ─────────────────────────────────────────────────────────────────────
 // Auto-fit map bounds to route
 // ─────────────────────────────────────────────────────────────────────
-function FitBounds({ coords }) {
+function FitBounds({ coords, is3D }) {
   const map = useMap();
   useEffect(() => {
     if (coords.length >= 2) {
       const bounds = coords.map(c => [c[0], c[1]]);
       setTimeout(() => {
         map.invalidateSize();
-        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+        // Counteract scale(2) in 3D mode by adding large padding so route isn't cut off
+        const pad = is3D ? 120 : 30;
+        map.fitBounds(bounds, { padding: [pad, pad], maxZoom: is3D ? 15 : 16 });
       }, 200);
     }
-  }, [coords, map]);
+  }, [coords, map, is3D]);
   return null;
 }
 
@@ -28,8 +30,9 @@ const MAP_TILES = {
   },
   satellite: {
     label: 'Satelit',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri World Imagery'
+    // Menggunakan Google Maps Hybrid (Satelit + Label) karena kualitas di Indonesia lebih tinggi dan proses render lebih cepat
+    url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+    attribution: 'Google Maps'
   }
 };
 
@@ -194,7 +197,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                   style={{ height: '55vh', width: '100%', zIndex: 1 }}
                 >
                   <TileLayer url={MAP_TILES[mapType]?.url || MAP_TILES.street.url} attribution={MAP_TILES[mapType]?.attribution || ''} />
-                  <FitBounds coords={routeCoords} />
+                  <FitBounds coords={routeCoords} is3D={is3D} />
 
                   {/* Outer Glow Stroke for SUP.ID Ocean Blue Contrast */}
                   <Polyline
