@@ -110,6 +110,14 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
     const tileY = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
     const mapUrl = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${tileX}/${tileY}@2x.png`;
 
+    // Calculate total path length
+    let totalLen = 0;
+    for (let i = 1; i < norm.length; i++) {
+      const [x1, y1] = norm[i - 1].split(',').map(Number);
+      const [x2, y2] = norm[i].split(',').map(Number);
+      totalLen += Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
+
     return (
       <div style={{ position: 'relative', borderRadius: '0', overflow: 'hidden' }}>
         <div style={{
@@ -126,21 +134,28 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
           zIndex: 1
         }} />
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block', position: 'relative', zIndex: 2 }}>
-          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.25)" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" />
-          <polyline points={norm.join(' ')} fill="none" stroke="#FC4C02" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Shadow */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Faint base path */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(252,76,2,0.2)" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Drawing animation */}
           <polyline
-            className="route-flow-line"
             points={norm.join(' ')}
-            fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5"
+            fill="none" stroke="#FC4C02" strokeWidth="4"
             strokeLinejoin="round" strokeLinecap="round"
-            strokeDasharray="10 14"
-            style={{ animation: 'routeFlow 1.2s linear infinite' }}
+            strokeDasharray={totalLen}
+            strokeDashoffset={totalLen}
+            style={{ animation: 'routeDraw 3s ease-in-out forwards' }}
           />
+          {/* Start dot */}
           <circle cx={startPt[0]} cy={startPt[1]} r="7" fill="#2DC76D" stroke="white" strokeWidth="3" />
-          <circle cx={endPt[0]} cy={endPt[1]} r="6" fill="#FC4C02" stroke="white" strokeWidth="3" />
-          {/* Start label */}
+          {/* End dot — fades in */}
+          <circle cx={endPt[0]} cy={endPt[1]} r="6" fill="#FC4C02" stroke="white" strokeWidth="3"
+            style={{ opacity: 0, animation: 'markerFadeIn 0.4s ease forwards 2.8s' }} />
+          {/* Labels */}
           <text x={Number(startPt[0]) + 10} y={Number(startPt[1]) - 4} fill="#1E3A5F" fontSize="10" fontWeight="800">START</text>
-          <text x={Number(endPt[0]) + 10} y={Number(endPt[1]) - 4} fill="#1E3A5F" fontSize="10" fontWeight="800">FINISH</text>
+          <text x={Number(endPt[0]) + 10} y={Number(endPt[1]) - 4} fill="#1E3A5F" fontSize="10" fontWeight="800"
+            style={{ opacity: 0, animation: 'markerFadeIn 0.4s ease forwards 2.8s' }}>FINISH</text>
         </svg>
       </div>
     );

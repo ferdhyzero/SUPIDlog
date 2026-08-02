@@ -85,34 +85,28 @@ function RouteMapSVG({ routeJson }) {
         }} />
 
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block', position: 'relative', zIndex: 2 }}>
-          {/* Route shadow */}
-          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
-          {/* Main route line (solid) */}
-          <polyline points={norm.join(' ')} fill="none" stroke="#FC4C02" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
-          {/* Animated flowing dash overlay */}
+          {/* Route shadow (static, always visible) */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(0,0,0,0.12)" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Base route line (faint, shows full path) */}
+          <polyline points={norm.join(' ')} fill="none" stroke="rgba(252,76,2,0.2)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+          {/* Animated drawing line — draws from START to FINISH */}
           <polyline
-            className="route-flow-line"
             points={norm.join(' ')}
             fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="2"
+            stroke="#FC4C02"
+            strokeWidth="3.5"
             strokeLinejoin="round"
             strokeLinecap="round"
-            strokeDasharray="8 12"
-            style={{ animation: 'routeFlow 1.2s linear infinite' }}
+            strokeDasharray={totalLen}
+            strokeDashoffset={totalLen}
+            style={{ animation: `routeDraw 2.5s ease-in-out forwards` }}
           />
 
-          {/* Start pulse ring */}
-          <circle className="pulse-start" cx={startPt[0]} cy={startPt[1]} r="5.5" fill="none" stroke="#2DC76D" strokeWidth="2" opacity="0.5"
-            style={{ animation: 'markerPulse 2s ease-in-out infinite' }} />
-          {/* Start dot (green) */}
+          {/* Start dot (green) — always visible */}
           <circle cx={startPt[0]} cy={startPt[1]} r="5.5" fill="#2DC76D" stroke="white" strokeWidth="2.5" />
-
-          {/* End pulse ring */}
-          <circle className="pulse-end" cx={endPt[0]} cy={endPt[1]} r="4.5" fill="none" stroke="#FC4C02" strokeWidth="2" opacity="0.5"
-            style={{ animation: 'markerPulseEnd 2s ease-in-out infinite 0.5s' }} />
-          {/* End dot (orange) */}
-          <circle cx={endPt[0]} cy={endPt[1]} r="4.5" fill="#FC4C02" stroke="white" strokeWidth="2.5" />
+          {/* End dot (orange) — fades in at the end of animation */}
+          <circle cx={endPt[0]} cy={endPt[1]} r="4.5" fill="#FC4C02" stroke="white" strokeWidth="2.5"
+            style={{ opacity: 0, animation: 'markerFadeIn 0.4s ease forwards 2.3s' }} />
         </svg>
       </div>
     );
