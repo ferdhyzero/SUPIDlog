@@ -170,93 +170,80 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
     <div className="activity-detail-overlay" onClick={onClose}>
       <div className="activity-detail-sheet" onClick={e => e.stopPropagation()}>
 
-        {/* ── Top Bar ── */}
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 20,
-          background: 'white',
-          padding: '14px 16px',
-          borderBottom: '1px solid #E8EEF4',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-        }}>
+        {/* ── Leaflet Map Container + Floating Controls ── */}
+        <div style={{ height: '55vh', background: mapType === 'satellite' ? '#111827' : '#e5e1d6', position: 'relative', zIndex: 1, overflow: 'hidden', perspective: '1000px' }}>
+          
+          {/* Top Left Back Button */}
           <button onClick={onClose} style={{
-            background: '#F1F5F9', border: 'none', width: '34px', height: '34px',
-            borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            position: 'absolute', top: '16px', left: '16px', zIndex: 1000,
+            background: 'white', border: 'none', width: '40px', height: '40px',
+            borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
-          <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0F172A' }}>Detail Sesi Paddle</span>
-          <div style={{ width: '34px' }} />
-        </div>
 
-        {/* ── Leaflet Map Container + Floating Controls ── */}
-        <div style={{ height: '380px', background: mapType === 'satellite' ? '#111827' : '#e5e1d6', position: 'relative', zIndex: 1, overflow: 'hidden', perspective: '1000px' }}>
+          {/* Top Right Save & Menu */}
+          <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 1000, display: 'flex', gap: '8px' }}>
+            <button onClick={(e) => { e.stopPropagation(); alert('Rute Disimpan!'); }} style={{
+              background: 'white', border: 'none', height: '40px', padding: '0 16px',
+              borderRadius: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontWeight: 800, fontSize: '0.82rem', color: 'black'
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              Simpan Rute
+            </button>
+            <button style={{
+              background: 'white', border: 'none', width: '40px', height: '40px',
+              borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+            </button>
+          </div>
+
+          {/* Map Controls Right Side */}
+          <div style={{ position: 'absolute', top: '70px', right: '16px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')} style={{
+              background: 'white', border: 'none', width: '40px', height: '40px',
+              borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline></svg>
+            </button>
+            <button onClick={() => setIs3D(!is3D)} style={{
+              background: 'white', border: 'none', width: '40px', height: '40px',
+              borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontWeight: 800, fontSize: '0.9rem', color: 'black'
+            }}>
+              {is3D ? '2D' : '3D'}
+            </button>
+          </div>
+
           {hasRoute ? (
             <>
-              {/* Map Controls Top Right */}
+              {/* Bottom Left Avatar */}
               <div style={{
-                position: 'absolute', top: '12px', right: '12px', zIndex: 500,
-                display: 'flex', flexDirection: 'column', gap: '8px'
+                position: 'absolute', bottom: '20px', left: '16px', zIndex: 1000,
+                width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden',
+                border: '3px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
               }}>
-                {/* Map Layer Toggle Button (Street / Satellite) */}
-                <button
-                  onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
-                  style={{
-                    border: 'none', background: 'white', color: '#0F172A',
-                    width: '38px', height: '38px', borderRadius: '10px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                  }}
-                  title="Ganti Peta"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/>
-                  </svg>
-                </button>
-                {/* 3D Perspective Toggle Button */}
-                <button
-                  onClick={() => setIs3D(!is3D)}
-                  style={{
-                    border: 'none', background: is3D ? '#0284c7' : 'white',
-                    color: is3D ? 'white' : '#0F172A',
-                    width: '38px', height: '38px', borderRadius: '10px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                  }}
-                  title="3D Perspektif"
-                >
-                  <span style={{ fontWeight: 900, fontSize: '0.9rem' }}>3D</span>
-                </button>
+                <img src={act.avatar_url || 'https://via.placeholder.com/60'} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
 
-              {/* Replay Animation Button Bottom Center */}
-              <button
-                onClick={handlePlayAnimation}
-                disabled={isPlaying}
-                style={{
-                  position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 500,
-                  background: isPlaying ? 'rgba(2, 132, 199, 0.7)' : '#0284c7',
-                  color: 'white', border: 'none', padding: '10px 20px', borderRadius: '30px',
-                  fontWeight: 900, fontSize: '0.85rem', cursor: isPlaying ? 'default' : 'pointer',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  boxShadow: '0 6px 16px rgba(0,0,0,0.25)',
-                  transition: 'all 0.2s ease',
-                  opacity: isPlaying ? 0.8 : 1
-                }}
-              >
+              {/* Bottom Right Play Button */}
+              <button onClick={handlePlayAnimation} disabled={isPlaying} style={{
+                position: 'absolute', bottom: '20px', right: '16px', zIndex: 1000,
+                background: 'white', border: 'none', width: '60px', height: '60px',
+                borderRadius: '50%', cursor: isPlaying ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'all 0.2s ease', opacity: isPlaying ? 0.7 : 1
+              }}>
                 {isPlaying ? (
-                  <>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                    </svg>
-                    Memutar...
-                  </>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="black"><rect x="7" y="7" width="10" height="10"/></svg>
                 ) : (
-                  <>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Putar Rute
-                  </>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'translateX(2px)' }}><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 )}
               </button>
 
@@ -274,7 +261,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                   dragging={true}
                   zoomControl={false}
                   attributionControl={false}
-                  style={{ height: '380px', width: '100%', zIndex: 1 }}
+                  style={{ height: '55vh', width: '100%', zIndex: 1 }}
                 >
                 <TileLayer url={MAP_TILES[mapType]?.url || MAP_TILES.street.url} attribution={MAP_TILES[mapType]?.attribution || ''} />
                 <FitBounds coords={routeCoords} />
