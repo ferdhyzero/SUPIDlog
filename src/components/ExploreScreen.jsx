@@ -39,6 +39,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const [leafletReady, setLeafletReady] = useState(false);
   const [isSearchingGeocode, setIsSearchingGeocode] = useState(false);
   const [currentZoomLevel, setCurrentZoomLevel] = useState(7);
+  const [showListBottomSheet, setShowListBottomSheet] = useState(false);
 
   // Autocomplete Suggestions State
   const [suggestionsList, setSuggestionsList] = useState([]);
@@ -845,26 +846,33 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
   const paginatedSpots = filteredSpots.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div style={{ width: '100%', padding: '12px 12px 90px 12px', display: 'flex', flexDirection: 'column', gap: '10px', boxSizing: 'border-box' }}>
+    <div style={{ position: 'relative', width: '100%', height: 'calc(100vh - 125px)', overflow: 'hidden', boxSizing: 'border-box' }}>
       
-      {/* Header Bar */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* ── FULL-HEIGHT LEAFLET MAP CONTAINER ── */}
+      <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 1 }} />
+
+      {/* ── FLOATING TOP CONTROLS OVERLAY (GLASSMORPHISM) ── */}
+      <div style={{
+        position: 'absolute', top: '10px', left: '10px', right: '10px', zIndex: 1000,
+        background: 'rgba(15, 23, 42, 0.88)', backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)', padding: '10px 12px', borderRadius: '16px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: '8px'
+      }}>
+        {/* Top Header Row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              Explore Spots
-            </h2>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Peta Google Satellite ({spots.length} Spot Terdaftar)</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'white' }}>Explore Spots</span>
+            <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 700 }}>({spots.length})</span>
           </div>
 
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
             <button
               onClick={() => setShowAddSpotModal(true)}
-              style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              style={{ padding: '5px 10px', borderRadius: '8px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Baru
@@ -872,485 +880,357 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
             <button
               onClick={() => setMapType(mapType === 'satellite' ? 'roadmap' : 'satellite')}
-              style={{ padding: '5px 9px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.72rem', fontWeight: 800, background: mapType === 'satellite' ? '#0f172a' : '#f8fafc', color: mapType === 'satellite' ? '#F59E0B' : '#0f172a', cursor: 'pointer' }}
+              style={{ padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', fontSize: '0.72rem', fontWeight: 800, background: mapType === 'satellite' ? '#F59E0B' : 'rgba(255,255,255,0.2)', color: mapType === 'satellite' ? '#0F172A' : 'white', cursor: 'pointer' }}
             >
-              {mapType === 'satellite' ? 'Satelit' : 'Standard'}
+              {mapType === 'satellite' ? 'Satelit' : 'Biasa'}
             </button>
-
-            <div style={{ display: 'flex', background: '#f1f5f9', padding: '2px', borderRadius: '8px' }}>
-              <button onClick={() => setViewMode('map')} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: viewMode === 'map' ? '#0284c7' : 'transparent', color: viewMode === 'map' ? 'white' : 'var(--text-muted)', cursor: 'pointer' }}>Maps</button>
-              <button onClick={() => setViewMode('list')} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', fontSize: '0.72rem', fontWeight: 800, background: viewMode === 'list' ? 'white' : 'transparent', color: viewMode === 'list' ? '#0284c7' : 'var(--text-muted)', cursor: 'pointer' }}>List</button>
-            </div>
           </div>
         </div>
-      </div>
 
-      {/* REAL-TIME ADDRESS SEARCH BOX WITH POWER AUTOCOMPLETE SUGGESTIONS & ICON-ONLY SUBMIT BUTTON */}
-      <div style={{ position: 'relative' }}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (searchQuery.trim()) {
-              handlePerformAddressSearch(searchQuery);
-            }
-          }}
-          style={{ position: 'relative' }}
-        >
-          <input 
-            type="text" 
-            placeholder="Cari pantai, danau, sungai, atau alamat..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => { if (suggestionsList.length > 0) setShowSuggestionsDropdown(true); }}
-            style={{
-              width: '100%',
-              padding: '10px 16px 10px 40px',
-              borderRadius: '14px',
-              border: '2px solid var(--ocean-blue)',
-              fontSize: '0.85rem',
-              background: 'white',
-              boxShadow: 'var(--shadow-sm)',
-              fontFamily: 'inherit'
+        {/* Search Bar Form */}
+        <div style={{ position: 'relative' }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                handlePerformAddressSearch(searchQuery);
+              }
             }}
-          />
-
-          {/* LEFT CLICKABLE SEARCH SUBMIT BUTTON */}
-          <button
-            type="submit"
-            disabled={isSearchingGeocode}
-            style={{
-              position: 'absolute',
-              left: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'transparent',
-              border: 'none',
-              padding: '6px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#0284c7'
-            }}
-            title="Cari Lokasi"
+            style={{ position: 'relative' }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
-        </form>
+            <input 
+              type="text" 
+              placeholder="Cari pantai, danau, sungai, atau alamat..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => { if (suggestionsList.length > 0) setShowSuggestionsDropdown(true); }}
+              style={{
+                width: '100%',
+                padding: '8px 14px 8px 36px',
+                borderRadius: '10px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                fontSize: '0.8rem',
+                background: 'rgba(255,255,255,0.15)',
+                color: 'white',
+                outline: 'none',
+                fontFamily: 'inherit'
+              }}
+            />
 
-        {/* POWER AUTOCOMPLETE DROPDOWN SUGGESTIONS CARD */}
-        {showSuggestionsDropdown && suggestionsList.length > 0 && (
-          <div 
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              marginTop: '4px',
-              background: 'white',
-              borderRadius: '14px',
-              border: '1.5px solid #0284c7',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
-              zIndex: 1000,
-              maxHeight: '260px',
-              overflowY: 'auto'
-            }}
-          >
-            <div style={{ padding: '8px 12px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>REKOMENDASI LOKASI ({suggestionsList.length})</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowSuggestionsDropdown(false);
-                  setSuggestionsList([]);
-                }}
-                style={{
-                  background: '#EF4444',
-                  color: 'white',
-                  border: 'none',
-                  padding: '2px 8px',
-                  borderRadius: '6px',
-                  fontSize: '0.65rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px'
-                }}
-              >
-                <span>Tutup</span>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSearchingGeocode}
+              style={{
+                position: 'absolute', left: '6px', top: '50%', transform: 'translateY(-50%)',
+                background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38BDF8'
+              }}
+              title="Cari Lokasi"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </form>
 
-            {suggestionsList.map((item, idx) => (
-              <div
-                key={idx}
-                onClick={() => handleSelectSuggestion(item)}
-                style={{
-                  padding: '10px 12px',
-                  borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  background: 'white'
-                }}
-              >
-                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <strong style={{ fontSize: '0.84rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
-                  <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 700, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category} • {item.lat.toFixed(4)}, {item.lng.toFixed(4)}</span>
-                </div>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7' }}>Pilih ➔</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Pin Action Banner for Custom Search Result */}
-      {searchQuery.trim().length >= 3 && (
-        <div 
-          onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
-          style={{
-            background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
-            color: 'white',
-            borderRadius: '14px',
-            padding: '10px 14px',
-            display: 'flex',
-            justify: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(0, 180, 216, 0.35)',
-            marginTop: '2px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            </div>
-            <div>
-              <strong style={{ fontSize: '0.88rem', display: 'block', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>Sematkan "{searchQuery}"</strong>
-              <span style={{ fontSize: '0.72rem', opacity: 0.95 }}>Simpan ke Rencana Kunjungan</span>
-            </div>
-          </div>
-          <span style={{ background: 'rgba(255,255,255,0.28)', padding: '5px 12px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>SEMATKAN</span>
-        </div>
-      )}
-
-      {/* Filter Horizontal Scroll Chips */}
-      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }}>
-        {filters.map((f) => (
-          <button 
-            key={f}
-            className={`filter-chip ${activeFilter === f ? 'active' : ''}`}
-            onClick={() => {
-              setActiveFilter(f);
-              setActiveMapLocation(null);
-            }}
-            style={{ padding: '4px 10px', fontSize: '0.72rem' }}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
-      {/* MAP CONTAINER ALWAYS MOUNTED IN DOM TO PREVENT BLANK CANVAS ON VIEW SWITCH */}
-      <div style={{ display: viewMode === 'map' ? 'block' : 'none', height: '320px', borderRadius: '16px', overflow: 'hidden', border: '2px solid var(--ocean-blue)', boxShadow: 'var(--shadow-md)', position: 'relative' }}>
-        <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 1 }} />
-
-        {/* TOP-LEFT SLEEK GLASSMORPHISM LOKASI SAYA GPS TARGET BUTTON (ICON-ONLY NO TEXT) */}
-        <button
-          type="button"
-          onClick={() => {
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                  const { latitude, longitude } = pos.coords;
-                  if (leafletMapInstance.current) {
-                    leafletMapInstance.current.setView([latitude, longitude], 14, { animate: true });
-                  }
-                },
-                (err) => {
-                  alert('Gagal mendeteksi lokasi GPS.');
-                }
-              );
-            }
-          }}
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            zIndex: 999,
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            background: 'rgba(15, 23, 42, 0.68)',
-            backdropFilter: 'blur(8px)',
-            color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 0
-          }}
-          title="Lokasi Saya (GPS Target)"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
-        </button>
-
-        {/* MAP FLOATING BOTTOM INFO BAR WITH ICON-ONLY DETAIL & RESET BUTTONS */}
-        <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', background: 'rgba(15, 23, 42, 0.92)', backdropFilter: 'blur(8px)', color: 'white', padding: '8px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 5 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {activeMapLocation 
-                ? `FOKUS: "${activeMapLocation.name}" (${activeMapLocation.lat ? activeMapLocation.lat.toFixed(4) : ''}, ${activeMapLocation.lng ? activeMapLocation.lng.toFixed(4) : ''})`
-                : `GOOGLE MAPS SATELLITE: ${spots.length} Penanda Titik Dinamis`}
-            </span>
-          </div>
-
-          {activeMapLocation && (
-            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-              {/* ICON-ONLY DETAIL BUTTON (EYE SVG) */}
-              <button 
-                onClick={() => setSelectedSpotForModal(activeMapLocation)} 
-                style={{ background: '#0284c7', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
-                title="Lihat Detail Spot"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-              {/* ICON-ONLY RESET BUTTON (REFRESH SVG) */}
-              <button 
-                onClick={() => { setActiveMapLocation(null); }} 
-                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
-                title="Reset Fokus Peta"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Spot Cards List with 5 Items Pagination */}
-      <div style={{ display: viewMode === 'list' ? 'flex' : 'none', flexDirection: 'column', gap: '10px' }}>
-        {userId && savedPlans && savedPlans.length > 0 && (
-          <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', padding: '10px 12px', borderRadius: '14px', marginBottom: '4px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#92400E', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Rencana Trip Saya ({savedPlans.length})
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {savedPlans.map((plan) => (
-                <div 
-                  key={plan.id} 
-                  onClick={() => {
-                    if (plan.lat && plan.lng) {
-                      setActiveMapLocation({ name: plan.spot_name, lat: parseFloat(plan.lat), lng: parseFloat(plan.lng) });
-                      setViewMode('map');
-                    } else {
-                      const matched = spots.find(s => s.name.toLowerCase().trim() === plan.spot_name.toLowerCase().trim());
-                      if (matched) {
-                        setActiveMapLocation(matched);
-                        setViewMode('map');
-                      }
-                    }
-                  }}
-                  style={{ background: 'white', padding: '8px 10px', borderRadius: '10px', border: '1px solid #FCD34D', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+          {/* Autocomplete Dropdown */}
+          {showSuggestionsDropdown && suggestionsList.length > 0 && (
+            <div 
+              style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
+                background: 'white', borderRadius: '12px', border: '1.5px solid #0284c7',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: 2000, maxHeight: '220px', overflowY: 'auto'
+              }}
+            >
+              <div style={{ padding: '6px 10px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.7rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>REKOMENDASI LOKASI ({suggestionsList.length})</span>
+                <button
+                  type="button"
+                  onClick={() => { setShowSuggestionsDropdown(false); setSuggestionsList([]); }}
+                  style={{ background: '#EF4444', color: 'white', border: 'none', padding: '2px 6px', borderRadius: '4px', fontSize: '0.62rem', fontWeight: 800, cursor: 'pointer' }}
                 >
-                  <div>
-                    <strong style={{ fontSize: '0.82rem', color: '#78350F', display: 'block' }}>{plan.spot_name}</strong>
-                    <span style={{ fontSize: '0.7rem', color: '#B45309' }}>Tanggal: {plan.formatted_date || plan.planned_date}</span>
+                  Tutup
+                </button>
+              </div>
+
+              {suggestionsList.map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleSelectSuggestion(item)}
+                  style={{
+                    padding: '8px 10px', borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', background: 'white'
+                  }}
+                >
+                  <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleUnpinPlan(plan.id, plan.spot_name); }} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '3px 7px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Lepas</button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ fontSize: '0.78rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
+                    <span style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category}</span>
+                  </div>
                 </div>
               ))}
             </div>
+          )}
+        </div>
+
+        {/* Pin Action Banner */}
+        {searchQuery.trim().length >= 3 && (
+          <div 
+            onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
+            style={{
+              background: 'linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)',
+              color: 'white', borderRadius: '10px', padding: '6px 10px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <strong style={{ fontSize: '0.75rem' }}>Sematkan "{searchQuery}"</strong>
+            </div>
+            <span style={{ background: 'rgba(255,255,255,0.3)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 900 }}>SEMATKAN</span>
           </div>
         )}
 
-        {paginatedSpots.map((spot) => {
-          const badge = getVisitBadge(spot.name);
-
-          return (
-            <div 
-              key={spot.id} 
-              style={{ 
-                background: 'white', 
-                borderRadius: '18px', 
-                border: '1px solid #E2E8F0', 
-                overflow: 'hidden', 
-                boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-                display: 'flex',
-                flexDirection: 'column'
+        {/* Category Chips Scroll */}
+        <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {filters.map((f) => (
+            <button 
+              key={f}
+              onClick={() => { setActiveFilter(f); setActiveMapLocation(null); }}
+              style={{
+                padding: '3px 9px', borderRadius: '14px', border: 'none', fontSize: '0.68rem', fontWeight: 800,
+                background: activeFilter === f ? '#0284c7' : 'rgba(255,255,255,0.15)',
+                color: activeFilter === f ? 'white' : '#CBD5E1', cursor: 'pointer', whiteSpace: 'nowrap'
               }}
             >
-              {/* Top Hero Image Banner */}
-              <div 
-                onClick={() => {
-                  setActiveMapLocation(spot);
-                  setViewMode('map');
-                }}
-                style={{
-                  position: 'relative',
-                  height: '140px',
-                  width: '100%',
-                  overflow: 'hidden',
-                  cursor: 'pointer'
-                }}
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FLOATING BOTTOM CONTROLS ON MAP ── */}
+      {/* GPS Target Location Button (Bottom Left) */}
+      <button
+        type="button"
+        onClick={() => {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const { latitude, longitude } = pos.coords;
+                if (leafletMapInstance.current) {
+                  leafletMapInstance.current.setView([latitude, longitude], 14, { animate: true });
+                }
+              },
+              () => alert('Gagal mendeteksi lokasi GPS.')
+            );
+          }
+        }}
+        style={{
+          position: 'absolute', bottom: '16px', left: '16px', zIndex: 1000,
+          width: '42px', height: '42px', borderRadius: '12px',
+          background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)',
+          color: 'white', border: '1px solid rgba(255, 255, 255, 0.35)',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.35)', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}
+        title="Lokasi Saya (GPS Target)"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+      </button>
+
+      {/* Floating Bottom List Spot Button (Bottom Right) */}
+      <button
+        type="button"
+        onClick={() => setShowListBottomSheet(true)}
+        style={{
+          position: 'absolute', bottom: '16px', right: '16px', zIndex: 1000,
+          background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: 'white',
+          border: '1.5px solid rgba(255,255,255,0.4)', padding: '10px 18px', borderRadius: '30px',
+          fontWeight: 900, fontSize: '0.82rem', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '6px',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.35)', transition: 'all 0.2s ease'
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        List Spot ({filteredSpots.length})
+      </button>
+
+      {/* ── POP-UP BOTTOM SHEET FOR SPOTS LIST ── */}
+      {(showListBottomSheet || viewMode === 'list') && (
+        <div 
+          onClick={() => { setShowListBottomSheet(false); setViewMode('map'); }}
+          style={{ position: 'fixed', inset: 0, zIndex: 2500, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()} 
+            style={{ 
+              maxHeight: '82vh', background: '#F8FAFC', 
+              borderTopLeftRadius: '24px', borderTopRightRadius: '24px', 
+              overflowY: 'auto', padding: '14px 14px 90px 14px',
+              boxShadow: '0 -10px 30px rgba(0,0,0,0.3)',
+              display: 'flex', flexDirection: 'column', gap: '12px'
+            }}
+          >
+            {/* Drag handle */}
+            <div style={{ width: '42px', height: '5px', background: '#CBD5E1', borderRadius: '3px', margin: '0 auto 4px auto' }} />
+
+            {/* Header inside Bottom Sheet */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0F172A', margin: 0 }}>Daftar Spot Dayung ({filteredSpots.length})</h3>
+                <span style={{ fontSize: '0.72rem', color: '#64748B' }}>Pilih spot untuk melihat lokasi di peta</span>
+              </div>
+              <button 
+                onClick={() => { setShowListBottomSheet(false); setViewMode('map'); }} 
+                style={{ background: '#E2E8F0', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontWeight: 800, color: '#475569' }}
               >
-                <img 
-                  src={getSpotPhoto(spot)} 
-                  alt={spot.name} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
+                ✕
+              </button>
+            </div>
 
-                {/* Dark Gradient Overlay */}
-                <div 
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.88) 100%)'
-                  }} 
-                />
-
-                {/* Top Left Pill */}
-                <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
-                  <span style={{ background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800 }}>
-                    {spot.category || 'Custom Spot'}
+            {/* Saved Trips Section */}
+            {userId && savedPlans && savedPlans.length > 0 && (
+              <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', padding: '10px 12px', borderRadius: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#92400E', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Rencana Trip Saya ({savedPlans.length})
                   </span>
-                  {badge && (
-                    <span style={{ background: badge.bg, color: badge.color, padding: '3px 8px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 900 }}>
-                      {badge.label}
-                    </span>
-                  )}
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {savedPlans.map((plan) => (
+                    <div 
+                      key={plan.id} 
+                      onClick={() => {
+                        setShowListBottomSheet(false);
+                        setViewMode('map');
+                        if (plan.lat && plan.lng) {
+                          setActiveMapLocation({ name: plan.spot_name, lat: parseFloat(plan.lat), lng: parseFloat(plan.lng) });
+                        } else {
+                          const matched = spots.find(s => s.name.toLowerCase().trim() === plan.spot_name.toLowerCase().trim());
+                          if (matched) setActiveMapLocation(matched);
+                        }
+                      }}
+                      style={{ background: 'white', padding: '8px 10px', borderRadius: '10px', border: '1px solid #FCD34D', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                    >
+                      <div>
+                        <strong style={{ fontSize: '0.82rem', color: '#78350F', display: 'block' }}>{plan.spot_name}</strong>
+                        <span style={{ fontSize: '0.7rem', color: '#B45309' }}>Tanggal: {plan.formatted_date || plan.planned_date}</span>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); handleUnpinPlan(plan.id, plan.spot_name); }} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '3px 7px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>Lepas</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-                {/* Top Right Delete Button (Only for user-created spots) */}
-                {userId && (
-                  (spot.created_by && parseInt(spot.created_by) === parseInt(userId)) ||
-                  spot.category === 'Custom Spot'
-                ) && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDeleteSpot(spot); }}
-                    style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      width: '30px',
-                      height: '30px',
-                      borderRadius: '8px',
-                      background: 'rgba(239, 68, 68, 0.85)',
-                      backdropFilter: 'blur(6px)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      color: 'white',
-                      cursor: 'pointer',
+            {/* Paginated Spots Cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {paginatedSpots.map((spot) => {
+                const badge = getVisitBadge(spot.name);
+
+                return (
+                  <div 
+                    key={spot.id} 
+                    style={{ 
+                      background: 'white', 
+                      borderRadius: '18px', 
+                      border: '1px solid #E2E8F0', 
+                      overflow: 'hidden', 
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 0,
-                      boxShadow: '0 2px 8px rgba(239,68,68,0.4)'
+                      flexDirection: 'column'
                     }}
-                    title="Hapus Spot Ini"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                      <line x1="10" y1="11" x2="10" y2="17"/>
-                      <line x1="14" y1="11" x2="14" y2="17"/>
-                    </svg>
-                  </button>
-                )}
+                    <div 
+                      onClick={() => {
+                        setShowListBottomSheet(false);
+                        setViewMode('map');
+                        setActiveMapLocation(spot);
+                      }}
+                      style={{ position: 'relative', height: '130px', width: '100%', overflow: 'hidden', cursor: 'pointer' }}
+                    >
+                      <img src={getSpotPhoto(spot)} alt={spot.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.85) 100%)' }} />
 
-                {/* Bottom Content over image */}
-                <div style={{ position: 'absolute', bottom: '10px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.8)', margin: 0 }}>
-                      {spot.name}
-                    </h3>
-                    <div style={{ fontSize: '0.72rem', color: '#FCD34D', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>★★★★★</span>
-                      <span style={{ color: 'rgba(255,255,255,0.85)' }}>
-                        ({spot.lat ? (+spot.lat).toFixed(3) : '-5.147'}, {spot.lng ? (+spot.lng).toFixed(3) : '119.415'})
-                      </span>
+                      <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
+                        <span style={{ background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800 }}>
+                          {spot.category || 'Custom Spot'}
+                        </span>
+                        {badge && (
+                          <span style={{ background: badge.bg, color: badge.color, padding: '3px 8px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 900 }}>
+                            {badge.label}
+                          </span>
+                        )}
+                      </div>
+
+                      {userId && (
+                        (spot.created_by && parseInt(spot.created_by) === parseInt(userId)) ||
+                        spot.category === 'Custom Spot'
+                      ) && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteSpot(spot); }}
+                          style={{
+                            position: 'absolute', top: '10px', right: '10px', width: '30px', height: '30px',
+                            borderRadius: '8px', background: 'rgba(239, 68, 68, 0.85)', backdropFilter: 'blur(6px)',
+                            border: '1px solid rgba(255,255,255,0.3)', color: 'white', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                          }}
+                          title="Hapus Spot Ini"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                      )}
+
+                      <div style={{ position: 'absolute', bottom: '10px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <div>
+                          <h3 style={{ fontSize: '1rem', fontWeight: 900, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.8)', margin: 0 }}>
+                            {spot.name}
+                          </h3>
+                          <div style={{ fontSize: '0.7rem', color: '#FCD34D', fontWeight: 700, marginTop: '2px' }}>
+                            ({spot.lat ? (+spot.lat).toFixed(3) : '-5.147'}, {spot.lng ? (+spot.lng).toFixed(3) : '119.415'})
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} 
+                          style={{ background: '#0284c7', color: 'white', border: 'none', padding: '5px 12px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <span>Fokus Peta</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '8px 10px' }}>
+                      <button
+                        onClick={() => { setShowListBottomSheet(false); handleInitiatePin(spot); }}
+                        style={{ width: '100%', padding: '7px', borderRadius: '10px', border: '1.5px dashed #38BDF8', background: '#F0F9FF', color: '#0284c7', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Sematkan Rencana</span>
+                      </button>
                     </div>
                   </div>
-
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedSpotForModal(spot); }} 
-                    style={{
-                      background: '#0284c7',
-                      color: 'white',
-                      border: 'none',
-                      padding: '6px 14px',
-                      borderRadius: '9999px',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <span>Peta & Detail</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Bottom Action Dashed Button */}
-              <div style={{ padding: '8px 10px' }}>
-                <button
-                  onClick={() => handleInitiatePin(spot)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    borderRadius: '12px',
-                    border: '1.5px dashed #38BDF8',
-                    background: '#F0F9FF',
-                    color: '#0284c7',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>Sematkan Tanggal Rencana</span>
-                </button>
-              </div>
+                );
+              })}
             </div>
-          );
-        })}
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', fontSize: '0.75rem', fontWeight: 800, opacity: currentPage === 1 ? 0.5 : 1 }}>Prev</button>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)' }}>Hal {currentPage} dari {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', fontSize: '0.75rem', fontWeight: 800, opacity: currentPage === totalPages ? 0.5 : 1 }}>Next</button>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
+                <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', fontSize: '0.75rem', fontWeight: 800, opacity: currentPage === 1 ? 0.5 : 1 }}>Prev</button>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)' }}>Hal {currentPage} dari {totalPages}</span>
+                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)} style={{ padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', fontSize: '0.75rem', fontWeight: 800, opacity: currentPage === totalPages ? 0.5 : 1 }}>Next</button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* MODAL SEMATKAN RENCANA VISIT */}
       {selectedPlanSpot && (
