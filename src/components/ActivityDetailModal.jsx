@@ -10,7 +10,6 @@ function FitBounds({ coords }) {
   useEffect(() => {
     if (coords.length >= 2) {
       const bounds = coords.map(c => [c[0], c[1]]);
-      // Delay to ensure container is rendered in modal
       setTimeout(() => {
         map.invalidateSize();
         map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
@@ -20,8 +19,27 @@ function FitBounds({ coords }) {
   return null;
 }
 
+// Map Tile Options
+const MAP_TILES = {
+  street: {
+    label: 'Biasa',
+    url: 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+    attribution: '&copy; CartoDB & OSM'
+  },
+  satellite: {
+    label: 'Satelit',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri World Imagery'
+  },
+  topo: {
+    label: '3D Topo',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenTopoMap'
+  }
+};
+
 // ─────────────────────────────────────────────────────────────────────
-// ACTIVITY DETAIL MODAL (Strava-style fullscreen detail with Leaflet)
+// ACTIVITY DETAIL MODAL (SUP.ID Blue Theme, Map Switcher, Replay Animation)
 // ─────────────────────────────────────────────────────────────────────
 export default function ActivityDetailModal({ activity, currentUserId, onClose, onRequireLogin }) {
   const [comments, setComments] = useState([]);
@@ -30,6 +48,14 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
   const [kudosCount, setKudosCount] = useState(activity?.kudos_count || 0);
   const [isKudosed, setIsKudosed] = useState(false);
   const [kudosLoading, setKudosLoading] = useState(false);
+
+  // Map layer state: 'street' | 'satellite' | 'topo'
+  const [mapType, setMapType] = useState('street');
+
+  // Animation state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [animIndex, setAnimIndex] = useState(null); // null means show full route
+  const animRef = useRef(null);
 
   const act = activity;
   if (!act) return null;
@@ -52,6 +78,47 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
   const endPt = hasRoute ? routeCoords[routeCoords.length - 1] : null;
   const centerLat = hasRoute ? (Math.min(...routeCoords.map(p => p[0])) + Math.max(...routeCoords.map(p => p[0]))) / 2 : -5.147;
   const centerLng = hasRoute ? (Math.min(...routeCoords.map(p => p[1])) + Math.max(...routeCoords.map(p => p[1]))) / 2 : 119.432;
+
+  // Display route: either slice when playing animation or full route
+  const displayedRoute = (isPlaying && animIndex !== null)
+    ? routeCoords.slice(0, animIndex + 1)
+    : routeCoords;
+
+  const currentMarker = (isPlaying && animIndex !== null && routeCoords[animIndex])
+    ? routeCoords[animIndex]
+    : endPt;
+
+  // Play animation controller
+  const handlePlayAnimation = () => {
+    if (!hasRoute) return;
+    if (isPlaying) {
+      clearInterval(animRef.current);
+      setIsPlaying(false);
+      setAnimIndex(null);
+      return;
+    }
+
+    setIsPlaying(true);
+    setAnimIndex(1);
+
+    const stepTime = Math.max(30, Math.floor(3000 / routeCoords.length));
+    let idx = 1;
+
+    animRef.current = setInterval(() => {
+      idx++;
+      if (idx >= routeCoords.length) {
+        clearInterval(animRef.current);
+        setIsPlaying(false);
+        setAnimIndex(null);
+      } else {
+        setAnimIndex(idx);
+      }
+    }, stepTime);
+  };
+
+  useEffect(() => {
+    return () => clearInterval(animRef.current);
+  }, []);
 
   // Load comments
   useEffect(() => {
@@ -108,7 +175,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
 
         {/* ── Top Bar ── */}
         <div style={{
-          position: 'sticky', top: 0, zIndex: 10,
+          position: 'sticky', top: 0, zIndex: 20,
           background: 'white',
           padding: '14px 16px',
           borderBottom: '1px solid #E8EEF4',
@@ -122,36 +189,96 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
               <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
             </svg>
           </button>
-          <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0F172A' }}>Detail Aktivitas</span>
+          <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0F172A' }}>Detail Sesi Paddle</span>
           <div style={{ width: '34px' }} />
         </div>
 
-        {/* ── Leaflet Map Section ── */}
-        <div style={{ height: '280px', background: '#dce9f0', position: 'relative', zIndex: 1 }}>
+        {/* ── Leaflet Map Container + Floating Controls ── */}
+        <div style={{ height: '290px', background: '#0F172A', position: 'relative', zIndex: 1 }}>
           {hasRoute ? (
-            <MapContainer
-              center={[centerLat, centerLng]}
-              zoom={14}
-              scrollWheelZoom={false}
-              dragging={true}
-              zoomControl={false}
-              style={{ height: '280px', width: '100%', zIndex: 1 }}
-            >
-              <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-              />
-              <FitBounds coords={routeCoords} />
-              {/* Route polyline */}
-              <Polyline
-                positions={routeCoords}
-                pathOptions={{ color: '#FC4C02', weight: 4, opacity: 0.9, lineCap: 'round', lineJoin: 'round' }}
-              />
-              {/* Start marker (green) */}
-              <CircleMarker center={startPt} radius={7} pathOptions={{ fillColor: '#2DC76D', fillOpacity: 1, color: 'white', weight: 3 }} />
-              {/* End marker (orange) */}
-              <CircleMarker center={endPt} radius={6} pathOptions={{ fillColor: '#FC4C02', fillOpacity: 1, color: 'white', weight: 3 }} />
-            </MapContainer>
+            <>
+              {/* Map Controls Top Right */}
+              <div style={{
+                position: 'absolute', top: '10px', right: '10px', zIndex: 500,
+                display: 'flex', gap: '4px', background: 'rgba(15, 23, 42, 0.75)',
+                backdropFilter: 'blur(8px)', padding: '3px', borderRadius: '10px',
+                border: '1px solid rgba(255,255,255,0.2)'
+              }}>
+                {Object.keys(MAP_TILES).map(key => (
+                  <button
+                    key={key}
+                    onClick={() => setMapType(key)}
+                    style={{
+                      border: 'none',
+                      background: mapType === key ? '#0284c7' : 'transparent',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '7px',
+                      fontSize: '0.68rem',
+                      fontWeight: mapType === key ? 900 : 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {MAP_TILES[key].label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Replay Animation Button Bottom Right */}
+              <button
+                onClick={handlePlayAnimation}
+                style={{
+                  position: 'absolute', bottom: '12px', right: '12px', zIndex: 500,
+                  background: isPlaying ? '#DC2626' : 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  color: 'white', border: '1.5px solid rgba(255,255,255,0.4)',
+                  padding: '7px 14px', borderRadius: '20px',
+                  fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}
+              >
+                {isPlaying ? (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    Stop
+                  </>
+                ) : (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Putar Animasi Rute
+                  </>
+                )}
+              </button>
+
+              <MapContainer
+                center={[centerLat, centerLng]}
+                zoom={14}
+                scrollWheelZoom={false}
+                dragging={true}
+                zoomControl={false}
+                attributionControl={false}
+                style={{ height: '290px', width: '100%', zIndex: 1 }}
+              >
+                <TileLayer url={MAP_TILES[mapType].url} attribution={MAP_TILES[mapType].attribution} />
+                <FitBounds coords={routeCoords} />
+
+                {/* Outer Glow Stroke for SUP.ID Ocean Blue Contrast */}
+                <Polyline
+                  positions={displayedRoute}
+                  pathOptions={{ color: '#0369a1', weight: 6.5, opacity: 0.7, lineCap: 'round', lineJoin: 'round' }}
+                />
+                {/* Main SUP.ID Ocean Blue Polyline */}
+                <Polyline
+                  positions={displayedRoute}
+                  pathOptions={{ color: '#00D2FF', weight: 4, opacity: 1, lineCap: 'round', lineJoin: 'round' }}
+                />
+
+                {/* Start marker (green) */}
+                <CircleMarker center={startPt} radius={7} pathOptions={{ fillColor: '#2DC76D', fillOpacity: 1, color: 'white', weight: 3 }} />
+                {/* End / Moving marker (cyan blue dot) */}
+                <CircleMarker center={currentMarker} radius={6.5} pathOptions={{ fillColor: '#00D2FF', fillOpacity: 1, color: 'white', weight: 3 }} />
+              </MapContainer>
+            </>
           ) : (
             <div style={{
               height: '100%',
@@ -163,7 +290,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
                   <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
                   <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
                 </svg>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.9 }}>No GPS route recorded</div>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.9 }}>Tidak ada rute GPS tercatat</div>
               </div>
             </div>
           )}
@@ -243,7 +370,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
         </div>
 
         {/* ── Comments Section ── */}
-        <div style={{ padding: '16px', background: 'white', borderTop: '1px solid #F1F5F9' }}>
+        <div style={{ padding: '16px 16px 24px', background: 'white', borderTop: '1px solid #F1F5F9' }}>
           <h3 style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0F172A', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Komentar ({comments.length})
@@ -305,8 +432,8 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
           )}
         </div>
 
-        {/* Bottom safe area */}
-        <div style={{ height: '20px', background: 'white' }} />
+        {/* Bottom safe area so bottom navigation bar does not cover comment input */}
+        <div style={{ height: '90px', background: 'white' }} />
       </div>
     </div>
   );

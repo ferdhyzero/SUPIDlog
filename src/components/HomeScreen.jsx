@@ -49,9 +49,9 @@ function FeedMiniMap({ routeJson }) {
         >
           <TileLayer url="https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png" />
           <FeedMapFitBounds coords={coords} />
-          <Polyline positions={coords} pathOptions={{ color: '#FC4C02', weight: 3.5, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }} />
+          <Polyline positions={coords} pathOptions={{ color: '#0284c7', weight: 4, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }} />
           <CircleMarker center={startPt} radius={5} pathOptions={{ fillColor: '#2DC76D', fillOpacity: 1, color: 'white', weight: 2 }} />
-          <CircleMarker center={endPt} radius={4.5} pathOptions={{ fillColor: '#FC4C02', fillOpacity: 1, color: 'white', weight: 2 }} />
+          <CircleMarker center={endPt} radius={4.5} pathOptions={{ fillColor: '#0284c7', fillOpacity: 1, color: 'white', weight: 2 }} />
         </MapContainer>
       </div>
     );
