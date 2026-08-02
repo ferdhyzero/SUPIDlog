@@ -185,27 +185,8 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
             </svg>
           </button>
 
-          {/* Top Right Save & Menu */}
-          <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 1000, display: 'flex', gap: '8px' }}>
-            <button onClick={(e) => { e.stopPropagation(); alert('Rute Disimpan!'); }} style={{
-              background: 'white', border: 'none', height: '40px', padding: '0 16px',
-              borderRadius: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)', fontWeight: 800, fontSize: '0.82rem', color: 'black'
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-              Simpan Rute
-            </button>
-            <button style={{
-              background: 'white', border: 'none', width: '40px', height: '40px',
-              borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
-            </button>
-          </div>
-
           {/* Map Controls Right Side */}
-          <div style={{ position: 'absolute', top: '70px', right: '16px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')} style={{
               background: 'white', border: 'none', width: '40px', height: '40px',
               borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -224,15 +205,6 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
 
           {hasRoute ? (
             <>
-              {/* Bottom Left Avatar */}
-              <div style={{
-                position: 'absolute', bottom: '20px', left: '16px', zIndex: 1000,
-                width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden',
-                border: '3px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
-              }}>
-                <img src={act.avatar_url || 'https://via.placeholder.com/60'} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-
               {/* Bottom Right Play Button */}
               <button onClick={handlePlayAnimation} disabled={isPlaying} style={{
                 position: 'absolute', bottom: '20px', right: '16px', zIndex: 1000,
@@ -250,7 +222,7 @@ export default function ActivityDetailModal({ activity, currentUserId, onClose, 
               <div style={{
                 height: '100%',
                 width: '100%',
-                transform: is3D ? 'translateY(10%) rotateX(50deg) scale(1.4)' : 'none',
+                transform: is3D ? 'translateY(5%) rotateX(50deg) scale(1.8)' : 'none',
                 transformOrigin: 'center center',
                 transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
               }}>
