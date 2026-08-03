@@ -946,17 +946,65 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           )}
         </div>
 
-        {/* Filter Horizontal Chips */}
+        {/* Pin Action Banner & Reset Map Button */}
+        {(activeMapLocation || searchQuery.trim().length >= 2) && (
+          <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => handleInitiatePin(activeMapLocation || { name: searchQuery.trim() })}
+              style={{
+                flex: 1, minWidth: 0,
+                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                color: 'white', border: 'none', borderRadius: '14px', padding: '5px 10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                cursor: 'pointer', boxShadow: '0 3px 10px rgba(2,132,199,0.35)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  Sematkan "{activeMapLocation ? activeMapLocation.name : searchQuery.trim()}"
+                </span>
+              </div>
+              <span style={{ background: 'rgba(255,255,255,0.25)', padding: '1px 6px', borderRadius: '8px', fontSize: '0.58rem', fontWeight: 900, marginLeft: '4px', flexShrink: 0 }}>
+                SEMATKAN
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMapLocation(null);
+                setSearchQuery('');
+                if (leafletMapInstance.current) {
+                  leafletMapInstance.current.setView([-5.147812, 119.415421], 6, { animate: true });
+                }
+              }}
+              style={{
+                background: '#F1F5F9', color: '#475569', border: '1px solid #CBD5E1',
+                borderRadius: '14px', padding: '5px 8px', fontSize: '0.62rem', fontWeight: 800,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+              }}
+              title="Reset Peta & Pencarian"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Reset
+            </button>
+          </div>
+        )}
+
+        {/* Filter Horizontal Chips (Extra Compact Size) */}
         <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', scrollbarWidth: 'none', padding: '1px 0' }}>
           {filters.map((f) => (
             <button 
               key={f}
               onClick={() => { setActiveFilter(f); setActiveMapLocation(null); }}
               style={{
-                padding: '4px 10px', borderRadius: '16px', border: 'none', fontSize: '0.66rem', fontWeight: 800,
+                padding: '3px 8px', borderRadius: '12px', border: 'none', fontSize: '0.6rem', fontWeight: 800,
                 background: activeFilter === f ? '#0284c7' : 'white',
                 color: activeFilter === f ? 'white' : '#0F172A',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.12)', cursor: 'pointer', whiteSpace: 'nowrap'
+                boxShadow: '0 2px 5px rgba(0,0,0,0.12)', cursor: 'pointer', whiteSpace: 'nowrap'
               }}
             >
               {f}
