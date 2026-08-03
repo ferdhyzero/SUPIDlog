@@ -246,8 +246,6 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         maxZoom: 20
       }).setView(initialCenter, 6);
 
-      window.L.control.zoom({ position: 'topright' }).addTo(map);
-
       // Map click handler (1x click = reverse geocode to search bar + blue banner, 2x dblclick = open detail modal)
       let mapClickTimer = null;
 
@@ -853,8 +851,8 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* ── FLOATING TOP CONTROLS OVERLAY (SEARCH & FILTERS) ── */}
       <div style={{
-        position: 'absolute', top: '10px', left: '10px', right: '10px', zIndex: 1000,
-        display: 'flex', flexDirection: 'column', gap: '8px'
+        position: 'absolute', top: '8px', left: '8px', right: '8px', zIndex: 1000,
+        display: 'flex', flexDirection: 'column', gap: '6px'
       }}>
         {/* Search Input Bar */}
         <div style={{ position: 'relative' }}>
@@ -875,14 +873,14 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               onFocus={() => { if (suggestionsList.length > 0) setShowSuggestionsDropdown(true); }}
               style={{
                 width: '100%',
-                padding: '10px 16px 10px 40px',
-                borderRadius: '30px',
+                padding: '7px 12px 7px 32px',
+                borderRadius: '24px',
                 border: 'none',
-                fontSize: '0.85rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 background: 'white',
                 color: '#0F172A',
-                boxShadow: '0 4px 18px rgba(0,0,0,0.18)',
+                boxShadow: '0 3px 14px rgba(0,0,0,0.18)',
                 outline: 'none',
                 fontFamily: 'inherit',
                 boxSizing: 'border-box'
@@ -893,13 +891,13 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               type="submit"
               disabled={isSearchingGeocode}
               style={{
-                position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
-                background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer',
+                position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
+                background: 'transparent', border: 'none', padding: '2px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284c7'
               }}
               title="Cari Spot"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
@@ -910,17 +908,17 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           {showSuggestionsDropdown && suggestionsList.length > 0 && (
             <div 
               style={{
-                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
-                background: 'white', borderRadius: '16px', border: '1px solid #E2E8F0',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.25)', zIndex: 2000, maxHeight: '220px', overflowY: 'auto'
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
+                background: 'white', borderRadius: '14px', border: '1px solid #E2E8F0',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.25)', zIndex: 2000, maxHeight: '200px', overflowY: 'auto'
               }}
             >
-              <div style={{ padding: '8px 12px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.7rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ padding: '6px 10px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.65rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>REKOMENDASI SPOT ({suggestionsList.length})</span>
                 <button
                   type="button"
                   onClick={() => { setShowSuggestionsDropdown(false); setSuggestionsList([]); }}
-                  style={{ background: '#EF4444', color: 'white', border: 'none', padding: '2px 8px', borderRadius: '6px', fontSize: '0.62rem', fontWeight: 800, cursor: 'pointer' }}
+                  style={{ background: '#EF4444', color: 'white', border: 'none', padding: '2px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 800, cursor: 'pointer' }}
                 >
                   Tutup
                 </button>
@@ -931,16 +929,16 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                   key={idx}
                   onClick={() => handleSelectSuggestion(item)}
                   style={{
-                    padding: '9px 12px', borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
+                    padding: '7px 10px', borderBottom: idx === suggestionsList.length - 1 ? 'none' : '1px solid #F1F5F9',
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', background: 'white'
                   }}
                 >
-                  <div style={{ width: '26px', height: '26px', borderRadius: '8px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: item.source === 'database' ? '#E0F2FE' : '#FEF3C7', color: item.source === 'database' ? '#0284c7' : '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <strong style={{ fontSize: '0.8rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
-                    <span style={{ fontSize: '0.65rem', color: '#0284c7', fontWeight: 700, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category}</span>
+                    <strong style={{ fontSize: '0.75rem', color: '#0F172A', fontWeight: 800, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.address || item.name}</strong>
+                    <span style={{ fontSize: '0.62rem', color: '#0284c7', fontWeight: 700, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.category}</span>
                   </div>
                 </div>
               ))}
@@ -949,16 +947,16 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         </div>
 
         {/* Filter Horizontal Chips */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', scrollbarWidth: 'none', padding: '2px 0' }}>
+        <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', scrollbarWidth: 'none', padding: '1px 0' }}>
           {filters.map((f) => (
             <button 
               key={f}
               onClick={() => { setActiveFilter(f); setActiveMapLocation(null); }}
               style={{
-                padding: '5px 12px', borderRadius: '20px', border: 'none', fontSize: '0.72rem', fontWeight: 800,
+                padding: '4px 10px', borderRadius: '16px', border: 'none', fontSize: '0.66rem', fontWeight: 800,
                 background: activeFilter === f ? '#0284c7' : 'white',
                 color: activeFilter === f ? 'white' : '#0F172A',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.12)', cursor: 'pointer', whiteSpace: 'nowrap'
+                boxShadow: '0 2px 6px rgba(0,0,0,0.12)', cursor: 'pointer', whiteSpace: 'nowrap'
               }}
             >
               {f}
@@ -969,22 +967,22 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* ── RIGHT ACTION BUTTON STACK (LAYER & MY LOCATION) ── */}
       <div style={{
-        position: 'absolute', top: '115px', right: '12px', zIndex: 1000,
-        display: 'flex', flexDirection: 'column', gap: '10px'
+        position: 'absolute', top: '95px', right: '10px', zIndex: 1000,
+        display: 'flex', flexDirection: 'column', gap: '8px'
       }}>
         {/* Layer Map Switcher Button (Outline Layers Icon) */}
         <button
           type="button"
           onClick={() => setMapType(mapType === 'satellite' ? 'roadmap' : 'satellite')}
           style={{
-            width: '42px', height: '42px', borderRadius: '50%',
+            width: '36px', height: '36px', borderRadius: '50%',
             background: 'white', color: '#0F172A', border: 'none',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.2)', cursor: 'pointer',
+            boxShadow: '0 3px 12px rgba(0,0,0,0.2)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}
           title={mapType === 'satellite' ? 'Tampilan Peta Biasa' : 'Tampilan Peta Satelit'}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
             <polyline points="2 12 12 17 22 12"/>
             <polyline points="2 17 12 22 22 17"/>
@@ -1008,14 +1006,14 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
             }
           }}
           style={{
-            width: '42px', height: '42px', borderRadius: '50%',
+            width: '36px', height: '36px', borderRadius: '50%',
             background: 'white', color: '#0F172A', border: 'none',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.2)', cursor: 'pointer',
+            boxShadow: '0 3px 12px rgba(0,0,0,0.2)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}
           title="Lokasi Saya (GPS Target)"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.2">
             <circle cx="12" cy="12" r="10"/>
             <circle cx="12" cy="12" r="3"/>
             <line x1="12" y1="2" x2="12" y2="4"/>
@@ -1031,14 +1029,14 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         type="button"
         onClick={() => setShowAddSpotModal(true)}
         style={{
-          position: 'absolute', bottom: '215px', right: '12px', zIndex: 1000,
+          position: 'absolute', bottom: '180px', right: '10px', zIndex: 1000,
           background: 'white', color: '#0F172A', border: 'none',
-          padding: '9px 16px', borderRadius: '30px', fontWeight: 900, fontSize: '0.82rem',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: '6px',
+          padding: '7px 14px', borderRadius: '24px', fontWeight: 900, fontSize: '0.75rem',
+          boxShadow: '0 3px 14px rgba(0,0,0,0.22)', display: 'flex', alignItems: 'center', gap: '5px',
           cursor: 'pointer'
         }}
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12h14"/>
         </svg>
         + Buat Spot
@@ -1046,8 +1044,8 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* ── HORIZONTAL SPOT CARDS CAROUSEL (BOTTOM OVER MAP) ── */}
       <div style={{
-        position: 'absolute', bottom: '48px', left: 0, right: 0, zIndex: 1000,
-        padding: '0 12px', overflowX: 'auto', display: 'flex', gap: '12px',
+        position: 'absolute', bottom: '40px', left: 0, right: 0, zIndex: 1000,
+        padding: '0 10px', overflowX: 'auto', display: 'flex', gap: '10px',
         scrollbarWidth: 'none', scrollSnapType: 'x mandatory'
       }}>
         {filteredSpots.map((spot) => {
@@ -1064,38 +1062,38 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                 }
               }}
               style={{
-                width: '260px', flexShrink: 0, scrollSnapAlign: 'center',
-                background: 'white', borderRadius: '16px', border: isSelected ? '2px solid #0284c7' : '1px solid #E2E8F0',
-                overflow: 'hidden', boxShadow: '0 6px 20px rgba(0,0,0,0.18)', cursor: 'pointer',
+                width: '215px', flexShrink: 0, scrollSnapAlign: 'center',
+                background: 'white', borderRadius: '14px', border: isSelected ? '2px solid #0284c7' : '1px solid #E2E8F0',
+                overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.16)', cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
             >
               {/* Hero Photo Header */}
-              <div style={{ position: 'relative', height: '110px', width: '100%', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', height: '90px', width: '100%', overflow: 'hidden' }}>
                 <img src={getSpotPhoto(spot)} alt={spot.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.8) 100%)' }} />
 
-                <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '4px' }}>
-                  <span style={{ background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)', color: 'white', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 800 }}>
+                <div style={{ position: 'absolute', top: '6px', left: '6px', display: 'flex', gap: '4px' }}>
+                  <span style={{ background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(4px)', color: 'white', padding: '2px 7px', borderRadius: '9999px', fontSize: '0.62rem', fontWeight: 800 }}>
                     {spot.category || 'Spot SUP'}
                   </span>
                   {badge && (
-                    <span style={{ background: badge.bg, color: badge.color, padding: '2px 8px', borderRadius: '9999px', fontSize: '0.65rem', fontWeight: 900 }}>
+                    <span style={{ background: badge.bg, color: badge.color, padding: '2px 6px', borderRadius: '9999px', fontSize: '0.6rem', fontWeight: 900 }}>
                       {badge.label}
                     </span>
                   )}
                 </div>
 
-                <div style={{ position: 'absolute', bottom: '8px', left: '10px', right: '10px' }}>
-                  <h4 style={{ fontSize: '0.92rem', fontWeight: 900, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ position: 'absolute', bottom: '6px', left: '8px', right: '8px' }}>
+                  <h4 style={{ fontSize: '0.84rem', fontWeight: 900, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {spot.name}
                   </h4>
                 </div>
               </div>
 
               {/* Card Footer Content */}
-              <div style={{ padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
-                <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>
+              <div style={{ padding: '6px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
+                <span style={{ fontSize: '0.63rem', color: '#64748B', fontWeight: 700 }}>
                   📍 {spot.lat ? (+spot.lat).toFixed(3) : '-5.147'}, {spot.lng ? (+spot.lng).toFixed(3) : '119.415'}
                 </span>
 
@@ -1106,8 +1104,8 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                   }}
                   style={{
                     background: '#0284c7', color: 'white', border: 'none',
-                    padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem',
-                    fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px'
+                    padding: '3px 8px', borderRadius: '14px', fontSize: '0.65rem',
+                    fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px'
                   }}
                 >
                   Detail ➔
@@ -1123,14 +1121,14 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         onClick={() => setShowListBottomSheet(true)}
         style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1000,
-          height: '42px', background: 'white', borderTopLeftRadius: '18px', borderTopRightRadius: '18px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-          boxShadow: '0 -4px 14px rgba(0,0,0,0.12)', cursor: 'pointer'
+          height: '36px', background: 'white', borderTopLeftRadius: '16px', borderTopRightRadius: '16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+          boxShadow: '0 -3px 12px rgba(0,0,0,0.1)', cursor: 'pointer'
         }}
       >
-        <div style={{ width: '32px', height: '4px', background: '#CBD5E1', borderRadius: '2px', position: 'absolute', top: '6px' }} />
-        <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#0F172A', marginTop: '6px' }}>
-          📋 {filteredSpots.length} Spot Dayung <span style={{ color: '#0284c7', fontSize: '0.75rem' }}>▲ Lihat Semua</span>
+        <div style={{ width: '28px', height: '3px', background: '#CBD5E1', borderRadius: '2px', position: 'absolute', top: '5px' }} />
+        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#0F172A', marginTop: '4px' }}>
+          📋 {filteredSpots.length} Spot Dayung <span style={{ color: '#0284c7', fontSize: '0.7rem' }}>▲ Lihat Semua</span>
         </span>
       </div>
 
