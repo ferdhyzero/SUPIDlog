@@ -10,9 +10,7 @@ export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto 
   const [isRealGps, setIsRealGps] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentCoords, setCurrentCoords] = useState({ lat: -5.14378, lng: 119.45851 });
-  const [pathHistory, setPathHistory] = useState([
-    { lat: -5.14378, lng: 119.45851 }
-  ]);
+  const [pathHistory, setPathHistory] = useState([]);
   
   // 'map' (Google Maps), 'vector_canvas' (Offline Vector Map), or 'dashboard'
   const [viewMode, setViewMode] = useState(navigator.onLine ? 'map' : 'vector_canvas');

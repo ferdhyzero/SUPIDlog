@@ -110,9 +110,9 @@ function ActivityFeedCard({ act, currentUserId, onKudos, onComment, onClick }) {
       background: 'white',
       borderRadius: '18px',
       border: '1px solid #E8EEF4',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+      boxShadow: '0 2px 12px rgba(215, 215, 215, 0)',
       overflow: 'hidden',
-      marginBottom: '2px'
+      marginBottom: '2px',
     }}>
       {/* ── Clickable area: Header + Stats + Map ── */}
       <div onClick={onClick} style={{ cursor: 'pointer' }}>
@@ -211,7 +211,7 @@ function ActivityFeedCard({ act, currentUserId, onKudos, onComment, onClick }) {
             <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
             <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
           </svg>
-          Kudos {kudosCount > 0 && <span style={{ fontWeight: 900 }}>{kudosCount}</span>}
+          Like {kudosCount > 0 && <span style={{ fontWeight: 900 }}>{kudosCount}</span>}
         </button>
 
         {/* Comment */}
@@ -514,7 +514,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
           {/* Hero Greeting & Weather Card */}
           <div
             className="hero-card"
-            style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #070D1B 0%, #0369a1 100%)', borderRadius: '18px', padding: '18px 16px', boxShadow: '0 6px 20px rgba(2, 132, 199, 0.25)', border: '1px solid rgba(255, 255, 255, 0.25)' }}
+            style={{ height: '200px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%)', borderRadius: '18px', padding: '18px 16px', boxShadow: '0 6px 20px rgba(2, 132, 199, 0.25)', border: '1px solid rgba(255, 255, 255, 0.25)' }}
           >
             <img src="/sup-hero-bg.webp" alt="Stand Up Paddle Boarding Indonesia" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%', opacity: 0.95, filter: 'brightness(1.05) contrast(1.05)', zIndex: 0, pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(7, 13, 27, 0.10) 0%, rgba(3, 105, 161, 0.25) 100%)', zIndex: 1, pointerEvents: 'none' }} />
@@ -534,7 +534,7 @@ export default function HomeScreen({ userId = null, userName = 'Guest SUPer', on
 
 
 
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 700 }}>
+              <div style={{ display: 'flex', gap: '9px', flexWrap: 'wrap', fontSize: '0.75rem', fontWeight: 700, marginTop: '95px' }}>
                 {[
                   { icon: <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>, label: weather.temp },
                   { icon: <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>, label: weather.wind },

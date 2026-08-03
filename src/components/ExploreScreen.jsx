@@ -1084,10 +1084,10 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
           cursor: 'pointer'
         }}
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000000ff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12h14"/>
         </svg>
-        + Buat Spot
+        Buat Spot
       </button>
 
       {/* ── HORIZONTAL SPOT CARDS CAROUSEL (BOTTOM OVER MAP) ── */}
@@ -1151,9 +1151,9 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
                     setSelectedSpotForModal(spot);
                   }}
                   style={{
-                    background: '#0284c7', color: 'white', border: 'none',
+                    background: '#ffffffff', color: '#111', border: 'none',
                     padding: '3px 8px', borderRadius: '14px', fontSize: '0.65rem',
-                    fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px'
+                    fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px'
                   }}
                 >
                   Detail ➔
