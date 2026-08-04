@@ -43,10 +43,10 @@ export default function SplashModal({ onClose }) {
           style={{
             width: '136px',
             height: '136px',
-            borderRadius: '30px',
+            borderRadius: '40px',
             overflow: 'hidden',
             marginBottom: '24px',
-            border: '4px solid #ffffff',
+            border: '6px solid #ffffff',
             boxShadow: '0 0 0 3px rgba(255,255,255,0.4), 0 16px 36px rgba(0,0,0,0.4), 0 0 30px rgba(0,180,216,0.6)',
             animation: 'bounce 2.5s infinite ease-in-out',
             background: 'white'
@@ -84,7 +84,7 @@ export default function SplashModal({ onClose }) {
         </div>
 
         <div style={{ fontSize: '0.85rem', opacity: 0.85, fontWeight: 600, animation: 'pulseGlow 1.5s infinite' }}>
-          Ketuk layar untuk memulai 🌊
+          Ketuk layar untuk memulai 
         </div>
       </div>
     </div>

@@ -185,9 +185,9 @@ export default function App() {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 45%',
+            objectPosition: 'center 1%',
             opacity: 0.90,
-            filter: 'brightness(1.05) contrast(1.05)',
+            filter: 'brightness(0.35) contrast(1.05)',
             zIndex: 0,
             pointerEvents: 'none'
           }}
@@ -216,7 +216,7 @@ export default function App() {
               style={{
                 width: '32px',
                 height: '32px',
-                borderRadius: '8px',
+                borderRadius: '9px',
                 border: '1.5px solid #ffffff',
                 objectFit: 'cover',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
@@ -260,8 +260,8 @@ export default function App() {
                   color: 'white',
                   padding: '5px 10px 5px 6px',
                   borderRadius: '20px',
-                  fontSize: '0.75rem',
-                  fontWeight: 800,
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -271,7 +271,7 @@ export default function App() {
                 }}
               >
                 {/* User avatar circle */}
-                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #0284c7, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'linear-gradient(135deg, #0284c7, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
