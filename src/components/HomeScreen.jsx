@@ -96,7 +96,7 @@ function ActivityFeedCard({ act, currentUserId, onKudos, onComment, onClick }) {
   };
 
   const handleShare = async () => {
-    const text = `${act.user_name} paddled ${act.distance_km} km at ${act.spot_name}! 🏄 via SUP.ID`;
+    const text = `${act.user_name} paddled ${act.distance_km} km at ${act.spot_name}! via SUP.ID`;
     if (navigator.share) {
       try { await navigator.share({ title: 'SUP Activity', text, url: window.location.href }); } catch (e) {}
     } else {

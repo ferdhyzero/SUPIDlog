@@ -8,9 +8,9 @@ const SUP_PHOTO_POOL = [
   'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=600&q=80', // Sunset ocean paddleboarding
   'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=600&q=80', // Crystal clear lagoon & SUP
   'https://images.unsplash.com/photo-1516690561799-46d8f7489abf?auto=format&fit=crop&w=600&q=80', // Tropical island ocean coast
-  'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80', // Bali ocean beach reef
+  'https://images.unsplash.com/photo-1520950237264-dfe336995c34?auto=format&fit=crop&w=600&q=80', // Bali ocean beach reef
   'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80', // Ocean shoreline sunset
-  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80'  // Lake & mountain paddle trip
+  'https://images.unsplash.com/photo-1520950237264-dfe336995c34?auto=format&fit=crop&w=600&q=80'  // Lake & mountain paddle trip
 ];
 
 export const getSpotPhoto = (spot) => {
@@ -851,7 +851,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* ── FLOATING TOP CONTROLS OVERLAY (SEARCH & FILTERS) ── */}
       <div style={{
-        position: 'absolute', top: '8px', left: '8px', right: '8px', zIndex: 1000,
+        position: 'absolute', top: '8px', left: '8px', right: '8px', zIndex: 100,
         display: 'flex', flexDirection: 'column', gap: '6px'
       }}>
         {/* Search Input Bar */}
@@ -910,7 +910,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
               style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
                 background: 'white', borderRadius: '14px', border: '1px solid #E2E8F0',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.25)', zIndex: 2000, maxHeight: '200px', overflowY: 'auto'
+                boxShadow: '0 8px 24px rgba(0,0,0,0.25)', zIndex: 200, maxHeight: '200px', overflowY: 'auto'
               }}
             >
               <div style={{ padding: '6px 10px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.65rem', fontWeight: 800, color: '#0284c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1015,7 +1015,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* ── RIGHT ACTION BUTTON STACK (LAYER & MY LOCATION) ── */}
       <div style={{
-        position: 'absolute', top: '95px', right: '10px', zIndex: 1000,
+        position: 'absolute', top: '95px', right: '10px', zIndex: 100,
         display: 'flex', flexDirection: 'column', gap: '8px'
       }}>
         {/* Layer Map Switcher Button (Outline Layers Icon) */}
@@ -1077,7 +1077,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
         type="button"
         onClick={() => setShowAddSpotModal(true)}
         style={{
-          position: 'absolute', bottom: '180px', right: '10px', zIndex: 1000,
+          position: 'absolute', bottom: '180px', right: '10px', zIndex: 100,
           background: 'white', color: '#0F172A', border: 'none',
           padding: '7px 14px', borderRadius: '24px', fontWeight: 900, fontSize: '0.75rem',
           boxShadow: '0 3px 14px rgba(0,0,0,0.22)', display: 'flex', alignItems: 'center', gap: '5px',
@@ -1092,7 +1092,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
 
       {/* ── HORIZONTAL SPOT CARDS CAROUSEL (BOTTOM OVER MAP) ── */}
       <div style={{
-        position: 'absolute', bottom: '40px', left: 0, right: 0, zIndex: 1000,
+        position: 'absolute', bottom: '40px', left: 0, right: 0, zIndex: 100,
         padding: '0 10px', overflowX: 'auto', display: 'flex', gap: '10px',
         scrollbarWidth: 'none', scrollSnapType: 'x mandatory'
       }}>
@@ -1168,7 +1168,7 @@ export default function ExploreScreen({ userId = null, onSelectSpot, onRequireLo
       <div 
         onClick={() => setShowListBottomSheet(true)}
         style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1000,
+          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 100,
           height: '36px', background: 'white', borderTopLeftRadius: '16px', borderTopRightRadius: '16px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
           boxShadow: '0 -3px 12px rgba(0,0,0,0.1)', cursor: 'pointer'

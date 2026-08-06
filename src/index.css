@@ -373,9 +373,9 @@ p, span { line-height: 1.4; }
   width: 100%;
   max-width: var(--app-max-width);
   margin: 0 auto;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 99999 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -427,7 +427,7 @@ p, span { line-height: 1.4; }
 .activity-detail-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999 !important;
   background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(8px);
   display: flex;

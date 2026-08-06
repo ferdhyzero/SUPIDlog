@@ -115,16 +115,19 @@ export default function AdminDashboardScreen({ currentUser }) {
   return (
     <div style={{ width: '100%', padding: '12px 12px 24px 12px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
+      
       {/* Super Admin Hero Banner */}
       <div 
-        style={{
-          background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-          color: 'white',
-          borderRadius: '16px',
-          padding: '14px',
-          boxShadow: '0 4px 15px rgba(15, 23, 42, 0.2)'
-        }}
-      >
+  style={{
+    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.33) 0%, rgba(30, 41, 59, 0.23) 100%), url(https://images.unsplash.com/photo-1520950237264-dfe336995c34?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHBhZGRsZSUyMGJvYXJkfGVufDB8fDB8fHww)`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    color: 'white',
+    borderRadius: '16px',
+    padding: '14px',
+    boxShadow: '0 4px 15px rgba(15, 23, 42, 0.2)'
+  }}
+>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <div>
             <span style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800, color: '#F59E0B' }}>SUPER ADMIN</span>
@@ -136,6 +139,7 @@ export default function AdminDashboardScreen({ currentUser }) {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+          
           <div style={{ background: 'rgba(255,255,255,0.08)', padding: '8px 10px', borderRadius: '10px' }}>
             <span style={{ fontSize: '0.68rem', opacity: 0.8, display: 'block' }}>Total User</span>
             <strong style={{ fontSize: '1.1rem', fontWeight: 900 }}>{usersList.length}</strong>
