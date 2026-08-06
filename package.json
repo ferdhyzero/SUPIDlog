@@ -11,7 +11,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:api": "vitest run src/test/api-all-endpoints.test.js",
-    "test:screens": "vitest run src/test/screens-and-modals.test.jsx"
+    "test:screens": "vitest run src/test/screens-and-modals.test.jsx",
+    "test:e2e": "vitest run src/test/e2e.test.js",
+    "test:pwa": "vitest run src/test/pwa-offline.test.js",
+    "test:load": "vitest run src/test/api-load-performance.test.js",
+    "test:mobile": "vitest run src/test/mobile-viewport.test.jsx"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
