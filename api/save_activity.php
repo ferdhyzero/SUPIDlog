@@ -86,8 +86,8 @@ try {
         }
     } catch (Exception $exStamp) {}
 
-    // 3. Update user total distance
-    $stmtUser = $pdo->prepare("UPDATE users SET total_distance_km = total_distance_km + :dist WHERE id = :uid");
+    // 3. Update user total distance safely handling NULL values
+    $stmtUser = $pdo->prepare("UPDATE users SET total_distance_km = COALESCE(total_distance_km, 0) + :dist WHERE id = :uid");
     $stmtUser->execute(['dist' => $distance, 'uid' => $userId]);
 
     // 4. Auto-create post in community_posts if 1-click share is enabled

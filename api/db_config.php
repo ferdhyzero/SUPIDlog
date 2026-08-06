@@ -45,8 +45,8 @@ try {
         // Return clear JSON error message instead of 500 server crash
         echo json_encode([
             'success' => false,
-            'message' => 'Gagal Konek MySQL: ' . $eCpanel->getMessage(),
-            'hint' => 'Pastikan User & Password MySQL cPanel di api/db_config.php sudah diisi.'
+            'message' => 'Gagal Konek MySQL (cPanel: ' . $eCpanel->getMessage() . ' | Local: ' . $eLocal->getMessage() . ')',
+            'hint' => 'Pastikan database MySQL supidlog_db / myhostzo_sup di XAMPP / cPanel sudah dibuat.'
         ]);
         exit();
     }
