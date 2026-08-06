@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:api": "vitest run src/test/api-health.test.js"
+    "test:api": "vitest run src/test/api-all-endpoints.test.js",
+    "test:screens": "vitest run src/test/screens-and-modals.test.jsx"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

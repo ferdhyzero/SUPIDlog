@@ -31,6 +31,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    environmentOptions: {
+      jsdom: {
+        url: 'http://localhost/SUPIDlog/'
+      }
+    },
     setupFiles: './src/test/setup.js',
     include: ['src/test/**/*.test.{js,jsx}']
   }
