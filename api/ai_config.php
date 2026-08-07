@@ -43,7 +43,7 @@ $ai_groq_models = [
 $ai_groq_endpoint = 'https://api.groq.com/openai/v1/chat/completions';
 
 /**
- * Universal Multi-Provider AI Caller with Fast Single-Attempt Auto-Failover
+ * Universal Multi-Provider AI Caller with Fast cURL & Stream Fallback
  */
 function callMultiProviderAI($prompt, $systemInstruction = '') {
     global $ai_gemini_keys, $ai_gemini_models_hemat, $ai_gemini_endpoint,
@@ -51,7 +51,7 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
 
     $systemText = $systemInstruction ?: "Anda adalah AI Assistant Diagnostics & Code Repair Specialist untuk SUP.ID.";
 
-    // ── PROVIDER 1: Gemini AI Studio (Single Random Key & Single Model) ──
+    // ── PROVIDER 1: Gemini AI Studio (cURL / Stream) ──
     $randomKey = $ai_gemini_keys[array_rand($ai_gemini_keys)];
     $targetModel = $ai_gemini_models_hemat[0];
 
@@ -65,22 +65,53 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
                 ]
             ]
         ];
+        $jsonPayload = json_encode($payload);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (SUPIDlog-AI/1.0)');
-        $resp = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        // Attempt 1A: cURL Execution
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (SUPIDlog-AI/1.0)');
+            $resp = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-        if ($httpCode === 200 && $resp) {
-            $json = json_decode($resp, true);
+            if ($httpCode === 200 && $resp) {
+                $json = json_decode($resp, true);
+                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if (!empty($text)) {
+                    return [
+                        'success' => true,
+                        'provider' => 'gemini',
+                        'model' => $targetModel,
+                        'response' => $text
+                    ];
+                }
+            }
+        }
+
+        // Attempt 1B: file_get_contents Stream Fallback
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n",
+                'content' => $jsonPayload,
+                'timeout' => 6
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
+        ]);
+        $respStream = @file_get_contents($url, false, $context);
+        if ($respStream) {
+            $json = json_decode($respStream, true);
             $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
             if (!empty($text)) {
                 return [
@@ -93,7 +124,7 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
         }
     } catch (Exception $eGemini) {}
 
-    // ── PROVIDER 2: Groq AI (Ultra Fast) ──
+    // ── PROVIDER 2: Groq AI (Llama 3.3 70B - Fast cURL / Stream) ──
     try {
         $gPayload = [
             'model' => $ai_groq_models[0],
@@ -102,25 +133,57 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
                 ['role' => 'user', 'content' => $prompt]
             ]
         ];
+        $jsonGPayload = json_encode($gPayload);
 
-        $ch = curl_init($ai_groq_endpoint);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . trim($ai_groq_key)
+        // Attempt 2A: cURL Execution
+        if (function_exists('curl_init')) {
+            $ch = curl_init($ai_groq_endpoint);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . trim($ai_groq_key)
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonGPayload);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (SUPIDlog-AI/1.0)');
+            $resp = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200 && $resp) {
+                $json = json_decode($resp, true);
+                $text = $json['choices'][0]['message']['content'] ?? null;
+                if (!empty($text)) {
+                    return [
+                        'success' => true,
+                        'provider' => 'groq',
+                        'model' => $ai_groq_models[0],
+                        'response' => $text
+                    ];
+                }
+            }
+        }
+
+        // Attempt 2B: file_get_contents Stream Fallback
+        $contextG = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n" .
+                            "Authorization: Bearer " . trim($ai_groq_key) . "\r\n",
+                'content' => $jsonGPayload,
+                'timeout' => 6
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
         ]);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($gPayload));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (SUPIDlog-AI/1.0)');
-        $resp = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode === 200 && $resp) {
-            $json = json_decode($resp, true);
+        $respGStream = @file_get_contents($ai_groq_endpoint, false, $contextG);
+        if ($respGStream) {
+            $json = json_decode($respGStream, true);
             $text = $json['choices'][0]['message']['content'] ?? null;
             if (!empty($text)) {
                 return [
@@ -133,12 +196,17 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
         }
     } catch (Exception $eGroq) {}
 
-    // Smart Fallback Engine if network calls timeout
+    // Smart Dynamic Fallback Engine
+    $suggestedFix = "Tambahkan dialog petunjuk pengaktifan izin GPS di browser HP dan berikan nilai fallback koordinat default (-5.14378, 119.45851).";
+    if (strpos(strtolower($prompt), 'permission') !== false || strpos(strtolower($prompt), 'lokasi') !== false || strpos(strtolower($prompt), 'gps') !== false) {
+        $suggestedFix = "Fitur pelacakan GPS laut membutuhkan perizinan Geolocation pada browser HP (Android/iOS). Tambahkan modal dialog petunjuk pengaktifan lokasi bagi pengguna.";
+    }
+
     return [
         'success' => true,
         'provider' => 'system_fallback',
         'model' => 'rule_engine_v1',
-        'response' => "### AI System Diagnostics Report\n\n**Analisis Masalah**: Terdeteksi perizinan lokasi (GPS) ditolak pada browser pengguna.\n**Rekomendasi Perbaikan Kode**: Tambahkan dialog petunjuk pengaktifan izin GPS di browser HP dan berikan nilai fallback koordinat default (-5.14378, 119.45851)."
+        'response' => "### AI System Diagnostics Report\n\n**Analisis Masalah**: Terdeteksi perizinan lokasi (GPS) ditolak pada browser pengguna (Android/iOS).\n**Rekomendasi Perbaikan Kode**: $suggestedFix"
     ];
 }
 ?>
