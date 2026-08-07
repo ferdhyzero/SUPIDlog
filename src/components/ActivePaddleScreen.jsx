@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import LocationPermissionModal from './LocationPermissionModal';
 
 export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto }) {
   const [seconds, setSeconds] = useState(0);
@@ -11,6 +12,7 @@ export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentCoords, setCurrentCoords] = useState({ lat: -5.14378, lng: 119.45851 });
   const [pathHistory, setPathHistory] = useState([]);
+  const [showGpsModal, setShowGpsModal] = useState(false);
   
   // 'map' (Google Maps), 'vector_canvas' (Offline Vector Map), or 'dashboard'
   const [viewMode, setViewMode] = useState(navigator.onLine ? 'map' : 'vector_canvas');
@@ -111,7 +113,23 @@ export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto 
         },
         (error) => {
           console.log('GPS Error / Waiting for real movement:', error.message);
-          setGpsStatus('GPS READY 🛰️');
+          if (error.code === 1) { // PERMISSION_DENIED
+            setShowGpsModal(true);
+            setGpsStatus('IZIN PENGATURAN LOKASI DIBUTUHKAN');
+            // Log diagnostic report to AI engine automatically
+            fetch('/api/ai_diagnose.php?action=diagnose', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                feature_name: 'Pelacakan GPS Laut',
+                error_type: 'Frontend Permission Exception',
+                raw_error: 'Izin Geolocation ditolak oleh browser HP pengguna (User denied Geolocation)',
+                user_id: 1
+              })
+            }).catch(() => {});
+          } else {
+            setGpsStatus('GPS READY 🛰️');
+          }
         },
         {
           enableHighAccuracy: true,
@@ -917,6 +935,32 @@ export default function ActivePaddleScreen({ onStop, onStopWorkout, onTakePhoto 
           {capturedPhoto ? 'FOTO ✓' : 'FOTO'}
         </button>
       </div>
+
+      {/* Location Permission Instructions Modal */}
+      <LocationPermissionModal
+        isOpen={showGpsModal}
+        onClose={() => setShowGpsModal(false)}
+        onRetryGps={() => {
+          setShowGpsModal(false);
+          if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                setIsRealGps(true);
+                setGpsStatus('GPS LOCKED 🛰️');
+                setCurrentCoords({ lat: +pos.coords.latitude.toFixed(5), lng: +pos.coords.longitude.toFixed(5) });
+              },
+              () => {
+                setShowGpsModal(true);
+              }
+            );
+          }
+        }}
+        onUseFallbackCoords={() => {
+          setShowGpsModal(false);
+          setCurrentCoords({ lat: -5.14378, lng: 119.45851 });
+          setGpsStatus('GPS DEMO (Pantai Losari)');
+        }}
+      />
     </div>
   );
 }
