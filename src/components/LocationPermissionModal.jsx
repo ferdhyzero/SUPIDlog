@@ -20,9 +20,9 @@ export default function LocationPermissionModal({ isOpen, onClose, onRetryGps, o
           </div>
 
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, margin: 0, color: 'var(--text-main)' }}>Izin Lokasi GPS Dibutuhkan</h3>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 900, margin: 0, color: 'var(--text-main)' }}>Izin Sensor HTML5 Geolocation GPS</h3>
             <p style={{ fontSize: '0.78rem', color: '#64748B', margin: '2px 0 0' }}>
-              Browser membutuhkan izin GPS untuk merekam rute & kecepatan dayung Anda secara otomatis.
+              Aplikasi memerlukan perizinan akses <strong>HTML5 Geolocation API</strong> untuk membaca sensor satelit GPS HP secara presisi di laut.
             </p>
           </div>
         </div>
