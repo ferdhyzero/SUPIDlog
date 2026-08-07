@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AdminAIDiagnosticsScreen from './AdminAIDiagnosticsScreen';
 
 export default function AdminDashboardScreen({ currentUser }) {
   const [usersList, setUsersList] = useState([]);
@@ -8,7 +9,7 @@ export default function AdminDashboardScreen({ currentUser }) {
 
   const levelOptions = ['Beginner SUPer', 'Explorer', 'Advanced SUPer', 'Pro Athlete', 'Master Navigator', 'Super Admin'];
   const [communityPosts, setCommunityPosts] = useState([]);
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('users'); // 'users', 'moderation', 'ai_diagnostics'
 
   const loadUsers = async () => {
     try {
@@ -51,25 +52,36 @@ export default function AdminDashboardScreen({ currentUser }) {
       await fetch('/api/admin_users.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'approve_reset_password', user_id: userId })
+        body: JSON.stringify({ action: 'approve_reset', user_id: userId })
       });
-      setMsgNotice(`Reset password '${userName}' disetujui.`);
-      loadUsers();
+      setMsgNotice(`Permintaan reset password user '${userName}' disetujui!`);
+      setUsersList(usersList.map(u => u.id === userId ? { ...u, reset_status: null } : u));
     } catch (e) {}
   };
 
   const handleAdminResetPassword = async (userId, userName) => {
-    const newPass = prompt(`Password baru '${userName}':`, 'supid123');
-    if (!newPass) return;
+    const newPassword = window.prompt(`Masukkan password baru untuk '${userName}':`, '123456');
+    if (!newPassword) return;
 
     try {
       await fetch('/api/admin_users.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'admin_reset_password', user_id: userId, new_password: newPass })
+        body: JSON.stringify({ action: 'reset_password', user_id: userId, new_password: newPassword })
       });
-      setMsgNotice(`Password '${userName}' diubah.`);
+      setMsgNotice(`Password user '${userName}' diubah!`);
       loadUsers();
+    } catch (e) {}
+  };
+
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      await fetch('/api/admin_users.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'change_role', user_id: userId, new_role: newRole })
+      });
+      setUsersList(usersList.map(u => u.id === userId ? { ...u, role: newRole } : u));
     } catch (e) {}
   };
 
@@ -80,33 +92,21 @@ export default function AdminDashboardScreen({ currentUser }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'update_level', user_id: userId, level: newLevel })
       });
-      setMsgNotice(`Level '${newLevel}' disimpan.`);
       setUsersList(usersList.map(u => u.id === userId ? { ...u, level: newLevel } : u));
     } catch (e) {}
   };
 
-  const handleChangeRole = async (userId, newRole) => {
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Hapus akun '${userName}' secara permanen?`)) return;
+
     try {
       await fetch('/api/admin_users.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'update_role', user_id: userId, role: newRole })
+        body: JSON.stringify({ action: 'delete_user', user_id: userId })
       });
-      setUsersList(usersList.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      setUsersList(usersList.filter(u => u.id !== userId));
     } catch (e) {}
-  };
-
-  const handleDeleteUser = async (userId, userName) => {
-    if (confirm(`Hapus akun '${userName}'?`)) {
-      try {
-        await fetch('/api/admin_users.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'delete_user', user_id: userId })
-        });
-        setUsersList(usersList.filter(u => u.id !== userId));
-      } catch (e) {}
-    }
   };
 
   const pendingUsersCount = usersList.filter(u => u.status === 'pending').length;
@@ -115,19 +115,18 @@ export default function AdminDashboardScreen({ currentUser }) {
   return (
     <div style={{ width: '100%', padding: '12px 12px 24px 12px', display: 'flex', flexDirection: 'column', gap: '12px', boxSizing: 'border-box' }}>
       
-      
-      {/* Super Admin Hero Banner */}
+      {/* Super Admin Banner */}
       <div 
-  style={{
-    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.33) 0%, rgba(30, 41, 59, 0.23) 100%), url(https://images.unsplash.com/photo-1520950237264-dfe336995c34?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHBhZGRsZSUyMGJvYXJkfGVufDB8fDB8fHww)`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    color: 'white',
-    borderRadius: '16px',
-    padding: '14px',
-    boxShadow: '0 4px 15px rgba(15, 23, 42, 0.2)'
-  }}
->
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.33) 0%, rgba(30, 41, 59, 0.23) 100%), url(https://images.unsplash.com/photo-1520950237264-dfe336995c34?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHBhZGRsZSUyMGJvYXJkfGVufDB8fDB8fHww)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: 'white',
+          borderRadius: '16px',
+          padding: '14px',
+          boxShadow: '0 4px 15px rgba(15, 23, 42, 0.2)'
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <div>
             <span style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800, color: '#F59E0B' }}>SUPER ADMIN</span>
@@ -139,7 +138,6 @@ export default function AdminDashboardScreen({ currentUser }) {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-          
           <div style={{ background: 'rgba(255,255,255,0.08)', padding: '8px 10px', borderRadius: '10px' }}>
             <span style={{ fontSize: '0.68rem', opacity: 0.8, display: 'block' }}>Total User</span>
             <strong style={{ fontSize: '1.1rem', fontWeight: 900 }}>{usersList.length}</strong>
@@ -164,23 +162,32 @@ export default function AdminDashboardScreen({ currentUser }) {
       )}
 
       {/* Admin Tab Switcher */}
-      <div style={{ display: 'flex', background: '#E2E8F0', padding: '3px', borderRadius: '10px' }}>
+      <div style={{ display: 'flex', background: '#E2E8F0', padding: '3px', borderRadius: '10px', gap: '2px' }}>
         <button
           onClick={() => setActiveTab('users')}
-          style={{ flex: 1, padding: '6px 8px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.78rem', background: activeTab === 'users' ? '#0284C7' : 'transparent', color: activeTab === 'users' ? 'white' : '#64748B', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '6px 4px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.75rem', background: activeTab === 'users' ? '#0284C7' : 'transparent', color: activeTab === 'users' ? 'white' : '#64748B', cursor: 'pointer' }}
         >
-          User Manager ({usersList.length})
+          User ({usersList.length})
         </button>
 
         <button
           onClick={() => setActiveTab('moderation')}
-          style={{ flex: 1, padding: '6px 8px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.78rem', background: activeTab === 'moderation' ? '#0284C7' : 'transparent', color: activeTab === 'moderation' ? 'white' : '#64748B', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '6px 4px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.75rem', background: activeTab === 'moderation' ? '#0284C7' : 'transparent', color: activeTab === 'moderation' ? 'white' : '#64748B', cursor: 'pointer' }}
         >
-          Moderasi Feed ({communityPosts.length})
+          Moderasi ({communityPosts.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ai_diagnostics')}
+          style={{ flex: 1.2, padding: '6px 4px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.75rem', background: activeTab === 'ai_diagnostics' ? '#0284C7' : 'transparent', color: activeTab === 'ai_diagnostics' ? 'white' : '#64748B', cursor: 'pointer' }}
+        >
+          🤖 AI Diagnostics
         </button>
       </div>
 
-      {activeTab === 'users' ? (
+      {activeTab === 'ai_diagnostics' ? (
+        <AdminAIDiagnosticsScreen currentUser={currentUser} />
+      ) : activeTab === 'users' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {usersList.map((userItem) => {
             const isPendingReg = userItem.status === 'pending';
@@ -211,32 +218,41 @@ export default function AdminDashboardScreen({ currentUser }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <select value={userItem.level || 'Beginner SUPer'} onChange={(e) => handleLevelChange(userItem.id, e.target.value)} style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.75rem', fontWeight: 700 }}>
-                    {levelOptions.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
-                  </select>
+                {isPendingReset && (
+                  <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', padding: '6px 8px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#991B1B', fontWeight: 700 }}>Req Pass: <strong>{userItem.requested_password}</strong></span>
+                    <button onClick={() => handleApproveResetPassword(userItem.id, userItem.name)} style={{ background: '#DC2626', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}>Setujui Reset</button>
+                  </div>
+                )}
 
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    {userItem.email !== 'ahmadferdy66@gmail.com' && userItem.id !== 1 && (
-                      <button 
-                        onClick={() => handleChangeRole(userItem.id, isTargetAdmin ? 'user' : 'super_admin')}
-                        style={{ 
-                          background: isTargetAdmin ? '#E2E8F0' : '#FEF3C7', 
-                          color: isTargetAdmin ? '#475569' : '#B45309', 
-                          border: isTargetAdmin ? '1px solid #CBD5E1' : '1px solid #FCD34D', 
-                          padding: '4px 8px', 
-                          borderRadius: '6px', 
-                          fontSize: '0.72rem', 
-                          fontWeight: 800,
-                          cursor: 'pointer' 
-                        }}
-                      >
-                        {isTargetAdmin ? 'Ubah ke User' : 'Jadikan Admin'}
-                      </button>
-                    )}
-                    {isPendingReg && (
-                      <button onClick={() => handleApproveUser(userItem.id, userItem.name)} style={{ background: '#10B981', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>Setujui</button>
-                    )}
+                {isPendingReg && (
+                  <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '6px 8px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#92400E', fontWeight: 700 }}>Menunggu Verifikasi</span>
+                    <button onClick={() => handleApproveUser(userItem.id, userItem.name)} style={{ background: '#D97706', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}>Setujui Pendaftaran</button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <select
+                      value={userItem.level || 'Beginner SUPer'}
+                      onChange={(e) => handleLevelChange(userItem.id, e.target.value)}
+                      style={{ fontSize: '0.7rem', padding: '2px 4px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+                    >
+                      {levelOptions.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+
+                    <select
+                      value={userItem.role || 'user'}
+                      onChange={(e) => handleRoleChange(userItem.id, e.target.value)}
+                      style={{ fontSize: '0.7rem', padding: '2px 4px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+                    >
+                      <option value="user">User biasa</option>
+                      <option value="super_admin">Super Admin</option>
+                    </select>
+                  </div>
+
+                  <div>
                     {userItem.id !== 1 && userItem.email !== 'ahmadferdy66@gmail.com' && (
                       <button onClick={() => handleDeleteUser(userItem.id, userItem.name)} style={{ background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>Hapus</button>
                     )}

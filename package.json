@@ -15,7 +15,8 @@
     "test:e2e": "vitest run src/test/e2e.test.js",
     "test:pwa": "vitest run src/test/pwa-offline.test.js",
     "test:load": "vitest run src/test/api-load-performance.test.js",
-    "test:mobile": "vitest run src/test/mobile-viewport.test.jsx"
+    "test:mobile": "vitest run src/test/mobile-viewport.test.jsx",
+    "test:ai": "vitest run src/test/ai-engine.test.js"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
