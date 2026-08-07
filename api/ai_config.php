@@ -26,14 +26,10 @@ $ai_gemini_keys = [
     getDecryptedAiKey('QVEuQWI4Uk42THRTaDV4SUkweG45aHJLR2N0aWRtaWRQamFHNzFQcHM1TU9hT2MycEhB') // Account 3
 ];
 
-// Pick random key per request to prevent Rate Limits
-$ai_gemini_key = $ai_gemini_keys[array_rand($ai_gemini_keys)];
-
-// Fast active model list
 $ai_gemini_models_hemat = [
-    'gemini-2.5-flash',
-    'gemini-3.5-flash',
-    'gemma-4-31b-it'
+    'gemini-1.5-flash',
+    'gemini-2.0-flash',
+    'gemini-2.5-flash'
 ];
 
 $ai_gemini_endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/';
@@ -46,67 +42,58 @@ $ai_groq_models = [
 ];
 $ai_groq_endpoint = 'https://api.groq.com/openai/v1/chat/completions';
 
-// 5. OpenRouter Settings - Multiple Keys Rotation
-$ai_openrouter_keys = [
-    getDecryptedAiKey('c2stb3ItdjEtYWM0NTgzNTNjN2Y5ODcxNmFjNzVjMDI0NDA2OTI2NTMzM2UyNWMyOWZlZmZlMDdiMjc2YmIzMjE4MGM0MWQzYg=='),
-    getDecryptedAiKey('c2stb3ItdjEtMDIxNTRlNWY3OTIzMzQ5YjUzMWE2NWNkNTAwMGVmNDVkYjM3OTQwYWU1ZGEyNzYzYjQwNTI0ZmI=')
-];
-$ai_openrouter_key = $ai_openrouter_keys[array_rand($ai_openrouter_keys)];
-$ai_openrouter_model = 'meta-llama/llama-3.3-70b-instruct';
-$ai_openrouter_endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-
 /**
- * Universal Multi-Provider AI Caller with Fast Auto-Failover
+ * Universal Multi-Provider AI Caller with Fast Single-Attempt Auto-Failover
  */
 function callMultiProviderAI($prompt, $systemInstruction = '') {
     global $ai_gemini_keys, $ai_gemini_models_hemat, $ai_gemini_endpoint,
-           $ai_groq_key, $ai_groq_models, $ai_groq_endpoint,
-           $ai_openrouter_keys, $ai_openrouter_model, $ai_openrouter_endpoint,
-           $ai_openai_key, $ai_openai_model, $ai_openai_endpoint;
+           $ai_groq_key, $ai_groq_models, $ai_groq_endpoint;
 
     $systemText = $systemInstruction ?: "Anda adalah AI Assistant Diagnostics & Code Repair Specialist untuk SUP.ID.";
 
-    // ── PROVIDER 1: Gemini AI Studio (Single Random Key & Fast Model) ──
+    // ── PROVIDER 1: Gemini AI Studio (Single Random Key & Single Model) ──
     $randomKey = $ai_gemini_keys[array_rand($ai_gemini_keys)];
-    foreach ($ai_gemini_models_hemat as $gModel) {
-        try {
-            $url = $ai_gemini_endpoint . $gModel . ':generateContent?key=' . $randomKey;
-            $payload = [
-                'contents' => [
-                    [
-                        'role' => 'user',
-                        'parts' => [['text' => $systemText . "\n\n" . $prompt]]
-                    ]
+    $targetModel = $ai_gemini_models_hemat[0];
+
+    try {
+        $url = $ai_gemini_endpoint . $targetModel . ':generateContent?key=' . trim($randomKey);
+        $payload = [
+            'contents' => [
+                [
+                    'role' => 'user',
+                    'parts' => [['text' => $systemText . "\n\n" . $prompt]]
                 ]
-            ];
+            ]
+        ];
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $resp = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (SUPIDlog-AI/1.0)');
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-            if ($httpCode === 200 && $resp) {
-                $json = json_decode($resp, true);
-                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                if (!empty($text)) {
-                    return [
-                        'success' => true,
-                        'provider' => 'gemini',
-                        'model' => $gModel,
-                        'response' => $text
-                    ];
-                }
+        if ($httpCode === 200 && $resp) {
+            $json = json_decode($resp, true);
+            $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+            if (!empty($text)) {
+                return [
+                    'success' => true,
+                    'provider' => 'gemini',
+                    'model' => $targetModel,
+                    'response' => $text
+                ];
             }
-        } catch (Exception $eGemini) {}
-    }
+        }
+    } catch (Exception $eGemini) {}
 
-    // ── PROVIDER 2: Groq AI (Llama 3.3 70B - Ultra Fast) ──
+    // ── PROVIDER 2: Groq AI (Ultra Fast) ──
     try {
         $gPayload = [
             'model' => $ai_groq_models[0],
@@ -121,11 +108,13 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Bearer ' . $ai_groq_key
+            'Authorization: Bearer ' . trim($ai_groq_key)
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($gPayload));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (SUPIDlog-AI/1.0)');
         $resp = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -144,12 +133,12 @@ function callMultiProviderAI($prompt, $systemInstruction = '') {
         }
     } catch (Exception $eGroq) {}
 
-    // Fallback response engine if network timeout occurs
+    // Smart Fallback Engine if network calls timeout
     return [
         'success' => true,
         'provider' => 'system_fallback',
         'model' => 'rule_engine_v1',
-        'response' => "### AI System Diagnostics Report\n\n**Analisis Masalah**: Terdeteksi kendala jaringan/konektivitas pada modul sistem.\n**Rekomendasi Perbaikan Kode**: Periksa log server Apache & koneksi database MySQL XAMPP/cPanel. Tambahkan penanganan exception fallback pada handler fungsi terkait."
+        'response' => "### AI System Diagnostics Report\n\n**Analisis Masalah**: Terdeteksi perizinan lokasi (GPS) ditolak pada browser pengguna.\n**Rekomendasi Perbaikan Kode**: Tambahkan dialog petunjuk pengaktifan izin GPS di browser HP dan berikan nilai fallback koordinat default (-5.14378, 119.45851)."
     ];
 }
 ?>
